@@ -1,0 +1,205 @@
+(function() {
+    // Configuration
+    var appSysId = '33df17ef47d8ea10d93447c4416d43cd'; // YOUR TARGET APPLICATION SCOPE SYS ID
+    var logPrefix = '[AI Agent Relationship Explorer]: ';
+
+    // Data storage for expanded output
+    var output = {
+        use_cases: []
+    };
+    
+    // Helper functions
+    function queryRecords(tableName, scopeId) {
+        gs.info(logPrefix + 'Querying ' + tableName);
+        var gr = new GlideRecord(tableName);
+        if (scopeId) {
+            gr.addQuery('sys_scope', scopeId);
+        }
+        gr.query();
+        return gr;
+    }
+    
+    function extractData(gr, fields) {
+        var data = {};
+        fields.forEach(function(f) {
+            if (gr.isValidField(f)) {
+                data[f] = gr.getValue(f);
+            }
+        });
+        return data;
+    }
+    
+    // 1. Fetch Use Cases
+    gs.info(logPrefix + 'Fetching Use Cases');
+    var useCaseFields = ['sys_id', 'name', 'description', 'team'];
+    var useCases = {};
+    var grUseCase = queryRecords('sn_aia_usecase', appSysId);
+    while (grUseCase.next()) {
+        useCases[grUseCase.getUniqueValue()] = extractData(grUseCase, useCaseFields);
+    }
+    
+    // 2. Fetch Teams and Team Members
+    gs.info(logPrefix + 'Fetching Teams and Team Members');
+    var teams = {};
+    var grTeam = queryRecords('sn_aia_team', appSysId);
+    while (grTeam.next()) {
+        teams[grTeam.getUniqueValue()] = {
+            sys_id: grTeam.getUniqueValue(),
+            name: grTeam.getValue('name'),
+            agents: []
+        };
+    }
+    
+    var teamToAgents = {};
+    var grTeamMember = queryRecords('sn_aia_team_member', appSysId);
+    while (grTeamMember.next()) {
+        var teamId = grTeamMember.getValue('team');
+        var agentId = grTeamMember.getValue('agent');
+        
+        if (!teamToAgents[teamId]) {
+            teamToAgents[teamId] = [];
+        }
+        teamToAgents[teamId].push(agentId);
+    }
+    
+// 3. Fetch Agents and their details (now including instructions and role)
+gs.info(logPrefix + 'Fetching Agents with instructions and role');
+var agents = {};
+var grAgent = queryRecords('sn_aia_agent', appSysId);
+while (grAgent.next()) {
+    var agentId = grAgent.getUniqueValue();
+    agents[agentId] = {
+        sys_id: agentId,
+        name: grAgent.getValue('name'),
+        description: grAgent.getValue('description'),
+        // Get the actual role field instead of copying the name
+        role: grAgent.getValue('role'),
+        // Try to get instructions from different possible fields
+        instructions: grAgent.getValue('instructions') || grAgent.getValue('prompt') || grAgent.getValue('agent_prompt') || "",
+        tools: []
+    };
+        
+        // Try to get agent profile data from other tables if needed
+        if (!agents[agentId].instructions) {
+            // Try to find agent configuration in profile table
+            var grProfile = new GlideRecord('sn_aia_agent_config');
+            grProfile.addQuery('agent', agentId);
+            grProfile.query();
+            if (grProfile.next()) {
+                agents[agentId].instructions = grProfile.getValue('prompt') || "";
+            }
+        }
+    }
+    
+    // 4. Fetch Agent-Tool relationships
+    gs.info(logPrefix + 'Fetching Agent-Tool relationships');
+    var agentToTools = {};
+    var toolIds = [];
+    var grAgentTool = queryRecords('sn_aia_agent_tool_m2m', appSysId);
+    while (grAgentTool.next()) {
+        var agentId = grAgentTool.getValue('agent');
+        var toolId = grAgentTool.getValue('tool');
+        toolIds.push(toolId);
+        
+        if (!agentToTools[agentId]) {
+            agentToTools[agentId] = [];
+        }
+        agentToTools[agentId].push({
+            sys_id: toolId,
+            name: grAgentTool.getValue('name') || '',
+            description: grAgentTool.getValue('description') || ''
+        });
+    }
+    
+    // 5. Get tool details including type
+    gs.info(logPrefix + 'Fetching tool details including type');
+    var tools = {};
+    var grTool = new GlideRecord('sn_aia_tool');
+    grTool.addQuery('sys_id', 'IN', toolIds);
+    grTool.query();
+    while (grTool.next()) {
+        tools[grTool.getUniqueValue()] = {
+            sys_id: grTool.getUniqueValue(),
+            name: grTool.getValue('name'),
+            description: grTool.getValue('description'),
+            type: grTool.getValue('type')
+        };
+    }
+    
+    // 6. Fetch trigger information for use cases
+    gs.info(logPrefix + 'Fetching trigger information for use cases');
+    var useCaseTriggers = {};
+    var grTrigger = queryRecords('sn_aia_trigger_configuration', appSysId);
+    while (grTrigger.next()) {
+        var useCaseId = grTrigger.getValue('usecase');
+        if (!useCaseTriggers[useCaseId]) {
+            useCaseTriggers[useCaseId] = [];
+        }
+        
+        useCaseTriggers[useCaseId].push({
+            sys_id: grTrigger.getUniqueValue(),
+            name: grTrigger.getValue('name'),
+            objective_template: grTrigger.getValue('objective_template'),
+            condition: grTrigger.getValue('condition'),
+            target_table: grTrigger.getValue('target_table')
+        });
+    }
+    
+    // 7. Build the relationship structure
+    gs.info(logPrefix + 'Building expanded relationship structure');
+    
+    // Assign tools to agents
+    for (var agentId in agents) {
+        if (agentToTools[agentId]) {
+            agentToTools[agentId].forEach(function(tool) {
+                // Use tool details from the tools object if available
+                if (tools[tool.sys_id]) {
+                    var toolInfo = {
+                        sys_id: tool.sys_id,
+                        name: tool.name || tools[tool.sys_id].name,
+                        description: tool.description || tools[tool.sys_id].description,
+                        type: tools[tool.sys_id].type
+                    };
+                    agents[agentId].tools.push(toolInfo);
+                } else {
+                    agents[agentId].tools.push(tool);
+                }
+            });
+        }
+    }
+    
+    // Assign agents to teams
+    for (var teamId in teams) {
+        if (teamToAgents[teamId]) {
+            teamToAgents[teamId].forEach(function(agentId) {
+                if (agents[agentId]) {
+                    teams[teamId].agents.push(agents[agentId]);
+                }
+            });
+        }
+    }
+    
+    // Build use case objects with their related teams, agents, and triggers
+    for (var useCaseId in useCases) {
+        var useCase = useCases[useCaseId];
+        var useCaseObj = {
+            sys_id: useCaseId,
+            name: useCase.name,
+            description: useCase.description,
+            triggers: useCaseTriggers[useCaseId] || [],
+            agents: []
+        };
+        
+        // If the use case has a team, add its agents
+        if (useCase.team && teams[useCase.team]) {
+            teams[useCase.team].agents.forEach(function(agent) {
+                useCaseObj.agents.push(agent);
+            });
+        }
+        
+        output.use_cases.push(useCaseObj);
+    }
+    
+    gs.info(logPrefix + 'Export complete. Outputting expanded relationship data.');
+    gs.info(JSON.stringify(output, null, 2));
+})();

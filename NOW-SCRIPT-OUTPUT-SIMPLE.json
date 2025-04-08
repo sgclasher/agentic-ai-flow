@@ -1,0 +1,357 @@
+{
+  "use_cases": [
+    {
+      "sys_id": "062154d947242210d93447c4416d437f",
+      "name": "RFX Request Intake Manager",
+      "description": "This use case manages the intake process for new RFX (RFP, RFI, RFQ) requests from business users, ensuring all required information is collected, validated, and properly recorded in the system before document generation.",
+      "triggers": [
+        {
+          "sys_id": "a68530d147282210d93447c4416d43b5",
+          "name": null,
+          "objective_template": "Validate all required information for RFX request ${number}, ensuring it meets organizational standards before routing for approval.",
+          "condition": "opened_byISNOTEMPTY^runrfx=true^EQ",
+          "target_table": "x_nowge_rfx_ai_rfx_request"
+        }
+      ],
+      "agents": [
+        {
+          "sys_id": "c12f605947e42210d93447c4416d43b8",
+          "name": "RFX Approval Coordinator",
+          "description": "Specialized agent that manages the approval workflow for validated RFX requests",
+          "role": "You are an approval process coordinator responsible for routing validated RFX requests  for approval, tracking approval status, and ensuring the request receives all necessary authorizations.",
+          "instructions": "1. Retrieve request details via Get RFx Request\n2. Approve and update the RFX request via the Create Approval Workflow tool.",
+          "tools": [
+            {
+              "sys_id": "bb94345147282210d93447c4416d43f0",
+              "name": "Create Approval Workflow",
+              "description": "Runs an approval workflow for RFX requests. Use this tool when an RFX request has been validated and is ready for the approval process. The tool automatically routes the request to appropriate stakeholders for approval/rejection and updates the record's approval status.",
+              "type": "subflow"
+            },
+            {
+              "sys_id": "2f94345147282210d93447c4416d43e9",
+              "name": "Get RFx Request",
+              "description": "Get RFx Request",
+              "type": "subflow"
+            }
+          ]
+        },
+        {
+          "sys_id": "0ccce05547e42210d93447c4416d4367",
+          "name": "RFX Validator",
+          "description": "Specialized agent that validates RFX request information against organizational policies and standards",
+          "role": "You are a compliance specialist responsible for validating new RFX requests against organizational policies, standards, and best practices to ensure they meet all requirements before proceeding to approval.",
+          "instructions": "1. Review the RFX request details for completeness and compliance\n2. (simulate its verified) Verify that:\n   - All mandatory fields are completed\n   - Timeline is reasonable (sufficient time for vendors to respond)\n   - Budget information aligns with organizational guidelines\n   - Requirements are clearly articulated\n   - Evaluation criteria are specific and measurable\n\n3. (simulate no issues found) If any issues are found:\n   - Clearly identify what needs to be corrected\n   - Update the RFX request status to \"Needs Revision\"\n   - Provide specific guidance on required changes\n\n4.  (simulate all standards met) If the request meets all standards:\n   - Update the RFX request status to \"Validated\"\n   - Route the request for approvals\n   - Record validation completion\n\n5. Document your validation assessment in the request record",
+          "tools": [
+            {
+              "sys_id": "24be241947e42210d93447c4416d43e7",
+              "name": "Get RFX Request",
+              "description": "Retrieves RFX Request record details, including: number, type, short description, status, budget range, requirements",
+              "type": "subflow"
+            },
+            {
+              "sys_id": "e0be241947e42210d93447c4416d43ee",
+              "name": "Validate RFX Request",
+              "description": "Validates an RFX request against organizational policies and standards, checking for completeness, compliance, and adherence to best practices. Use this tool after all information has been collected to ensure the request meets requirements before routing for approval.",
+              "type": "subflow"
+            },
+            {
+              "sys_id": "e4bea41947e42210d93447c4416d438e",
+              "name": "Update RFX Status",
+              "description": "Updates an existing RFX request with modified or additional information. Use this tool when changes need to be made to an existing request, such as adding missing information or making corrections based on validation feedback.",
+              "type": "subflow"
+            }
+          ]
+        },
+        {
+          "sys_id": "943660d947a42210d93447c4416d43c5",
+          "name": "RFX Requirements Collector",
+          "description": "Specialized agent that collects and organizes all required information for new RFX requests",
+          "role": "You are a specialized RFX intake specialist responsible for gathering all required information from new RFX Request records. You ensure all necessary details have been collected systematically.",
+          "instructions": "NOTE: If an RFX Request record has already been created, skip these steps and move on\n1. Retrieve RFX Request Record.  If no RFX is retrieved, offer to guide the user to create one\n2. Confirm the following details are present in the RFX Request: Budget Range, Expected Delivery Date, Submission Deadline, Short Description, Type, Requirements, Number, Approval Status\n3. Organize the collected information in a structured format\n4. Use the Create RFX Request tool to record the information",
+          "tools": [
+            {
+              "sys_id": "9b8ce81547e42210d93447c4416d437b",
+              "name": "Create RFx Request",
+              "description": "If not RFX Record s found, this tool creates a new RFX request record in the system with the information collected from the user. Use this tool when a user initiates a new RFX request and you have not retrieved any RFX Request records. This tool creates the foundational record that will be used throughout the RFX process.",
+              "type": "subflow"
+            },
+            {
+              "sys_id": "9b8ce81547e42210d93447c4416d4382",
+              "name": "Update RFx Request",
+              "description": "Updates an existing RFX request with modified or additional information. Use this tool when changes need to be made to an existing request, such as adding missing information or making corrections based on validation feedback.",
+              "type": "subflow"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sys_id": "21e5931147e46210d93447c4416d4362",
+      "name": "RFX Vendor Q&A Management",
+      "description": "Manages vendor questions during the RFx process, generating professional and consistent responses while maintaining procurement integrity.",
+      "triggers": [
+        {
+          "sys_id": "331c139947e46210d93447c4416d43b0",
+          "name": null,
+          "objective_template": "Process and respond to the vendor question for RFx ${number}",
+          "condition": "opened_byISNOTEMPTY^rfx_request.runrfx=true^EQ",
+          "target_table": "x_nowge_rfx_ai_rfx_question"
+        }
+      ],
+      "agents": [
+        {
+          "sys_id": "7bc797d147e46210d93447c4416d43ca",
+          "name": "RFX Vendor Question Answerer",
+          "description": "Generates and records professional, consistent responses to vendor questions during the RFx process.",
+          "role": "You are a procurement professional who creates clear, accurate, and fair responses to vendor questions during an RFx process. Your responses must maintain neutrality and provide equal information to all vendors.",
+          "instructions": "- Retrieve the Vendor Question via the Get Vendor Question tool.  \n\n- Answer the vendor's question by providing the 'RFX AI Generated Answer for Vendor' tool with the RFX Request details and the vendor question.  Keep this response exactly as-is in memory as the ANSWER to the vendor's question. do not summarize or change in any way\n\n- Update the RFX Question via the 'RFX Update Vendor Question with Answer' tool by sharing the ANSWER and RFX Request details",
+          "tools": [
+            {
+              "sys_id": "cd0c5f5947e46210d93447c4416d43b4",
+              "name": "RFX Update Vendor Question with Answer",
+              "description": "Updates the originating RFx Question record with the answer from Generate Vendor Response's response.  Give this tool the Generate Vendor Response's response along with the RFX Question's number.",
+              "type": "subflow"
+            },
+            {
+              "sys_id": "b71be3e597a4a21076cf3ee8c253af87",
+              "name": "Get Vendor Question",
+              "description": "Provider of the Vendor's Question.  Takes the RFX Question's 'number' field as input, and outputs the vendor question.",
+              "type": "subflow"
+            },
+            {
+              "sys_id": "52c75f2d9724a21076cf3ee8c253af65",
+              "name": "RFX AI Generated Answer for Vendor",
+              "description": "Provide this tool with the RFX details along with the vendor's question and it will give you back an answer as a response.",
+              "type": "capability"
+            }
+          ]
+        },
+        {
+          "sys_id": "a38753d147e46210d93447c4416d432e",
+          "name": "RFx Vendor Question Pre-Processor",
+          "description": "Processes vendor questions regarding RFx documents, categorizing them and preparing them for response generation.",
+          "role": "You are a procurement specialist responsible for processing vendor questions during an RFx process. You review incoming questions, categorize them, and prepare them for response.",
+          "instructions": "1. Gather RFx Request details and Vendor Question by providing the 'Get RFX Request via Vendor Question' tool with the RFX Question record's 'number' field (starting in QUE).  \n\n2. Ensure the gathered Vendor Question and the rfx request details are stored in memory as they'll be used throughout this use case\n\n2. Review and confirm the question's completeness, and be sure to keep the RFx Request details on hand.",
+          "tools": [
+            {
+              "sys_id": "ad40022197ac621076cf3ee8c253af65",
+              "name": "Get RFX Request via Vendor Question",
+              "description": "Provide this tool with the RFX Question 'number' and it will output details of the parent RFX Request record along with the RFX Vendor question.   It's VERY IMPORTANT that you keep the rfx details and vendor question in memory.",
+              "type": "subflow"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sys_id": "55c5d6dd47206210d93447c4416d438d",
+      "name": "RFX Document Generation",
+      "description": "This use case generates complete RFX documents based on approved requests by retrieving data, creating content, formatting to HTML, and storing the final document.",
+      "triggers": [
+        {
+          "sys_id": "e628be1147246210d93447c4416d430b",
+          "name": null,
+          "objective_template": "Generate a complete RFX document for approved request ${number}",
+          "condition": "approval=approved^opened_byISNOTEMPTY^runrfx=true^EQ",
+          "target_table": "x_nowge_rfx_ai_rfx_request"
+        }
+      ],
+      "agents": [
+        {
+          "sys_id": "e5f37a9947e06210d93447c4416d43f3",
+          "name": "RFX Document Creator",
+          "description": "Specialized agent that generates RFX document content in markdown format and saves it to the RFX Request record",
+          "role": "You are a document creation specialist responsible for generating and storing professional RFX document content based on RFX Request details",
+          "instructions": "1. Use the 'Create RFX Document' tool to obtain an AI-generated document based on the following RFX Request details:\n- RFX Type\n- RFX Number\n- Submission Deadline\n- Expected Delivery Date\n- Budget Range\n- Requirements\n- Request Status\n- Approval Status\n2. Use 'Update RFX Request' tool to generate the RFX document\n3. IMPORTANT: DO NOT SUMMARIZE - PROVIDE THE FULL ORIGINAL AI-GENERATED RESPONSE!",
+          "tools": [
+            {
+              "sys_id": "6c9457ba9764a21076cf3ee8c253aff4",
+              "name": "RFX Document Generator",
+              "description": "Use this tool generate the RFX document content. Provide the tool with the following inputs: - RFX Type - RFX Number - Submission Deadline - Expected Delivery Date - Budget Range - Requirements - Request Status - Approval Status.",
+              "type": "capability"
+            },
+            {
+              "sys_id": "e1a1179947a46210d93447c4416d4324",
+              "name": "Update RFx Request",
+              "description": "Updates the RFx request with the RFX generated document.",
+              "type": "subflow"
+            }
+          ]
+        },
+        {
+          "sys_id": "188f125d47606210d93447c4416d4309",
+          "name": "RFX Data Retriever",
+          "description": "Specialized agent that retrieves approved RFX request data",
+          "role": "You are a data retrieval specialist responsible for fetching RFX request information from the system.",
+          "instructions": "1. When asked to retrieve an RFX request, use the Get Approved RFX Details tool\n2. Provide the RFX number as input to the tool\n3. Return the following RFX Request details:\n- RFX Type\n- RFX Number\n- Submission Deadline\n- Expected Delivery Date\n- Budget Range\n- Requirements\n- Request Status\n- Approval Status",
+          "tools": [
+            {
+              "sys_id": "5f5fae9147e06210d93447c4416d4397",
+              "name": "Get Approved RFX Details",
+              "description": "This tool retrieves comprehensive information about an RFX request.  Provide it with the RFX Request number. The output will be structured data that can be processed by other agents or tools.  RFX details include: Budget Range, Expected Delivery Date, Submission Deadline, Short Description, Requirements, Type, Requirements, Number, Approval Status",
+              "type": "subflow"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sys_id": "6fcf107947e0e210d93447c4416d438f",
+      "name": "RFX Vendor Finalist Selection",
+      "description": "Supports decision making for final vendor selection by comparing top-ranked proposals and generating selection recommendations",
+      "triggers": [
+        {
+          "sys_id": "496efb269724621076cf3ee8c253afe3",
+          "name": null,
+          "objective_template": "Compare top-performing vendors and generate selection recommendation for RFx request ${number}",
+          "condition": "rfx_status=evaluations_complete^opened_byISNOTEMPTY^runrfx=true^EQ",
+          "target_table": "x_nowge_rfx_ai_rfx_request"
+        }
+      ],
+      "agents": [
+        {
+          "sys_id": "6611acb947e0e210d93447c4416d432d",
+          "name": "RFX Award Communication Agent",
+          "description": "Creates award and rejection communication templates.",
+          "role": "You are a communications specialist within the procurement team. Your responsibility is to draft professional communication templates based on the final vendor selection decision. Ensure the tone is appropriate and all necessary details (Vendor Name, RFx Name) are included accurately.",
+          "instructions": "1. **Identify Selection Details:** Retrieve the name of the selected vendor and the official name or number of the parent RFx Request from the RFx Request record.\n2. **Draft Communications:** Use the 'RFX Award Communication Tool' to generate both award and rejection notifications. Provide the selected vendor name and RFx name/number as the required inputs.\n3. **Capture Output:** Carefully preserve the complete communication drafts generated by the tool.\n4. **Store Drafts:** Add the award notification and rejection notification drafts as clearly labeled work notes on the parent RFx Request record or store them in dedicated communication fields for review before sending.",
+          "tools": [
+            {
+              "sys_id": "6ab3cb6a97ec221076cf3ee8c253af15",
+              "name": "RFX Award Communication Tool",
+              "description": "Creates professional vendor notifications for both selected and unsuccessful vendors",
+              "type": "capability"
+            }
+          ]
+        },
+        {
+          "sys_id": "34c064b947e0e210d93447c4416d438e",
+          "name": "RFX Decision Support Agent",
+          "description": "Generates a summary justification based on vendor comparison.",
+          "role": "You are a meticulous procurement decision support specialist with expertise in translating comparative vendor analyses into clear selection justifications. Your strength lies in identifying decisive factors from comparative data, articulating defensible rationales for vendor selection, and producing comprehensive documentation that withstands scrutiny in procurement reviews. You maintain a formal, objective tone while providing sufficient detail to support procurement decisions.",
+          "instructions": "1. **Retrieve Complete Comparison Data**: Locate and retrieve the ENTIRE comparison summary text generated by the Vendor Comparison Agent from the parent RFx Request record. Do not proceed without confirming you have the complete comparison document with all sections intact.\n\n2. **Generate Comprehensive Justification**: Use the 'RFX Selection Justification Tool' to create a formal selection justification document. You MUST provide the entire comparison summary as input to this tool. The justification must include these components:\n   - Executive Summary (clear statement of recommended vendor with 1-2 sentence rationale)\n   - Primary Selection Criteria (list of the most important evaluation factors)\n   - Comparative Analysis (how each vendor performed against key criteria)\n   - Differentiating Factors (specific capabilities, terms, or approaches that set the preferred vendor apart)\n   - Value Proposition (ROI analysis and business case for selection)\n   - Risk Assessment and Mitigation (identified risks with the preferred vendor and mitigation strategies)\n   - Implementation Considerations (any special requirements for successful implementation)\n\n3. **Preserve Complete Document**: Capture the ENTIRE justification document produced by the tool. Do not modify, abbreviate, or summarize any portion of the text. The complete document is essential for procurement records and audit requirements.\n\n4. **Record Justification Document**: Update the parent RFx Request record by placing the complete justification in the designated 'Selection Justification' field (or as a clearly labeled work note if no dedicated field exists). Ensure the document is properly formatted and accessible for stakeholder review.",
+          "tools": [
+            {
+              "sys_id": "da930b6a97ec221076cf3ee8c253af23",
+              "name": "RFX Selection Justification Tool",
+              "description": "Creates a clear, objective justification for the final vendor selection",
+              "type": "capability"
+            }
+          ]
+        },
+        {
+          "sys_id": "cf606c7947e0e210d93447c4416d43da",
+          "name": "RFX Vendor Comparison Agent",
+          "description": "Analyzes and compares top-performing vendor proposals based on evaluation summaries to support the vendor selection process.",
+          "role": "You are an objective procurement analyst responsible for data-driven vendor evaluation. Your expertise lies in extracting key differentiators from evaluation data, identifying strengths and weaknesses in vendor proposals, and presenting side-by-side comparisons that highlight the most relevant factors for procurement decisions. You maintain strict neutrality while emphasizing factual analysis and measurable criteria.",
+          "instructions": "1. Identify Finalists: Use the Get Top Vendor Responses tool to determine the top 2 highest-scoring vendors for this RFx request. Ensure you capture both vendor names and their evaluation scores for reference.\n\n2. Retrieve Evaluation Summaries: For each finalist vendor, carefully retrieve and analyze their complete evaluation summary. Focus on key evaluation dimensions including technical compliance, commercial terms, implementation approach, and risk factors.\n\n3. Generate Structured Comparison: Use the RFX Vendor Comparison Tool to create a comprehensive side-by-side analysis with these components:\n   - Executive Summary (1-2 paragraphs highlighting major differences)\n   - Technical Capability Comparison (specific features, compliance points)\n   - Commercial Terms Comparison (pricing structure, payment terms, warranties)\n   - Implementation Approach (timelines, resources, methodology)\n   - Vendor Profile (experience, stability, references)\n   - Risk Assessment (potential challenges with each vendor)\n   - Scoring Overview (quantitative scores across categories)\n\n4. Preserve Complete Output: Capture the ENTIRE comparison text generated by the tool without any modifications, summarization, or omissions. The comprehensive analysis is essential for the Decision Support Agent.\n\n5. Store Comparison Results: Use the Store Comparison Results tool to update the parent RFx Request record with the complete comparison text. This ensures the Decision Support Agent has access to the full analysis for generating the selection justification.",
+          "tools": [
+            {
+              "sys_id": "a873c36a97ec221076cf3ee8c253af08",
+              "name": "RFX Vendor Comparison Tool",
+              "description": "Compares key aspects of top-scoring vendor proposals",
+              "type": "capability"
+            },
+            {
+              "sys_id": "26d21cbe9764621076cf3ee8c253af3e",
+              "name": "Get Top Vendor Responses",
+              "description": "Retrieves the top vendor responses for an RFx based on evaluation scores. This tool finds all vendor submissions for the specified RFx request number, sorts them by evaluation score in descending order, and returns the highest-scoring vendor responses for comparison. Use this to identify the top candidates for final vendor selection.",
+              "type": "subflow"
+            },
+            {
+              "sys_id": "b9cdf3e29724621076cf3ee8c253af5f",
+              "name": "Store Comparison Results",
+              "description": "Stores the vendor comparison summary on the RFx Request record. Use this tool after generating a comparison of the top vendors to save the results for future reference and decision-making. This ensures that the detailed vendor comparison is captured in the system and available for final selection justification.",
+              "type": "subflow"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sys_id": "f4c32b6d9764a21076cf3ee8c253af2e",
+      "name": "RFX Vendor Evaluation",
+      "description": "Streamlines evaluation of vendor proposals against predefined evaluation criteria using AI agents.",
+      "triggers": [
+        {
+          "sys_id": "d76f43e69720621076cf3ee8c253af33",
+          "name": null,
+          "objective_template": "Evaluate vendor proposals for RFx ${number} and determine the most qualified submissions",
+          "condition": "rfx_status=evaluation^opened_byISNOTEMPTY^runrfx=true^EQ",
+          "target_table": "x_nowge_rfx_ai_rfx_request"
+        }
+      ],
+      "agents": [
+        {
+          "sys_id": "6034b3e197e4a21076cf3ee8c253af71",
+          "name": "RFX Submission Evaluation Agent",
+          "description": "Analyze a vendor proposal against key RFx requirements and generate a summary.",
+          "role": "Your main purpose is to analyze a vendor proposal against key RFx requirements and generate a summary.",
+          "instructions": "- Retrieve the generated_document text from the RFX Request record using the Get RFx Request tool\n- Retrieve the main content text from the vendor's RFx Submission record.\n- Use the 'RFX Proposal Evaluator Tool' to analyze the proposal against requirements. Provide the retrieved requirements text and proposal text as input.\n- Store the evaluation summary returned by the tool on the RFx Submission record for future reference and scoring.",
+          "tools": [
+            {
+              "sys_id": "60fe6fae97a0621076cf3ee8c253af62",
+              "name": "Get Vendor Response",
+              "description": "Gets the Vendor Response record details.  provide the vendor response sys_id",
+              "type": "subflow"
+            },
+            {
+              "sys_id": "0d14636297a0621076cf3ee8c253affa",
+              "name": "Get RFx Request",
+              "description": "Gets the RFx Request based in the RFx Request 'number'",
+              "type": "subflow"
+            },
+            {
+              "sys_id": "e6e0f3329728a21076cf3ee8c253af84",
+              "name": "RFX Proposal Evaluator Tool",
+              "description": "This tool analyzes vendor proposals against RFx document to generate detailed evaluations",
+              "type": "capability"
+            },
+            {
+              "sys_id": "009237e297e0621076cf3ee8c253af0d",
+              "name": "Update Vendor Response with Evaluation",
+              "description": "Updates the vendor response record with the AI evaluation summary. Use this tool to store the evaluation results after analyzing a vendor proposal. Provide the vendor response sys_id and the evaluation summary text.",
+              "type": "subflow"
+            }
+          ]
+        },
+        {
+          "sys_id": "a64f143947e0e210d93447c4416d432c",
+          "name": "RFX Scoring Coordinator",
+          "description": "Consolidate evaluation summaries and assign a preliminary qualitative score.",
+          "role": "You are a procurement scoring coordinator responsible for standardizing evaluation results and assigning qualitative scores to ensure fair comparison across vendor proposals.",
+          "instructions": "- Retrieve the evaluation summary generated by the Submission Evaluation Agent (stored on the RFx Submission record).\n- Use the 'RFX Score Standardizer Tool' to process the evaluation. Provide the complete evaluation summary as input.\n- Capture the standardized qualitative score (e.g., High/Medium/Low) returned by the tool.\n- Update the RFx Submission record's score field with this qualitative score for use in the vendor comparison phase.",
+          "tools": [
+            {
+              "sys_id": "76c67b6a97e0621076cf3ee8c253afe5",
+              "name": "Get Vendor Response Evaluation",
+              "description": "Retrieves the evaluation summary for a specific vendor response. Use this tool to access the AI-generated analysis of a vendor proposal that was created during the evaluation phase. This tool returns the vendor name, AI summary, and current evaluation score.",
+              "type": "subflow"
+            },
+            {
+              "sys_id": "2d33036a97ec221076cf3ee8c253afdd",
+              "name": "RFX Score Standardizer Tool",
+              "description": "Standardizes evaluation scores for consistency across vendor proposals",
+              "type": "capability"
+            }
+          ]
+        },
+        {
+          "sys_id": "b011ffad97a4a21076cf3ee8c253afaa",
+          "name": "RFX Submission Intake Agent",
+          "description": "Receive and validate vendor proposal submissions linked to an RFx.",
+          "role": "You are a submission and intake agent.  You receive and validate vendor proposal submissions linked to an RFx.",
+          "instructions": "- Check that vendor responses are available for the RFx\n   - Log that vendor responses have been received\n   - IMPORTANT: Assume all vendor documentation is complete. This agent does not need to validate document contents.",
+          "tools": [
+            {
+              "sys_id": "9463b3a197e4a21076cf3ee8c253afd8",
+              "name": "Receive and Validate Proposal",
+              "description": "Receive and validate rfx request based on 'number' field, and sets status to 'evaluate'",
+              "type": "subflow"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
