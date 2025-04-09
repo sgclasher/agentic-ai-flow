@@ -27,7 +27,12 @@ export function transformAgenticData(agenticData, layoutDirection = 'LR') {
         label: useCase.name,
         type: 'useCase',
         description: useCase.description,
-        details: useCase
+        details: useCase,
+        isCollapsed: false,
+        childrenCount: (useCase.agents || []).length,
+        nodeType: 'useCaseNode',
+        parentId: null,
+        level: 0
       },
       type: 'useCaseNode'
     });
@@ -47,7 +52,12 @@ export function transformAgenticData(agenticData, layoutDirection = 'LR') {
             target_table: trigger.target_table,
             condition: trigger.condition,
             objective: trigger.objective_template,
-            details: trigger
+            details: trigger,
+            isCollapsed: false,
+            childrenCount: 0,
+            nodeType: 'triggerNode',
+            parentId: null,
+            level: 0
           },
           type: 'triggerNode'
         });
@@ -78,7 +88,13 @@ export function transformAgenticData(agenticData, layoutDirection = 'LR') {
             description: agent.description,
             role: agent.role,
             instructions: agent.instructions,
-            details: agent
+            details: agent,
+            isCollapsed: false,
+            childrenCount: (agent.tools || []).length,
+            nodeType: 'agentNode',
+            parentId: useCaseId,  // Parent is the use case
+            level: 1,
+            visible: true  // Initially visible
           },
           type: 'agentNode'
         });
@@ -88,7 +104,10 @@ export function transformAgenticData(agenticData, layoutDirection = 'LR') {
           id: `edge-${useCaseId}-${agentId}`,
           source: useCaseId,
           target: agentId,
-          label: 'uses'
+          label: 'uses',
+          data: {
+            parentRelationship: true  // Mark this as a parent-child relationship edge
+          }
         });
 
         // Process tools for this agent
@@ -105,7 +124,13 @@ export function transformAgenticData(agenticData, layoutDirection = 'LR') {
                 type: 'tool',
                 description: tool.description,
                 toolType: tool.type,
-                details: tool
+                details: tool,
+                isCollapsed: false,
+                childrenCount: 0,
+                nodeType: 'toolNode',
+                parentId: agentId,  // Parent is the agent
+                level: 2,
+                visible: true  // Initially visible
               },
               type: 'toolNode'
             });
@@ -115,7 +140,10 @@ export function transformAgenticData(agenticData, layoutDirection = 'LR') {
               id: `edge-${agentId}-${toolId}`,
               source: agentId,
               target: toolId,
-              label: 'uses'
+              label: 'uses',
+              data: {
+                parentRelationship: true  // Mark this as a parent-child relationship edge
+              }
             });
           });
         }
