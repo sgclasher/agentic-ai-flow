@@ -113,9 +113,18 @@ export default function FlowVisualizer() {
         childNodes.forEach(childNode => {
           const childIndex = updatedNodes.findIndex(n => n.id === childNode.id);
           if (childIndex !== -1) {
+            // Check if this child has its own children
+            const grandChildren = currentNodes.filter(n => n.data.parentId === childNode.id);
+            const hasGrandChildren = grandChildren.length > 0;
+            
             updatedNodes[childIndex] = {
               ...updatedNodes[childIndex],
-              hidden: isCollapsed // Hide child if parent is collapsed
+              hidden: isCollapsed, // Hide child if parent is collapsed
+              data: {
+                ...updatedNodes[childIndex].data,
+                // If this child has children, ensure it's set to collapsed state when becoming visible
+                isCollapsed: hasGrandChildren ? true : updatedNodes[childIndex].data.isCollapsed
+              }
             };
             
             // If we're collapsing, also collapse any grandchildren
@@ -167,10 +176,19 @@ export default function FlowVisualizer() {
       // Find the child in the nodes array
       const childIndex = nodes.findIndex(n => n.id === child.id);
       if (childIndex !== -1) {
+        // Check if this child has its own children
+        const grandChildren = nodes.filter(n => n.data.parentId === child.id);
+        const hasGrandChildren = grandChildren.length > 0;
+        
         // Update this child's visibility
         nodes[childIndex] = {
           ...nodes[childIndex],
-          hidden: hidden
+          hidden: hidden,
+          data: {
+            ...nodes[childIndex].data,
+            // If this node has children and is being hidden, ensure it's set to collapsed state
+            isCollapsed: hasGrandChildren ? true : nodes[childIndex].data.isCollapsed
+          }
         };
         
         // Recursively update this child's descendants
@@ -211,6 +229,7 @@ export default function FlowVisualizer() {
       const initializedNodes = newNodes.map(node => {
         // Add children count to each node
         const nodeChildren = childrenMap[node.id] || [];
+        const hasChildren = nodeChildren.length > 0;
         
         if (node.data.level === 0) {
           // Root level nodes (use cases) - collapsed by default
@@ -228,6 +247,7 @@ export default function FlowVisualizer() {
             ...node,
             data: {
               ...node.data,
+              isCollapsed: hasChildren, // If this node has children, set it as collapsed by default
               childrenCount: nodeChildren.length
             },
             hidden: true // Hide child nodes initially
