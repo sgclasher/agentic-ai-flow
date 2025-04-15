@@ -4,7 +4,8 @@
  * @param {String} layoutDirection - Layout direction ('LR' or 'TB')
  * @returns {Object} { nodes, edges }
  */
-import { applyDagreLayout } from './layoutGraph';
+// Remove the layout import as it's no longer used here
+// import { applyDagreLayout } from './layoutGraph';
 
 export function transformAgenticData(agenticData, layoutDirection = 'LR') {
   if (!agenticData || !agenticData.use_cases || !agenticData.use_cases.length) {
@@ -151,12 +152,13 @@ export function transformAgenticData(agenticData, layoutDirection = 'LR') {
     }
   });
 
-  // Apply Dagre layout
-  const layoutedGraph = applyDagreLayout(nodes, edges, {
-    direction: layoutDirection,
-    nodeSeparation: 200,
-    rankSeparation: 300,
-  });
+  // Remove the layout application from this function
+  // const layoutedGraph = applyDagreLayout(nodes, edges, {
+  //   direction: layoutDirection,
+  //   nodeSeparation: 200,
+  //   rankSeparation: 300,
+  // });
 
-  return layoutedGraph;
+  // Return raw nodes and edges
+  return { nodes, edges };
 } 

@@ -23,6 +23,14 @@ import useAgenticStore from '../store/useAgenticStore';
 import { transformAgenticData } from '../utils/transformAgenticData';
 import { applyDagreLayout } from '../utils/layoutGraph';
 
+// Define node types outside of the component to avoid recreation on each render
+const nodeTypes = {
+  useCaseNode: UseCaseNode,
+  triggerNode: TriggerNode,
+  agentNode: AgentNode,
+  toolNode: ToolNode,
+};
+
 export default function FlowVisualizer() {
   const { agenticData, isLoading, error } = useAgenticStore();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -35,9 +43,41 @@ export default function FlowVisualizer() {
   // Track node collapse changes to prevent infinite layout re-rendering
   const lastCollapseStateRef = useRef({});
   const isLayoutNecessaryRef = useRef(false);
-
+  
+  // Helper function to recursively update visibility of all descendants
+  const updateDescendantVisibility = useCallback((nodes, parentId, hidden) => {
+    // Find all immediate children of the parent
+    const children = nodes.filter(node => node.data.parentId === parentId);
+    
+    children.forEach(child => {
+      // Find the child in the nodes array
+      const childIndex = nodes.findIndex(n => n.id === child.id);
+      if (childIndex !== -1) {
+        // Check if this child has its own children
+        const grandChildren = nodes.filter(n => n.data.parentId === child.id);
+        const hasGrandChildren = grandChildren.length > 0;
+        
+        // Update this child's visibility
+        nodes[childIndex] = {
+          ...nodes[childIndex],
+          hidden: hidden,
+          data: {
+            ...nodes[childIndex].data,
+            // If this node has children and is being hidden, ensure it's set to collapsed state
+            isCollapsed: hasGrandChildren ? true : nodes[childIndex].data.isCollapsed
+          }
+        };
+        
+        // Recursively update this child's descendants
+        updateDescendantVisibility(nodes, child.id, hidden);
+      }
+    });
+    
+    return nodes;
+  }, []);
+  
   // Helper to update visibility of all child nodes recursively
-  const updateChildNodesVisibility = (nodes, parentId, isParentCollapsed) => {
+  const updateChildNodesVisibility = useCallback((nodes, parentId, isParentCollapsed) => {
     console.log(`Updating visibility for children of ${parentId}, collapsed: ${isParentCollapsed}`);
     
     return nodes.map(node => {
@@ -73,9 +113,9 @@ export default function FlowVisualizer() {
       // For nodes that aren't direct children of the toggled node, return unchanged
       return node;
     });
-  };
-
-  // Toggle node expansion (show/hide children)
+  }, []);
+  
+  // Store references to layout functions to pass to nodes
   const toggleNodeExpansion = useCallback((nodeId) => {
     console.log(`Toggle expansion for node: ${nodeId}`);
     
@@ -157,6 +197,19 @@ export default function FlowVisualizer() {
           }))
         );
         
+        // Schedule a fit view after the toggle completes
+        window.requestAnimationFrame(() => {
+          setTimeout(() => {
+            reactFlowInstance.fitView({
+              padding: 0.6, // Significantly increased padding
+              includeHiddenNodes: false,
+              duration: 800,
+              minZoom: 0.3,
+              maxZoom: 1.5
+            });
+          }, 400); // Increased delay
+        });
+        
         return updatedNodes;
       } else {
         // No children to hide/show, just update the node's collapse state
@@ -165,58 +218,34 @@ export default function FlowVisualizer() {
         return updatedNodes;
       }
     });
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, reactFlowInstance, updateDescendantVisibility]);
 
-  // Helper function to recursively update visibility of all descendants
-  const updateDescendantVisibility = (nodes, parentId, hidden) => {
-    // Find all immediate children of the parent
-    const children = nodes.filter(node => node.data.parentId === parentId);
-    
-    children.forEach(child => {
-      // Find the child in the nodes array
-      const childIndex = nodes.findIndex(n => n.id === child.id);
-      if (childIndex !== -1) {
-        // Check if this child has its own children
-        const grandChildren = nodes.filter(n => n.data.parentId === child.id);
-        const hasGrandChildren = grandChildren.length > 0;
-        
-        // Update this child's visibility
-        nodes[childIndex] = {
-          ...nodes[childIndex],
-          hidden: hidden,
-          data: {
-            ...nodes[childIndex].data,
-            // If this node has children and is being hidden, ensure it's set to collapsed state
-            isCollapsed: hasGrandChildren ? true : nodes[childIndex].data.isCollapsed
-          }
-        };
-        
-        // Recursively update this child's descendants
-        updateDescendantVisibility(nodes, child.id, hidden);
+  // Add the required props to each node object instead of in nodeTypes
+  const getNodesWithProps = useCallback((currentNodes) => {
+    return currentNodes.map(node => ({
+      ...node,
+      data: {
+        ...node.data,
+        layoutDirection,
+        onToggle: toggleNodeExpansion
       }
-    });
-    
-    return nodes;
-  };
+    }));
+  }, [layoutDirection, toggleNodeExpansion]);
 
-  // Define node types with layout direction and id
-  const nodeTypes = useMemo(() => ({
-    useCaseNode: (props) => <UseCaseNode {...props} layoutDirection={layoutDirection} id={props.id} onToggle={toggleNodeExpansion} />,
-    triggerNode: (props) => <TriggerNode {...props} layoutDirection={layoutDirection} id={props.id} onToggle={toggleNodeExpansion} />,
-    agentNode: (props) => <AgentNode {...props} layoutDirection={layoutDirection} id={props.id} onToggle={toggleNodeExpansion} />,
-    toolNode: (props) => <ToolNode {...props} layoutDirection={layoutDirection} id={props.id} onToggle={toggleNodeExpansion} />,
-  }), [layoutDirection, toggleNodeExpansion]);
+  // Preprocess nodes to include the needed props
+  const nodesWithProps = useMemo(() => {
+    return getNodesWithProps(nodes);
+  }, [nodes, getNodesWithProps]);
 
   // Load nodes and edges when agenticData changes
   useEffect(() => {
     if (agenticData) {
-      const { nodes: newNodes, edges: newEdges } = transformAgenticData(agenticData, layoutDirection);
+      // Get raw nodes and edges without layout applied
+      const { nodes: rawNodes, edges: rawEdges } = transformAgenticData(agenticData);
       
       // Create a map to identify parent-child relationships
       const childrenMap = {};
-      
-      // Count children for each node
-      newNodes.forEach(node => {
+      rawNodes.forEach(node => {
         if (node.data.parentId) {
           if (!childrenMap[node.data.parentId]) {
             childrenMap[node.data.parentId] = [];
@@ -225,48 +254,85 @@ export default function FlowVisualizer() {
         }
       });
       
-      // Default to collapse all child nodes on initial load (showing only use cases)
-      const initializedNodes = newNodes.map(node => {
-        // Add children count to each node
+      // Set initial collapse/hidden states
+      const initializedNodes = rawNodes.map(node => {
         const nodeChildren = childrenMap[node.id] || [];
         const hasChildren = nodeChildren.length > 0;
         
         if (node.data.level === 0) {
-          // Root level nodes (use cases) - collapsed by default
           return {
             ...node,
-            data: {
-              ...node.data,
-              isCollapsed: true, // This controls child visibility - true means children are hidden
-              childrenCount: nodeChildren.length
-            }
+            data: { ...node.data, isCollapsed: true, childrenCount: nodeChildren.length },
+            hidden: false // Top-level nodes are visible
           };
         } else {
-          // Child nodes - hidden by default due to parent collapse
           return {
             ...node,
-            data: {
-              ...node.data,
-              isCollapsed: hasChildren, // If this node has children, set it as collapsed by default
-              childrenCount: nodeChildren.length
-            },
-            hidden: true // Hide child nodes initially
+            data: { ...node.data, isCollapsed: hasChildren, childrenCount: nodeChildren.length },
+            hidden: true // Child nodes are hidden initially
           };
         }
       });
       
-      setNodes(initializedNodes);
-      setEdges(newEdges);
+      // --- Apply Initial Layout --- 
+      // Filter for initially visible nodes (top-level use cases)
+      const visibleNodesInitial = initializedNodes.filter(node => !node.hidden);
+      const visibleNodeIdsInitial = new Set(visibleNodesInitial.map(node => node.id));
+      
+      // Filter edges to include only those connecting visible nodes
+      const visibleEdgesInitial = rawEdges.filter(edge => 
+        visibleNodeIdsInitial.has(edge.source) && visibleNodeIdsInitial.has(edge.target)
+      );
+
+      // Apply layout only to visible nodes/edges
+      const { nodes: layoutedNodes, edges: layoutedEdges } = applyDagreLayout(
+        visibleNodesInitial,
+        visibleEdgesInitial, // Use initially visible edges for layout
+        {
+          direction: layoutDirection, // Use the current layout direction state
+          nodeSeparation: 200,
+          rankSeparation: 300,
+        }
+      );
+      
+      // Merge layout positions back into the *full* initializedNodes array
+      const finalNodes = initializedNodes.map(node => {
+        const layoutedNode = layoutedNodes.find(n => n.id === node.id);
+        if (layoutedNode) {
+          // Apply layout position only if the node was part of the layout
+          return { ...node, position: layoutedNode.position };
+        }
+        // Keep original position (likely 0,0) for hidden nodes, though it shouldn't matter
+        return node; 
+      });
+
+      // Set the final state for nodes and edges
+      setNodes(finalNodes);
+      // Set the full edge list; visibility will be handled by the other useEffect
+      setEdges(rawEdges); 
       
       // Initialize last collapse state ref
       const collapseState = {};
-      initializedNodes.forEach(node => {
+      finalNodes.forEach(node => {
         collapseState[node.id] = node.data.isCollapsed;
       });
       lastCollapseStateRef.current = collapseState;
-      setLastUpdate('Initial hierarchical layout applied');
+      setLastUpdate('Initial layout applied to visible nodes');
+      
+      // Trigger fitView after layout is applied
+      window.requestAnimationFrame(() => {
+        setTimeout(() => {
+          reactFlowInstance?.fitView?.({
+            padding: 0.6,
+            includeHiddenNodes: false,
+            duration: 800,
+            minZoom: 0.3,
+            maxZoom: 1.5
+          });
+        }, 400);
+      });
     }
-  }, [agenticData, setNodes, setEdges, layoutDirection]);
+  }, [agenticData, setNodes, setEdges, layoutDirection, reactFlowInstance]);
 
   // Manually trigger a custom node change to fix any onClick propagation issues
   const customNodesChange = useCallback((changes) => {
@@ -351,9 +417,18 @@ export default function FlowVisualizer() {
       setNodes(mergedNodes);
       setEdges(layoutedEdges);
 
-      // Center the graph after layout
+      // Center the graph after layout with a slightly longer delay and increased padding
       window.requestAnimationFrame(() => {
-        reactFlowInstance.fitView({ padding: 0.2 });
+        // Use setTimeout to ensure the layout has fully applied before fitting view
+        setTimeout(() => {
+          reactFlowInstance.fitView({ 
+            padding: 0.6, // Significantly increased padding
+            includeHiddenNodes: false,
+            duration: 800,
+            minZoom: 0.3,
+            maxZoom: 1.5
+          });
+        }, 400); // Increased delay
       });
     }
   }, [nodes, edges, layoutDirection, setNodes, setEdges, reactFlowInstance]);
@@ -421,7 +496,19 @@ export default function FlowVisualizer() {
     
     // Force layout update
     isLayoutNecessaryRef.current = true;
-  }, [customSetNodes, setEdges]);
+    
+    // Ensure fit view after expansion
+    window.requestAnimationFrame(() => {
+      setTimeout(() => {
+        reactFlowInstance.fitView({
+          padding: 0.3,
+          includeHiddenNodes: false,
+          minZoom: 0.5,
+          maxZoom: 1.5
+        });
+      }, 300); // Slightly longer delay for the bigger layout change
+    });
+  }, [customSetNodes, setEdges, reactFlowInstance]);
 
   // Function to collapse all nodes to show only use cases
   const collapseAllNodes = useCallback(() => {
@@ -471,9 +558,21 @@ export default function FlowVisualizer() {
       // Force layout update
       isLayoutNecessaryRef.current = true;
       
+      // Ensure fit view after collapse
+      window.requestAnimationFrame(() => {
+        setTimeout(() => {
+          reactFlowInstance.fitView({
+            padding: 0.3,
+            includeHiddenNodes: false,
+            minZoom: 0.5,
+            maxZoom: 1.5
+          });
+        }, 300); // Slightly longer delay for the bigger layout change
+      });
+      
       return updatedNodes;
     });
-  }, [customSetNodes, setEdges]);
+  }, [customSetNodes, setEdges, reactFlowInstance]);
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'row' }}>
@@ -484,7 +583,7 @@ export default function FlowVisualizer() {
       ) : (
         <ReactFlowProvider>
           <ReactFlow
-            nodes={nodes}
+            nodes={nodesWithProps}
             edges={edges.filter(edge => !edge.hidden)}
             onNodesChange={customNodesChange}
             onEdgesChange={onEdgesChange}
@@ -492,6 +591,16 @@ export default function FlowVisualizer() {
             onNodeClick={onNodeClick}
             nodeTypes={nodeTypes}
             fitView
+            fitViewOptions={{
+              padding: 0.6, // Significantly increased padding
+              includeHiddenNodes: false,
+              duration: 800,
+              minZoom: 0.3,
+              maxZoom: 1.5
+            }}
+            minZoom={0.1}
+            maxZoom={2}
+            defaultViewport={{ zoom: 0.75, x: 0, y: 0 }}
           >
             <Controls />
             <MiniMap />
