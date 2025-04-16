@@ -71,28 +71,30 @@ function TriggerNode({ data, id }) {
       <div className="node-header">
         <div className="node-type">TRIGGER</div>
         
-        {canNavigate && (
-          <button 
-            className="node-external-link"
-            onClick={handleExternalLinkClick}
-            onMouseDown={(e) => e.stopPropagation()}
-            title="Open in ServiceNow"
-          >
-            <ExternalLinkIcon />
-          </button>
-        )}
-        
-        {/* Keep expand button logic if needed */}
-        {hasChildren && (
-          <button 
-            className="expand-button" 
-            onClick={handleToggle}
-            onMouseDown={(e) => e.stopPropagation()}
-            title={isCollapsed ? "Show child nodes" : "Hide child nodes"}
-          >
-            {isCollapsed ? '+' : '−'}
-          </button>
-        )}
+        <div className="node-header-buttons">
+          {canNavigate && (
+            <button 
+              className="node-external-link"
+              onClick={handleExternalLinkClick}
+              onMouseDown={(e) => e.stopPropagation()}
+              title="Open in ServiceNow"
+            >
+              <ExternalLinkIcon />
+            </button>
+          )}
+          
+          {/* Keep expand button logic if needed */}
+          {hasChildren && (
+            <button 
+              className="expand-button" 
+              onClick={handleToggle}
+              onMouseDown={(e) => e.stopPropagation()}
+              title={isCollapsed ? "Show child nodes" : "Hide child nodes"}
+            >
+              {isCollapsed ? '+' : '−'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Content area holds the objective (label) and description */}

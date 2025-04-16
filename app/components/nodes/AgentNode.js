@@ -36,8 +36,17 @@ function AgentNode({ data, id }) {
     e.stopPropagation();
     e.preventDefault();
     
+    console.log('AgentNode external link clicked:', {
+      serviceNowUrl,
+      details,
+      sys_id: details?.sys_id,
+      hasDetails: !!details,
+    });
+    
     // Generate URL using the utility function
     const url = generateServiceNowUrl(serviceNowUrl, 'agent', details?.sys_id);
+    
+    console.log('Generated URL:', url);
     
     if (url) {
       // Open link in new tab
@@ -64,27 +73,29 @@ function AgentNode({ data, id }) {
           <div className="node-title">{label}</div>
         </div>
         
-        {canNavigate && (
-          <button 
-            className="node-external-link"
-            onClick={handleExternalLinkClick}
-            onMouseDown={(e) => e.stopPropagation()}
-            title="Open in ServiceNow"
-          >
-            <ExternalLinkIcon />
-          </button>
-        )}
-        
-        {hasChildren && (
-          <button 
-            className="expand-button"
-            onClick={handleToggle}
-            onMouseDown={(e) => e.stopPropagation()}
-            title={isCollapsed ? "Show child nodes" : "Hide child nodes"}
-          >
-            {isCollapsed ? '+' : '−'}
-          </button>
-        )}
+        <div className="node-header-buttons">
+          {canNavigate && (
+            <button 
+              className="node-external-link"
+              onClick={handleExternalLinkClick}
+              onMouseDown={(e) => e.stopPropagation()}
+              title="Open in ServiceNow"
+            >
+              <ExternalLinkIcon />
+            </button>
+          )}
+          
+          {hasChildren && (
+            <button 
+              className="expand-button"
+              onClick={handleToggle}
+              onMouseDown={(e) => e.stopPropagation()}
+              title={isCollapsed ? "Show child nodes" : "Hide child nodes"}
+            >
+              {isCollapsed ? '+' : '−'}
+            </button>
+          )}
+        </div>
       </div>
       <div className="node-content">
         {description && (

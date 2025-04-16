@@ -9,7 +9,10 @@ const useAgenticStore = create((set) => ({
   serviceNowUrl: '', // Base ServiceNow instance URL
   
   // Set the ServiceNow URL
-  setServiceNowUrl: (url) => set({ serviceNowUrl: url }),
+  setServiceNowUrl: (url) => {
+    console.log('Setting ServiceNow URL:', url);
+    set({ serviceNowUrl: url });
+  },
   
   // Set the agentic data from JSON
   setAgenticData: (data) => set({ agenticData: data, error: null }),

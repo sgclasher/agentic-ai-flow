@@ -26,6 +26,9 @@ export function transformAgenticData(agenticData, layoutDirection = 'LR') {
 
   // Process sorted use cases
   sortedUseCases.forEach((useCase, useCaseIndex) => {
+    // Log to debug
+    console.log(`Processing use case: ${useCase.name} (${useCase.sys_id})`);
+    
     // Use case node
     const useCaseId = `usecase-${useCase.sys_id}`;
     nodes.push({
