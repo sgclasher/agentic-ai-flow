@@ -6,6 +6,10 @@ const useAgenticStore = create((set) => ({
   agenticData: null,
   isLoading: false,
   error: null,
+  serviceNowUrl: '', // Base ServiceNow instance URL
+  
+  // Set the ServiceNow URL
+  setServiceNowUrl: (url) => set({ serviceNowUrl: url }),
   
   // Set the agentic data from JSON
   setAgenticData: (data) => set({ agenticData: data, error: null }),
@@ -34,7 +38,7 @@ const useAgenticStore = create((set) => ({
   },
   
   // Reset the store
-  resetData: () => set({ agenticData: null, error: null }),
+  resetData: () => set({ agenticData: null, error: null, serviceNowUrl: '' }),
 }));
 
 export default useAgenticStore; 

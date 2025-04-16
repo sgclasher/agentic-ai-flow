@@ -16,8 +16,16 @@ export function transformAgenticData(agenticData, layoutDirection = 'LR') {
   const edges = [];
   let nodeId = 1;
 
-  // Process each use case
-  agenticData.use_cases.forEach((useCase, useCaseIndex) => {
+  // --- Sort Use Cases by Name ---
+  const sortedUseCases = [...agenticData.use_cases].sort((a, b) => {
+    // Basic string comparison should work due to the leading number in the name
+    const nameA = a.name || '';
+    const nameB = b.name || '';
+    return nameA.localeCompare(nameB);
+  });
+
+  // Process sorted use cases
+  sortedUseCases.forEach((useCase, useCaseIndex) => {
     // Use case node
     const useCaseId = `usecase-${useCase.sys_id}`;
     nodes.push({
@@ -48,11 +56,13 @@ export function transformAgenticData(agenticData, layoutDirection = 'LR') {
           id: triggerId,
           position: { x: 0, y: 0 },
           data: { 
-            label: trigger.name || 'Trigger',
+            // Use objective_template as the primary label if name is null
+            label: trigger.name || trigger.objective_template || 'Trigger', 
             type: 'trigger',
             target_table: trigger.target_table,
             condition: trigger.condition,
-            objective: trigger.objective_template,
+            // Keep objective mapped for potential use in details panel, but label is primary display
+            objective: trigger.objective_template, 
             details: trigger,
             isCollapsed: false,
             childrenCount: 0,

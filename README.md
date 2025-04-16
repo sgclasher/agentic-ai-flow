@@ -1,6 +1,6 @@
 # Agentic AI Flow Visualizer
 
-A Next.js application for visualizing ServiceNow agentic AI data as interactive flow diagrams. This tool transforms structured data from ServiceNow's agentic AI platform into an interactive, collapsible node graph that helps users understand the relationships between use cases, triggers, agents, and tools.
+A Next.js application for visualizing ServiceNow agentic AI data as interactive flow diagrams. This tool transforms structured JSON data from ServiceNow's agentic AI platform into an interactive, collapsible node graph that helps users understand the relationships between use cases, triggers, agents, and tools.
 
 ## Purpose
 
@@ -20,6 +20,17 @@ The Agentic AI Flow Visualizer was designed to provide a clear visual representa
 - **File Upload**: Upload ServiceNow agentic AI data files to visualize
 - **Detailed Information**: View detailed node information by clicking on nodes
 - **Expand/Collapse All**: Options to expand or collapse all nodes at once
+- **Customizable Layouts**: Arrange nodes automatically based on hierarchy
+- **Sequence Numbering**: Displays use cases in operational order
+
+## Architecture Overview
+
+The application is built using Next.js with React Flow for the visualization. It follows a modular component structure with:
+
+- **Component-based UI**: Each node type has its own React component
+- **Data Transformation Layer**: Utilities to convert ServiceNow data to React Flow format
+- **Automatic Layout Engine**: Uses Dagre for intelligent node positioning
+- **State Management**: Uses Zustand for application state
 
 ## File Structure
 
@@ -47,39 +58,101 @@ agentic-ai-flow/
 └── package.json          # Project dependencies
 ```
 
-## Key Components
+## Core Components Explained
 
 ### FlowVisualizer.js
-The main component responsible for rendering the flow diagram. It manages node and edge states, handles layout changes, and provides controls for manipulating the visualization.
+The main component responsible for rendering the flow diagram. It handles:
+- Initialization of React Flow with custom node and edge types
+- State management for nodes and edges
+- Layout direction toggling (horizontal/vertical)
+- Node expansion/collapse functionality
+- Updating node visibility based on collapse state
+- Applying the Dagre layout to visible nodes
+- UI controls for layout manipulation
+
+Key functions:
+- `toggleNodeExpansion`: Toggles the expansion state of a node
+- `updateChildNodesVisibility`: Updates visibility of child nodes
+- `applyLayout`: Re-applies the layout algorithm after node visibility changes
 
 ### Node Components
-Custom React Flow node components for different entity types:
-- **UseCaseNode**: Represents a use case in the agentic system
-- **TriggerNode**: Represents a trigger in the agentic system
-- **AgentNode**: Represents an agent in the agentic system
-- **ToolNode**: Represents a tool in the agentic system
+Custom React Flow node components for different entity types, each sharing:
+- A common structure with header and content sections
+- Collapse/expand functionality via a toggle button
+- Dynamic handle positioning based on layout direction
+- Customized styling for each node type
 
-Each node type has specific styling and can be collapsed/expanded to show/hide child nodes.
+Specific node components:
+- **UseCaseNode.js**: Represents use cases with sequence information
+- **TriggerNode.js**: Represents triggers with objective information
+- **AgentNode.js**: Represents agents with role and description fields
+- **ToolNode.js**: Represents tools with capability details
 
 ### transformAgenticData.js
-Utility that transforms raw ServiceNow agentic AI data into the nodes and edges required by React Flow. It parses the hierarchy of use cases, triggers, agents, and tools to create a properly structured graph.
+The core data transformation utility that:
+- Parses ServiceNow agentic AI JSON data
+- Creates React Flow nodes with appropriate data and styling
+- Establishes parent-child relationships as edges
+- Adds interactive properties like collapse/expand functionality
+- Sorts use cases by name (which can include sequence numbers)
+- Maps data fields to appropriate node properties
 
 ### layoutGraph.js
-Provides the `applyDagreLayout` function which organizes nodes using the Dagre library, supporting both left-to-right and top-to-bottom layouts.
+Provides intelligent node positioning using Dagre:
+- `applyDagreLayout`: Organizes nodes in either horizontal or vertical layouts
+- Sets node dimensions and spacing
+- Processes only visible nodes
+- Returns positioned nodes and edges ready for React Flow rendering
 
-## Data Flow
+## Component Interaction Flow
 
-1. **Data Upload**: User uploads a JSON file containing ServiceNow agentic AI data
-2. **Data Transformation**: The data is transformed into React Flow nodes and edges
-3. **Initial Layout**: The nodes are arranged using Dagre layout algorithm
-4. **Interaction**: User can interact with the diagram - expanding/collapsing nodes, changing layout, etc.
-5. **State Updates**: Node visibility changes trigger layout recalculations
+1. **Data Entry**: User uploads JSON via `FileUploader` or loads sample data
+2. **Data Processing**:
+   - `transformAgenticData.js` converts the JSON to React Flow format
+   - Node hierarchies and relationships are established
+   - Default collapse states are applied
+3. **Visualization**:
+   - `FlowVisualizer` renders the initial graph
+   - `layoutGraph.js` positions the nodes
+   - React Flow renders the interactive diagram
+4. **User Interaction**:
+   - Node collapse/expand triggers child visibility updates
+   - Layout changes trigger repositioning of all nodes
+   - Node selection shows additional information
 
 ## Node Collapse Behavior
 
-Nodes have two aspects of collapsibility:
-- **Child Node Visibility**: When a node is collapsed, its child nodes are hidden from the view, but the node content itself remains visible
-- **Visual Indication**: A collapsed node shows a message indicating that children are hidden
+Nodes implement a custom collapsibility system:
+- Each node has an `isCollapsed` state property
+- When collapsed, child nodes are hidden but the node itself remains visible
+- Toggle buttons (`+`/`−`) control this state
+- Parent nodes track child counts and show indicators
+- The `FlowVisualizer` component maintains a mapping of which nodes should be visible
+
+## CSS Architecture
+
+The styling system uses:
+- Global CSS with class-based styling
+- Distinct visual styling for each node type
+- Responsive sizing for node contents
+- Vertical stacking layout for header contents (node type and title)
+- Collapsible content areas
+
+Key style features:
+- Header/content separation within nodes
+- Dynamic margins and padding
+- Consistent UI elements across node types
+- Responsive text sizing
+
+## Data Format Requirements
+
+The application expects ServiceNow agentic AI data in JSON format with:
+- A hierarchical structure of use cases, triggers, agents, and tools
+- Name and description fields for nodes
+- Objective information for triggers
+- Role information for agents
+
+For operational sequencing, use cases should be named with a prefix number (e.g., "1. First Use Case").
 
 ## Installation
 
@@ -115,6 +188,19 @@ npm run dev
 - **Dagre**: Graph layout engine for organizing nodes
 - **Zustand**: State management library
 - **CSS Modules**: For component styling
+
+## React Flow Implementation Notes
+
+- Custom node types are defined outside component bodies to prevent React warnings
+- Node and edge types are passed to React Flow via the `nodeTypes` and `edgeTypes` props
+- Nodes use the React Flow `Handle` component for connecting edges
+- Position and layout are managed via the Dagre algorithm
+
+## Known Considerations
+
+- Node labels with excessive length may need adjustments for optimal display
+- Complex hierarchies with many nodes may require scrolling or zooming
+- For best performance, limit extremely large datasets
 
 ## Browser Compatibility
 

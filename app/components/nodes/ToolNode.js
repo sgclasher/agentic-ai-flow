@@ -2,32 +2,55 @@
 
 import { memo, useCallback } from 'react';
 import { Handle, Position } from 'reactflow';
+import useAgenticStore from '../../store/useAgenticStore';
+import { ExternalLinkIcon, generateServiceNowUrl } from '../../utils/nodeUtils';
 
 function ToolNode({ data, id }) {
-  // Extract values from data prop
-  const { layoutDirection, onToggle, isCollapsed, label, childrenCount, description } = data || {};
+  // Extract all props directly from the data object passed by FlowVisualizer
+  const { 
+    layoutDirection, onToggle, isCollapsed, label, childrenCount, 
+    description, toolType, details
+  } = data || {}; // Access data directly
+  
+  // Get ServiceNow URL from store
+  const serviceNowUrl = useAgenticStore(state => state.serviceNowUrl);
   
   // Determine handle positions based on layout direction
   const targetPosition = layoutDirection === 'TB' ? Position.Top : Position.Left;
   const sourcePosition = layoutDirection === 'TB' ? Position.Bottom : Position.Right;
-
+  
   // Toggle collapse state
   const handleToggle = useCallback((e) => {
     e.stopPropagation();
     e.preventDefault();
     
-    console.log('Toggle clicked for tool node:', id, 'Current collapsed state:', isCollapsed);
-    
-    // Call the parent's toggle function if available
     if (typeof onToggle === 'function') {
       onToggle(id);
     } else {
       console.warn('onToggle prop is not a function or is missing for node:', id);
     }
-  }, [id, onToggle, isCollapsed]);
+  }, [id, onToggle]);
   
-  // Only show the toggle button if this node has children
+  // Handle external link click
+  const handleExternalLinkClick = useCallback((e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    // Generate URL using the utility function
+    const url = generateServiceNowUrl(serviceNowUrl, 'tool', details?.sys_id, toolType);
+    
+    if (url) {
+      // Open link in new tab
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      console.warn('Cannot navigate: ServiceNow URL or sys_id missing');
+    }
+  }, [serviceNowUrl, details?.sys_id, toolType]);
+
   const hasChildren = childrenCount > 0;
+  
+  // Only show external link if we have a ServiceNow URL and sys_id
+  const canNavigate = Boolean(serviceNowUrl && details?.sys_id);
 
   return (
     <div className="node tool-node"
@@ -36,11 +59,25 @@ function ToolNode({ data, id }) {
       <Handle type="source" position={sourcePosition} />
       
       <div className="node-header">
-        <div className="node-type">Tool</div>
-        <div className="node-title">{label}</div>
+        <div className="header-content">
+          <div className="node-type">TOOL</div>
+          <div className="node-title">{label}</div>
+        </div>
+        
+        {canNavigate && (
+          <button 
+            className="node-external-link"
+            onClick={handleExternalLinkClick}
+            onMouseDown={(e) => e.stopPropagation()}
+            title="Open in ServiceNow"
+          >
+            <ExternalLinkIcon />
+          </button>
+        )}
+        
         {hasChildren && (
           <button 
-            className="expand-button" 
+            className="expand-button"
             onClick={handleToggle}
             onMouseDown={(e) => e.stopPropagation()}
             title={isCollapsed ? "Show child nodes" : "Hide child nodes"}
@@ -52,6 +89,11 @@ function ToolNode({ data, id }) {
       <div className="node-content">
         {description && (
           <div className="node-description">{description}</div>
+        )}
+        {toolType && (
+          <div className="node-field">
+            <span className="field-label">Type:</span> {toolType}
+          </div>
         )}
         {hasChildren && (
           <div className="node-children-info">

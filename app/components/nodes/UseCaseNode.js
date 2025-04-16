@@ -2,10 +2,18 @@
 
 import { memo, useCallback } from 'react';
 import { Handle, Position } from 'reactflow';
+import useAgenticStore from '../../store/useAgenticStore';
+import { ExternalLinkIcon, generateServiceNowUrl } from '../../utils/nodeUtils';
 
 function UseCaseNode({ data, id }) {
-  // Extract values from data prop
-  const { layoutDirection, onToggle, isCollapsed, label, childrenCount, description } = data || {};
+  // Extract all props directly from the data object
+  const { 
+    layoutDirection, onToggle, isCollapsed, label, childrenCount, 
+    description, details
+  } = data || {}; // Access data directly
+  
+  // Get ServiceNow URL from store
+  const serviceNowUrl = useAgenticStore(state => state.serviceNowUrl);
   
   // Determine handle positions based on layout direction
   const targetPosition = layoutDirection === 'TB' ? Position.Top : Position.Left;
@@ -26,8 +34,27 @@ function UseCaseNode({ data, id }) {
     }
   }, [id, onToggle, isCollapsed]);
 
+  // Handle external link click
+  const handleExternalLinkClick = useCallback((e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    // Generate URL using the utility function
+    const url = generateServiceNowUrl(serviceNowUrl, 'useCase', details?.sys_id);
+    
+    if (url) {
+      // Open link in new tab
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      console.warn('Cannot navigate: ServiceNow URL or sys_id missing');
+    }
+  }, [serviceNowUrl, details?.sys_id]);
+
   // Only show the toggle button if this node has children
   const hasChildren = childrenCount > 0;
+  
+  // Only show external link if we have a ServiceNow URL and sys_id
+  const canNavigate = Boolean(serviceNowUrl && details?.sys_id);
 
   return (
     <div className="node use-case-node"
@@ -35,9 +62,23 @@ function UseCaseNode({ data, id }) {
       <Handle type="target" position={targetPosition} />
       <Handle type="source" position={sourcePosition} />
       
-      <div className="node-header">
-        <div className="node-type">Use Case</div>
-        <div className="node-title">{label}</div>
+      <div className="node-header use-case-header">
+        <div className="header-content">
+          <div className="node-type">USE CASE</div>
+          <div className="node-title">{label}</div>
+        </div>
+        
+        {canNavigate && (
+          <button 
+            className="node-external-link"
+            onClick={handleExternalLinkClick}
+            onMouseDown={(e) => e.stopPropagation()}
+            title="Open in ServiceNow"
+          >
+            <ExternalLinkIcon />
+          </button>
+        )}
+        
         {hasChildren && (
           <button 
             className="expand-button"

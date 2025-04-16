@@ -2,7 +2,7 @@
   "use_cases": [
     {
       "sys_id": "062154d947242210d93447c4416d437f",
-      "name": "RFX Request Intake Manager",
+      "name": "1 - RFX Request Intake Manager",
       "description": "This use case manages the intake process for new RFX (RFP, RFI, RFQ) requests from business users, ensuring all required information is collected, validated, and properly recorded in the system before document generation.",
       "triggers": [
         {
@@ -87,7 +87,7 @@
     },
     {
       "sys_id": "21e5931147e46210d93447c4416d4362",
-      "name": "RFX Vendor Q&A Management",
+      "name": "3 - RFX Vendor Q&A Management",
       "description": "Manages vendor questions during the RFx process, generating professional and consistent responses while maintaining procurement integrity.",
       "triggers": [
         {
@@ -145,7 +145,7 @@
     },
     {
       "sys_id": "55c5d6dd47206210d93447c4416d438d",
-      "name": "RFX Document Generation",
+      "name": "2 - RFX Document Generation",
       "description": "This use case generates complete RFX documents based on approved requests by retrieving data, creating content, formatting to HTML, and storing the final document.",
       "triggers": [
         {
@@ -197,7 +197,7 @@
     },
     {
       "sys_id": "6fcf107947e0e210d93447c4416d438f",
-      "name": "RFX Vendor Finalist Selection",
+      "name": "5 - RFX Vendor Finalist Selection",
       "description": "Supports decision making for final vendor selection by comparing top-ranked proposals and generating selection recommendations",
       "triggers": [
         {
@@ -270,7 +270,7 @@
     },
     {
       "sys_id": "f4c32b6d9764a21076cf3ee8c253af2e",
-      "name": "RFX Vendor Evaluation",
+      "name": "4 - RFX Vendor Evaluation",
       "description": "Streamlines evaluation of vendor proposals against predefined evaluation criteria using AI agents.",
       "triggers": [
         {

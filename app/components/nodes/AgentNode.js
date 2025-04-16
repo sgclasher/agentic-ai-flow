@@ -2,10 +2,18 @@
 
 import { memo, useCallback } from 'react';
 import { Handle, Position } from 'reactflow';
+import useAgenticStore from '../../store/useAgenticStore';
+import { ExternalLinkIcon, generateServiceNowUrl } from '../../utils/nodeUtils';
 
 function AgentNode({ data, id }) {
-  // Extract values from data prop
-  const { layoutDirection, onToggle, isCollapsed, label, childrenCount, description, role } = data || {};
+  // Extract all props directly from the data object passed by FlowVisualizer
+  const { 
+    layoutDirection, onToggle, isCollapsed, label, childrenCount, 
+    description, role, details
+  } = data || {}; // Access data directly
+  
+  // Get ServiceNow URL from store
+  const serviceNowUrl = useAgenticStore(state => state.serviceNowUrl);
   
   // Determine handle positions based on layout direction
   const targetPosition = layoutDirection === 'TB' ? Position.Top : Position.Left;
@@ -16,29 +24,60 @@ function AgentNode({ data, id }) {
     e.stopPropagation();
     e.preventDefault();
     
-    console.log('Toggle clicked for agent node:', id, 'Current collapsed state:', isCollapsed);
-    
-    // Call the parent's toggle function if available
     if (typeof onToggle === 'function') {
       onToggle(id);
     } else {
       console.warn('onToggle prop is not a function or is missing for node:', id);
     }
-  }, [id, onToggle, isCollapsed]);
+  }, [id, onToggle]);
+
+  // Handle external link click
+  const handleExternalLinkClick = useCallback((e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    // Generate URL using the utility function
+    const url = generateServiceNowUrl(serviceNowUrl, 'agent', details?.sys_id);
+    
+    if (url) {
+      // Open link in new tab
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      console.warn('Cannot navigate: ServiceNow URL or sys_id missing');
+    }
+  }, [serviceNowUrl, details?.sys_id]);
   
-  // Only show the toggle button if this node has children
   const hasChildren = childrenCount > 0;
+  
+  // Only show external link if we have a ServiceNow URL and sys_id
+  const canNavigate = Boolean(serviceNowUrl && details?.sys_id);
 
   return (
     <div className="node agent-node"
          onClick={(e) => e.stopPropagation()}>
       <Handle type="target" position={targetPosition} />
+      <Handle type="source" position={sourcePosition} />
+      
       <div className="node-header">
-        <div className="node-type">Agent</div>
-        <div className="node-title">{label}</div>
+        <div className="header-content">
+          <div className="node-type">AGENT</div>
+          <div className="node-title">{label}</div>
+        </div>
+        
+        {canNavigate && (
+          <button 
+            className="node-external-link"
+            onClick={handleExternalLinkClick}
+            onMouseDown={(e) => e.stopPropagation()}
+            title="Open in ServiceNow"
+          >
+            <ExternalLinkIcon />
+          </button>
+        )}
+        
         {hasChildren && (
           <button 
-            className="expand-button" 
+            className="expand-button"
             onClick={handleToggle}
             onMouseDown={(e) => e.stopPropagation()}
             title={isCollapsed ? "Show child nodes" : "Hide child nodes"}
@@ -48,14 +87,13 @@ function AgentNode({ data, id }) {
         )}
       </div>
       <div className="node-content">
-        {role && (
-          <div className="node-role">
-            <span className="label">Role:</span>
-            <span className="value">{role}</span>
-          </div>
-        )}
         {description && (
           <div className="node-description">{description}</div>
+        )}
+        {role && (
+          <div className="node-field">
+            <span className="field-label">Role:</span> {role}
+          </div>
         )}
         {hasChildren && (
           <div className="node-children-info">
@@ -63,7 +101,6 @@ function AgentNode({ data, id }) {
           </div>
         )}
       </div>
-      <Handle type="source" position={sourcePosition} />
     </div>
   );
 }
