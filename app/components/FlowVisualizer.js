@@ -31,8 +31,14 @@ const nodeTypes = {
   toolNode: ToolNode,
 };
 
-export default function FlowVisualizer() {
+export default function FlowVisualizer({ onError }) {
   const { agenticData, isLoading, error } = useAgenticStore();
+  
+  // Debug logging
+  console.log('FlowVisualizer rendering with agenticData:', agenticData);
+  console.log('Is any data present?', agenticData && Object.keys(agenticData).length > 0);
+  console.log('Are there use_cases?', agenticData?.use_cases?.length);
+  
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
@@ -240,99 +246,113 @@ export default function FlowVisualizer() {
   // Load nodes and edges when agenticData changes
   useEffect(() => {
     if (agenticData) {
-      // Get raw nodes and edges without layout applied
-      const { nodes: rawNodes, edges: rawEdges } = transformAgenticData(agenticData);
-      
-      // Create a map to identify parent-child relationships
-      const childrenMap = {};
-      rawNodes.forEach(node => {
-        if (node.data.parentId) {
-          if (!childrenMap[node.data.parentId]) {
-            childrenMap[node.data.parentId] = [];
-          }
-          childrenMap[node.data.parentId].push(node.id);
-        }
-      });
-      
-      // Set initial collapse/hidden states
-      const initializedNodes = rawNodes.map(node => {
-        const nodeChildren = childrenMap[node.id] || [];
-        const hasChildren = nodeChildren.length > 0;
+      try {
+        // Get raw nodes and edges without layout applied
+        const { nodes: rawNodes, edges: rawEdges } = transformAgenticData(agenticData);
         
-        if (node.data.level === 0) {
-          return {
-            ...node,
-            data: { ...node.data, isCollapsed: true, childrenCount: nodeChildren.length },
-            hidden: false // Top-level nodes are visible
-          };
-        } else {
-          return {
-            ...node,
-            data: { ...node.data, isCollapsed: hasChildren, childrenCount: nodeChildren.length },
-            hidden: true // Child nodes are hidden initially
-          };
+        // Check if we got valid data back
+        if (!rawNodes.length && !rawEdges.length) {
+          throw new Error('Unable to transform the data into a valid flow diagram');
         }
-      });
-      
-      // --- Apply Initial Layout --- 
-      // Filter for initially visible nodes (top-level use cases)
-      const visibleNodesInitial = initializedNodes.filter(node => !node.hidden);
-      const visibleNodeIdsInitial = new Set(visibleNodesInitial.map(node => node.id));
-      
-      // Filter edges to include only those connecting visible nodes
-      const visibleEdgesInitial = rawEdges.filter(edge => 
-        visibleNodeIdsInitial.has(edge.source) && visibleNodeIdsInitial.has(edge.target)
-      );
+        
+        console.log(`Successfully transformed data: ${rawNodes.length} nodes, ${rawEdges.length} edges`);
+        
+        // Create a map to identify parent-child relationships
+        const childrenMap = {};
+        rawNodes.forEach(node => {
+          if (node.data.parentId) {
+            if (!childrenMap[node.data.parentId]) {
+              childrenMap[node.data.parentId] = [];
+            }
+            childrenMap[node.data.parentId].push(node.id);
+          }
+        });
+        
+        // Set initial collapse/hidden states
+        const initializedNodes = rawNodes.map(node => {
+          const nodeChildren = childrenMap[node.id] || [];
+          const hasChildren = nodeChildren.length > 0;
+          
+          if (node.data.level === 0) {
+            return {
+              ...node,
+              data: { ...node.data, isCollapsed: true, childrenCount: nodeChildren.length },
+              hidden: false // Top-level nodes are visible
+            };
+          } else {
+            return {
+              ...node,
+              data: { ...node.data, isCollapsed: hasChildren, childrenCount: nodeChildren.length },
+              hidden: true // Child nodes are hidden initially
+            };
+          }
+        });
+        
+        // --- Apply Initial Layout --- 
+        // Filter for initially visible nodes (top-level use cases)
+        const visibleNodesInitial = initializedNodes.filter(node => !node.hidden);
+        const visibleNodeIdsInitial = new Set(visibleNodesInitial.map(node => node.id));
+        
+        // Filter edges to include only those connecting visible nodes
+        const visibleEdgesInitial = rawEdges.filter(edge => 
+          visibleNodeIdsInitial.has(edge.source) && visibleNodeIdsInitial.has(edge.target)
+        );
 
-      // Apply layout only to visible nodes/edges
-      const { nodes: layoutedNodes, edges: layoutedEdges } = applyDagreLayout(
-        visibleNodesInitial,
-        visibleEdgesInitial, // Use initially visible edges for layout
-        {
-          direction: layoutDirection, // Use the current layout direction state
-          nodeSeparation: 200,
-          rankSeparation: 300,
-        }
-      );
-      
-      // Merge layout positions back into the *full* initializedNodes array
-      const finalNodes = initializedNodes.map(node => {
-        const layoutedNode = layoutedNodes.find(n => n.id === node.id);
-        if (layoutedNode) {
-          // Apply layout position only if the node was part of the layout
-          return { ...node, position: layoutedNode.position };
-        }
-        // Keep original position (likely 0,0) for hidden nodes, though it shouldn't matter
-        return node; 
-      });
+        // Apply layout only to visible nodes/edges
+        const { nodes: layoutedNodes, edges: layoutedEdges } = applyDagreLayout(
+          visibleNodesInitial,
+          visibleEdgesInitial, // Use initially visible edges for layout
+          {
+            direction: layoutDirection, // Use the current layout direction state
+            nodeSeparation: 200,
+            rankSeparation: 300,
+          }
+        );
+        
+        // Merge layout positions back into the *full* initializedNodes array
+        const finalNodes = initializedNodes.map(node => {
+          const layoutedNode = layoutedNodes.find(n => n.id === node.id);
+          if (layoutedNode) {
+            // Apply layout position only if the node was part of the layout
+            return { ...node, position: layoutedNode.position };
+          }
+          // Keep original position (likely 0,0) for hidden nodes, though it shouldn't matter
+          return node; 
+        });
 
-      // Set the final state for nodes and edges
-      setNodes(finalNodes);
-      // Set the full edge list; visibility will be handled by the other useEffect
-      setEdges(rawEdges); 
-      
-      // Initialize last collapse state ref
-      const collapseState = {};
-      finalNodes.forEach(node => {
-        collapseState[node.id] = node.data.isCollapsed;
-      });
-      lastCollapseStateRef.current = collapseState;
-      setLastUpdate('Initial layout applied to visible nodes');
-      
-      // Trigger fitView after layout is applied
-      window.requestAnimationFrame(() => {
-        setTimeout(() => {
-          reactFlowInstance?.fitView?.({
-            padding: 0.6,
-            includeHiddenNodes: false,
-            duration: 800,
-            minZoom: 0.3,
-            maxZoom: 1.5
-          });
-        }, 400);
-      });
+        // Set the final state for nodes and edges
+        setNodes(finalNodes);
+        // Set the full edge list; visibility will be handled by the other useEffect
+        setEdges(rawEdges); 
+        
+        // Initialize last collapse state ref
+        const collapseState = {};
+        finalNodes.forEach(node => {
+          collapseState[node.id] = node.data.isCollapsed;
+        });
+        lastCollapseStateRef.current = collapseState;
+        setLastUpdate('Initial layout applied to visible nodes');
+        
+        // Trigger fitView after layout is applied
+        window.requestAnimationFrame(() => {
+          setTimeout(() => {
+            reactFlowInstance?.fitView?.({
+              padding: 0.6,
+              includeHiddenNodes: false,
+              duration: 800,
+              minZoom: 0.3,
+              maxZoom: 1.5
+            });
+          }, 400);
+        });
+      } catch (error) {
+        console.error("Error processing agentic data:", error);
+        if (onError) {
+          onError(error);
+        }
+      }
     }
-  }, [agenticData, setNodes, setEdges, layoutDirection, reactFlowInstance]);
+  }, [agenticData, setNodes, setEdges, layoutDirection, reactFlowInstance, onError]);
 
   // Manually trigger a custom node change to fix any onClick propagation issues
   const customNodesChange = useCallback((changes) => {
@@ -575,152 +595,161 @@ export default function FlowVisualizer() {
   }, [customSetNodes, setEdges, reactFlowInstance]);
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'row' }}>
+    <div style={{ 
+      width: '100%', 
+      height: '100%', 
+      display: 'flex', 
+      flexDirection: 'row',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0 
+    }}>
       {!agenticData ? (
         <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <FileUploader />
         </div>
       ) : (
-        <ReactFlowProvider>
-          <ReactFlow
-            nodes={nodesWithProps}
-            edges={edges.filter(edge => !edge.hidden)}
-            onNodesChange={customNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            nodeTypes={nodeTypes}
-            fitView
-            fitViewOptions={{
-              padding: 0.6, // Significantly increased padding
-              includeHiddenNodes: false,
-              duration: 800,
-              minZoom: 0.3,
-              maxZoom: 1.5
-            }}
-            minZoom={0.1}
-            maxZoom={2}
-            defaultViewport={{ zoom: 0.75, x: 0, y: 0 }}
-          >
-            <Controls />
-            <MiniMap />
-            <Background variant="dots" gap={12} size={1} />
-            <Panel position="top-right" style={{ display: 'flex', gap: '10px' }}>
-              <button 
-                onClick={() => onLayout('LR')}
-                style={{
-                  background: layoutDirection === 'LR' ? '#2980b9' : '#3498db',
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                Horizontal Layout
-              </button>
-              <button 
-                onClick={() => onLayout('TB')}
-                style={{
-                  background: layoutDirection === 'TB' ? '#27ae60' : '#2ecc71',
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                Vertical Layout
-              </button>
-              <button 
-                onClick={collapseAllNodes}
-                style={{
-                  background: '#9b59b6',
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                Collapse All
-              </button>
-              <button 
-                onClick={expandAllNodes}
-                style={{
-                  background: '#f39c12',
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                Expand All
-              </button>
-              <button 
-                onClick={() => useAgenticStore.getState().resetData()}
-                style={{
-                  background: '#e74c3c',
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                Reset Flow
-              </button>
-            </Panel>
-            
-            {/* Status update panel */}
-            <Panel position="bottom-left" style={{ 
-              background: 'rgba(255, 255, 255, 0.8)', 
-              padding: '8px 12px', 
-              borderRadius: '4px',
-              fontSize: '12px',
-              color: '#333'
-            }}>
-              Last update: {lastUpdate || 'No updates yet'}
-            </Panel>
-            
-            {selectedNode && (
-              <Panel position="bottom-right" className="details-panel">
-                <div className="details-title">Selected: {selectedNode.data.label}</div>
-                <div className="details-content">
-                  <div className="details-field">
-                    <span className="details-label">Type:</span>
-                    <span className="details-value">{selectedNode.data.type}</span>
-                  </div>
-                  <div className="details-field">
-                    <span className="details-label">Level:</span>
-                    <span className="details-value">{selectedNode.data.level}</span>
-                  </div>
-                  <div className="details-field">
-                    <span className="details-label">Children:</span>
-                    <span className="details-value">{selectedNode.data.childrenCount}</span>
-                  </div>
-                  <div className="details-field">
-                    <span className="details-label">Collapsed:</span>
-                    <span className="details-value">{selectedNode.data.isCollapsed ? 'Yes' : 'No'}</span>
-                  </div>
-                  {selectedNode.data.description && (
-                    <div className="details-field">
-                      <span className="details-label">Description:</span>
-                      <span className="details-value">{selectedNode.data.description}</span>
-                    </div>
-                  )}
-                  {selectedNode.data.role && (
-                    <div className="details-field">
-                      <span className="details-label">Role:</span>
-                      <span className="details-value">{selectedNode.data.role}</span>
-                    </div>
-                  )}
+        <ReactFlow
+          nodes={nodesWithProps}
+          edges={edges.filter(edge => !edge.hidden)}
+          onNodesChange={customNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeClick={onNodeClick}
+          nodeTypes={nodeTypes}
+          fitView
+          fitViewOptions={{
+            padding: 0.6, // Significantly increased padding
+            includeHiddenNodes: false,
+            duration: 800,
+            minZoom: 0.3,
+            maxZoom: 1.5
+          }}
+          minZoom={0.1}
+          maxZoom={2}
+          defaultViewport={{ zoom: 0.75, x: 0, y: 0 }}
+          style={{ background: '#f8f8f8' }} // Add background color to make it visible
+        >
+          <Controls />
+          <MiniMap />
+          <Background variant="dots" gap={12} size={1} />
+          <Panel position="top-right" style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={() => onLayout('LR')}
+              style={{
+                background: layoutDirection === 'LR' ? '#2980b9' : '#3498db',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              Horizontal Layout
+            </button>
+            <button 
+              onClick={() => onLayout('TB')}
+              style={{
+                background: layoutDirection === 'TB' ? '#27ae60' : '#2ecc71',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              Vertical Layout
+            </button>
+            <button 
+              onClick={collapseAllNodes}
+              style={{
+                background: '#9b59b6',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              Collapse All
+            </button>
+            <button 
+              onClick={expandAllNodes}
+              style={{
+                background: '#f39c12',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              Expand All
+            </button>
+            <button 
+              onClick={() => useAgenticStore.getState().resetData()}
+              style={{
+                background: '#e74c3c',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              Reset Flow
+            </button>
+          </Panel>
+          
+          {/* Status update panel */}
+          <Panel position="bottom-left" style={{ 
+            background: 'rgba(255, 255, 255, 0.8)', 
+            padding: '8px 12px', 
+            borderRadius: '4px',
+            fontSize: '12px',
+            color: '#333'
+          }}>
+            Last update: {lastUpdate || 'No updates yet'}
+          </Panel>
+          
+          {selectedNode && (
+            <Panel position="bottom-right" className="details-panel">
+              <div className="details-title">Selected: {selectedNode.data.label}</div>
+              <div className="details-content">
+                <div className="details-field">
+                  <span className="details-label">Type:</span>
+                  <span className="details-value">{selectedNode.data.type}</span>
                 </div>
-              </Panel>
-            )}
-          </ReactFlow>
-        </ReactFlowProvider>
+                <div className="details-field">
+                  <span className="details-label">Level:</span>
+                  <span className="details-value">{selectedNode.data.level}</span>
+                </div>
+                <div className="details-field">
+                  <span className="details-label">Children:</span>
+                  <span className="details-value">{selectedNode.data.childrenCount}</span>
+                </div>
+                <div className="details-field">
+                  <span className="details-label">Collapsed:</span>
+                  <span className="details-value">{selectedNode.data.isCollapsed ? 'Yes' : 'No'}</span>
+                </div>
+                {selectedNode.data.description && (
+                  <div className="details-field">
+                    <span className="details-label">Description:</span>
+                    <span className="details-value">{selectedNode.data.description}</span>
+                  </div>
+                )}
+                {selectedNode.data.role && (
+                  <div className="details-field">
+                    <span className="details-label">Role:</span>
+                    <span className="details-value">{selectedNode.data.role}</span>
+                  </div>
+                )}
+              </div>
+            </Panel>
+          )}
+        </ReactFlow>
       )}
     </div>
   );
