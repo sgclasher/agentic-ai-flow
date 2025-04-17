@@ -43,6 +43,12 @@
           "instructions": "1. Review the RFX request details for completeness and compliance\n2. (simulate its verified) Verify that:\n   - All mandatory fields are completed\n   - Timeline is reasonable (sufficient time for vendors to respond)\n   - Budget information aligns with organizational guidelines\n   - Requirements are clearly articulated\n   - Evaluation criteria are specific and measurable\n\n3. (simulate no issues found) If any issues are found:\n   - Clearly identify what needs to be corrected\n   - Update the RFX request status to \"Needs Revision\"\n   - Provide specific guidance on required changes\n\n4.  (simulate all standards met) If the request meets all standards:\n   - Update the RFX request status to \"Validated\"\n   - Route the request for approvals\n   - Record validation completion\n\n5. Document your validation assessment in the request record",
           "tools": [
             {
+              "sys_id": "8021ddea2b0d52101d72fb466e91bfd1",
+              "name": "Strategic Sourcing Policy (RAG)",
+              "description": "Retrieves and applies organizational Strategic Sourcing Policy guidelines from KB0010010 to validate RFX requests. This RAG implementation ensures validation against approval thresholds, vendor participation requirements, response timeframes, ethical standards, supplier diversity, and sustainability requirements.",
+              "type": "action"
+            },
+            {
               "sys_id": "24be241947e42210d93447c4416d43e7",
               "name": "Get RFX Request",
               "description": "Retrieves RFX Request record details, including: number, type, short description, status, budget range, requirements",
@@ -94,7 +100,7 @@
           "sys_id": "331c139947e46210d93447c4416d43b0",
           "name": null,
           "objective_template": "Process and respond to the vendor question for RFx ${number}",
-          "condition": "opened_byISNOTEMPTY^rfx_request.runrfx=true^EQ",
+          "condition": "opened_byISNOTEMPTY^rfx_request.rfx_status=in_q_a^EQ",
           "target_table": "x_nowge_rfx_ai_rfx_question"
         }
       ],
@@ -152,7 +158,7 @@
           "sys_id": "e628be1147246210d93447c4416d430b",
           "name": null,
           "objective_template": "Generate a complete RFX document for approved request ${number}",
-          "condition": "approval=approved^opened_byISNOTEMPTY^runrfx=true^EQ",
+          "condition": "approval=approved^opened_byISNOTEMPTY^runrfx=true^rfx_status=draft^EQ",
           "target_table": "x_nowge_rfx_ai_rfx_request"
         }
       ],
