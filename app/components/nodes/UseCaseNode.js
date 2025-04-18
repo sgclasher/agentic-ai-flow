@@ -3,7 +3,7 @@
 import { memo, useCallback } from 'react';
 import { Handle, Position } from 'reactflow';
 import useAgenticStore from '../../store/useAgenticStore';
-import { ExternalLinkIcon, generateServiceNowUrl } from '../../utils/nodeUtils';
+import { NodeHeaderButtons } from '../NodeIcons';
 
 function UseCaseNode({ data, id }) {
   // Extract all props directly from the data object
@@ -20,19 +20,16 @@ function UseCaseNode({ data, id }) {
   const sourcePosition = layoutDirection === 'TB' ? Position.Bottom : Position.Right;
 
   // Toggle collapse state
-  const handleToggle = useCallback((e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    
-    console.log('Toggle clicked for use case node:', id, 'Current collapsed state:', isCollapsed);
+  const handleToggle = useCallback((nodeId) => {
+    console.log('Toggle clicked for use case node:', nodeId, 'Current collapsed state:', isCollapsed);
     
     // Call the parent's toggle function if available
     if (typeof onToggle === 'function') {
-      onToggle(id);
+      onToggle(nodeId);
     } else {
-      console.warn('onToggle prop is not a function or is missing for node:', id);
+      console.warn('onToggle prop is not a function or is missing for node:', nodeId);
     }
-  }, [id, onToggle, isCollapsed]);
+  }, [onToggle, isCollapsed]);
 
   // Handle external link click
   const handleExternalLinkClick = useCallback((e) => {
@@ -46,8 +43,10 @@ function UseCaseNode({ data, id }) {
       hasDetails: !!details,
     });
     
-    // Generate URL using the utility function
-    const url = generateServiceNowUrl(serviceNowUrl, 'useCase', details?.sys_id);
+    // Generate URL for the ServiceNow use case
+    const url = serviceNowUrl && details?.sys_id ? 
+      `${serviceNowUrl}/now/agent-studio/usecase-guided-setup/${details.sys_id}/params/step/details` : 
+      null;
     
     console.log('Generated URL:', url);
     
@@ -77,29 +76,14 @@ function UseCaseNode({ data, id }) {
           <div className="node-title">{label}</div>
         </div>
         
-        <div className="node-header-buttons">
-          {canNavigate && (
-            <button 
-              className="node-external-link"
-              onClick={handleExternalLinkClick}
-              onMouseDown={(e) => e.stopPropagation()}
-              title="Open in ServiceNow"
-            >
-              <ExternalLinkIcon />
-            </button>
-          )}
-          
-          {hasChildren && (
-            <button 
-              className="expand-button"
-              onClick={handleToggle}
-              onMouseDown={(e) => e.stopPropagation()}
-              title={isCollapsed ? "Show child nodes" : "Hide child nodes"}
-            >
-              {isCollapsed ? '+' : '−'}
-            </button>
-          )}
-        </div>
+        <NodeHeaderButtons 
+          id={id}
+          isCollapsed={isCollapsed}
+          hasChildren={hasChildren}
+          onToggle={handleToggle}
+          canNavigate={canNavigate}
+          onExternalLinkClick={handleExternalLinkClick}
+        />
       </div>
       <div className="node-content">
         {description && (

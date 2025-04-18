@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, memo, useLayoutEffect, forwardRef, useImperativeHandle } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -10,7 +10,9 @@ import ReactFlow, {
   addEdge,
   Panel,
   useReactFlow,
-  ReactFlowProvider
+  ReactFlowProvider,
+  applyNodeChanges,
+  applyEdgeChanges
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -31,7 +33,7 @@ const nodeTypes = {
   toolNode: ToolNode,
 };
 
-export default function FlowVisualizer({ onError }) {
+const FlowVisualizer = forwardRef(({ onError, layoutDirection: externalLayoutDirection, autoFitOnChange: externalAutoFitOnChange }, ref) => {
   const { agenticData, isLoading, error } = useAgenticStore();
   
   // Debug logging
@@ -42,7 +44,7 @@ export default function FlowVisualizer({ onError }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
-  const [layoutDirection, setLayoutDirection] = useState('LR'); // LR = left-to-right, TB = top-to-bottom
+  const [layoutDirection, setLayoutDirection] = useState(externalLayoutDirection || 'LR'); // LR = left-to-right, TB = top-to-bottom
   const [lastUpdate, setLastUpdate] = useState('');
   const reactFlowInstance = useReactFlow();
   
@@ -50,6 +52,35 @@ export default function FlowVisualizer({ onError }) {
   const lastCollapseStateRef = useRef({});
   const isLayoutNecessaryRef = useRef(false);
   
+  // Use external auto-fit setting if provided
+  const [autoFitOnChange, setAutoFitOnChange] = useState(
+    typeof externalAutoFitOnChange !== 'undefined' ? externalAutoFitOnChange : false
+  );
+  
+  // Update internal state when external props change
+  useEffect(() => {
+    if (typeof externalLayoutDirection !== 'undefined') {
+      setLayoutDirection(externalLayoutDirection);
+      isLayoutNecessaryRef.current = true;
+    }
+  }, [externalLayoutDirection]);
+  
+  useEffect(() => {
+    if (typeof externalAutoFitOnChange !== 'undefined') {
+      setAutoFitOnChange(externalAutoFitOnChange);
+    }
+  }, [externalAutoFitOnChange]);
+  
+  // Expose methods to parent component via ref
+  useImperativeHandle(ref, () => ({
+    expandAllNodes: () => {
+      expandAllNodes();
+    },
+    collapseAllNodes: () => {
+      collapseAllNodes();
+    }
+  }));
+
   // Helper function to recursively update visibility of all descendants
   const updateDescendantVisibility = useCallback((nodes, parentId, hidden) => {
     // Find all immediate children of the parent
@@ -203,18 +234,20 @@ export default function FlowVisualizer({ onError }) {
           }))
         );
         
-        // Schedule a fit view after the toggle completes
-        window.requestAnimationFrame(() => {
-          setTimeout(() => {
-            reactFlowInstance.fitView({
-              padding: 0.6, // Significantly increased padding
-              includeHiddenNodes: false,
-              duration: 800,
-              minZoom: 0.3,
-              maxZoom: 1.5
-            });
-          }, 400); // Increased delay
-        });
+        // Only fit view if autoFitOnChange is enabled
+        if (autoFitOnChange) {
+          window.requestAnimationFrame(() => {
+            setTimeout(() => {
+              reactFlowInstance.fitView({
+                padding: 0.6,
+                includeHiddenNodes: false,
+                duration: 800,
+                minZoom: 0.3,
+                maxZoom: 1.5
+              });
+            }, 400);
+          });
+        }
         
         return updatedNodes;
       } else {
@@ -224,7 +257,7 @@ export default function FlowVisualizer({ onError }) {
         return updatedNodes;
       }
     });
-  }, [setNodes, setEdges, reactFlowInstance, updateDescendantVisibility]);
+  }, [setNodes, setEdges, reactFlowInstance, updateDescendantVisibility, autoFitOnChange]);
 
   // Add the required props to each node object instead of in nodeTypes
   const getNodesWithProps = useCallback((currentNodes) => {
@@ -437,21 +470,22 @@ export default function FlowVisualizer({ onError }) {
       setNodes(mergedNodes);
       setEdges(layoutedEdges);
 
-      // Center the graph after layout with a slightly longer delay and increased padding
-      window.requestAnimationFrame(() => {
-        // Use setTimeout to ensure the layout has fully applied before fitting view
-        setTimeout(() => {
-          reactFlowInstance.fitView({ 
-            padding: 0.6, // Significantly increased padding
-            includeHiddenNodes: false,
-            duration: 800,
-            minZoom: 0.3,
-            maxZoom: 1.5
-          });
-        }, 400); // Increased delay
-      });
+      // Only fit view if autoFitOnChange is enabled
+      if (autoFitOnChange) {
+        window.requestAnimationFrame(() => {
+          setTimeout(() => {
+            reactFlowInstance.fitView({ 
+              padding: 0.6,
+              includeHiddenNodes: false,
+              duration: 800,
+              minZoom: 0.3,
+              maxZoom: 1.5
+            });
+          }, 400);
+        });
+      }
     }
-  }, [nodes, edges, layoutDirection, setNodes, setEdges, reactFlowInstance]);
+  }, [nodes, edges, layoutDirection, setNodes, setEdges, reactFlowInstance, autoFitOnChange]);
 
   // Update edge visibility when node visibility changes
   useEffect(() => {
@@ -517,18 +551,20 @@ export default function FlowVisualizer({ onError }) {
     // Force layout update
     isLayoutNecessaryRef.current = true;
     
-    // Ensure fit view after expansion
-    window.requestAnimationFrame(() => {
-      setTimeout(() => {
-        reactFlowInstance.fitView({
-          padding: 0.3,
-          includeHiddenNodes: false,
-          minZoom: 0.5,
-          maxZoom: 1.5
-        });
-      }, 300); // Slightly longer delay for the bigger layout change
-    });
-  }, [customSetNodes, setEdges, reactFlowInstance]);
+    // Only fit view if autoFitOnChange is enabled
+    if (autoFitOnChange) {
+      window.requestAnimationFrame(() => {
+        setTimeout(() => {
+          reactFlowInstance.fitView({
+            padding: 0.3,
+            includeHiddenNodes: false,
+            minZoom: 0.5,
+            maxZoom: 1.5
+          });
+        }, 300);
+      });
+    }
+  }, [customSetNodes, setEdges, reactFlowInstance, autoFitOnChange]);
 
   // Function to collapse all nodes to show only use cases
   const collapseAllNodes = useCallback(() => {
@@ -578,21 +614,23 @@ export default function FlowVisualizer({ onError }) {
       // Force layout update
       isLayoutNecessaryRef.current = true;
       
-      // Ensure fit view after collapse
-      window.requestAnimationFrame(() => {
-        setTimeout(() => {
-          reactFlowInstance.fitView({
-            padding: 0.3,
-            includeHiddenNodes: false,
-            minZoom: 0.5,
-            maxZoom: 1.5
-          });
-        }, 300); // Slightly longer delay for the bigger layout change
-      });
+      // Only fit view if autoFitOnChange is enabled
+      if (autoFitOnChange) {
+        window.requestAnimationFrame(() => {
+          setTimeout(() => {
+            reactFlowInstance.fitView({
+              padding: 0.3,
+              includeHiddenNodes: false,
+              minZoom: 0.5,
+              maxZoom: 1.5
+            });
+          }, 300);
+        });
+      }
       
       return updatedNodes;
     });
-  }, [customSetNodes, setEdges, reactFlowInstance]);
+  }, [customSetNodes, setEdges, reactFlowInstance, autoFitOnChange]);
 
   return (
     <div style={{ 
@@ -635,73 +673,6 @@ export default function FlowVisualizer({ onError }) {
           <Controls />
           <MiniMap />
           <Background variant="dots" gap={12} size={1} />
-          <Panel position="top-right" style={{ display: 'flex', gap: '10px' }}>
-            <button 
-              onClick={() => onLayout('LR')}
-              style={{
-                background: layoutDirection === 'LR' ? '#2980b9' : '#3498db',
-                color: 'white',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              Horizontal Layout
-            </button>
-            <button 
-              onClick={() => onLayout('TB')}
-              style={{
-                background: layoutDirection === 'TB' ? '#27ae60' : '#2ecc71',
-                color: 'white',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              Vertical Layout
-            </button>
-            <button 
-              onClick={collapseAllNodes}
-              style={{
-                background: '#9b59b6',
-                color: 'white',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              Collapse All
-            </button>
-            <button 
-              onClick={expandAllNodes}
-              style={{
-                background: '#f39c12',
-                color: 'white',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              Expand All
-            </button>
-            <button 
-              onClick={() => useAgenticStore.getState().resetData()}
-              style={{
-                background: '#e74c3c',
-                color: 'white',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              Reset Flow
-            </button>
-          </Panel>
           
           {/* Status update panel */}
           <Panel position="bottom-left" style={{ 
@@ -753,4 +724,8 @@ export default function FlowVisualizer({ onError }) {
       )}
     </div>
   );
-} 
+});
+
+FlowVisualizer.displayName = 'FlowVisualizer';
+
+export default FlowVisualizer; 

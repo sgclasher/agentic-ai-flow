@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import useAgenticStore from './store/useAgenticStore';
 // import FileUploader from './components/FileUploader'; // Remove FileUploader
 import ServiceNowConnector from './components/ServiceNowConnector'; // Import ServiceNowConnector
@@ -11,8 +11,20 @@ export default function Home() {
   const agenticData = useAgenticStore((state) => state.agenticData);
   const clearAgenticData = useAgenticStore((state) => state.clearAgenticData);
   const refreshData = useAgenticStore((state) => state.refreshData);
+  const resetData = useAgenticStore((state) => state.resetData);
   const [error, setError] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
+  
+  // Flow control states
+  const [layoutDirection, setLayoutDirection] = useState('LR');
+  const [autoFitEnabled, setAutoFitEnabled] = useState(false);
+  
+  // Refs for flow control methods
+  const flowVisualizerRef = useRef({
+    expandAllNodes: () => {},
+    collapseAllNodes: () => {},
+  });
 
   // Simple error boundary implementation
   const handleError = (error) => {
@@ -33,18 +45,149 @@ export default function Home() {
       setIsRefreshing(false);
     }
   };
+  
+  // Flow control handlers
+  const handleLayoutChange = (direction) => {
+    setLayoutDirection(direction);
+  };
+  
+  const handleExpandAll = () => {
+    flowVisualizerRef.current.expandAllNodes();
+  };
+  
+  const handleCollapseAll = () => {
+    flowVisualizerRef.current.collapseAllNodes();
+  };
+  
+  const handleAutoFitToggle = () => {
+    setAutoFitEnabled(!autoFitEnabled);
+  };
+  
+  const handleResetFlow = () => {
+    resetData();
+  };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-8 lg:p-12">
-      <div className="z-10 max-w-none w-full items-center justify-between font-mono text-sm lg:flex flex-col">
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 text-center">Agentic AI Flow Visualizer</h1>
-
-        {/* Conditionally render Connector or Visualizer */} 
+    <main className="flex min-h-screen flex-col items-center p-0" style={{ 
+      backgroundColor: '#f5f5f5', 
+      minHeight: '100vh',
+      width: '100vw',
+      margin: 0,
+      padding: 0,
+      overflow: 'hidden'
+    }}>
+      {agenticData && (
+        <header className="app-header">
+          <div className="header-top">
+            <div className="logo-and-title">
+              <h1 className="app-title">Agentic AI Flow Manager</h1>
+              <div className="logo-wrapper">
+                <img
+                  src="/images/nowgenticLogo.svg"
+                  alt="NOWGENTIC Logo"
+                  height={30}
+                  width={120}
+                />
+              </div>
+            </div>
+            <div className="header-actions">
+              <button 
+                onClick={clearAgenticData}
+                className="btn btn-secondary"
+              >
+                <span>Disconnect</span>
+              </button>
+              <button 
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="btn btn-primary"
+              >
+                {isRefreshing ? 'Refreshing...' : 'Refresh Data'} 
+              </button>
+              <button 
+                onClick={() => setShowDebug(!showDebug)}
+                className="btn btn-secondary btn-icon"
+                aria-label="Toggle debug info"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                  <path d="M12 16v.01"></path>
+                  <path d="M12 8v4"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          {showDebug && (
+            <div className="debug-info">
+              <details open>
+                <summary>Debug Information</summary>
+                <pre>
+                  {JSON.stringify({
+                    dataPresent: !!agenticData,
+                    useCases: agenticData?.use_cases?.length || 0,
+                    firstUseCase: agenticData?.use_cases?.[0]?.name || 'None'
+                  }, null, 2)}
+                </pre>
+              </details>
+            </div>
+          )}
+          
+          <div className="header-tabs">
+            <div className="button-group">
+              <button 
+                className={`btn ${layoutDirection === 'LR' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => handleLayoutChange('LR')}
+              >
+                Horizontal Layout
+              </button>
+              <button 
+                className={`btn ${layoutDirection === 'TB' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => handleLayoutChange('TB')}
+              >
+                Vertical Layout
+              </button>
+            </div>
+            <div className="button-group">
+              <button 
+                className="btn btn-neutral"
+                onClick={handleCollapseAll}
+              >
+                Collapse All
+              </button>
+              <button 
+                className="btn btn-neutral"
+                onClick={handleExpandAll}
+              >
+                Expand All
+              </button>
+            </div>
+            <button 
+              className="btn btn-secondary"
+              onClick={handleAutoFitToggle}
+            >
+              Auto-Fit: 
+              <span className={`status-badge ${autoFitEnabled ? 'status-badge-on' : 'status-badge-off'}`}>
+                {autoFitEnabled ? 'ON' : 'OFF'}
+              </span>
+            </button>
+            <button 
+              className="btn btn-danger"
+              onClick={handleResetFlow}
+            >
+              Reset Flow
+            </button>
+          </div>
+        </header>
+      )}
+      
+      <div className={`flex-1 w-full ${agenticData ? 'mt-0' : 'mt-8'}`}>
         {!agenticData ? (
-            // <FileUploader /> // Remove FileUploader instance
-            <ServiceNowConnector /> // Add ServiceNowConnector instance
+          <div className="flex flex-col items-center justify-center h-full p-4">
+            <ServiceNowConnector />
+          </div>
         ) : error ? (
-          <div className="text-red-600 p-4 border border-red-300 rounded bg-red-50 mb-4">
+          <div className="text-red-600 p-4 border border-red-300 rounded bg-red-50 mb-4 m-4">
             <h3 className="font-bold">Error Displaying Flow</h3>
             <p>{error}</p>
             <button 
@@ -55,43 +198,16 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <>
-            <div className="flex gap-4 mb-4">
-              <button 
-                onClick={clearAgenticData}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-              >
-                Disconnect / Load New Data
-              </button>
-              <button 
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50"
-              >
-                {isRefreshing ? 'Refreshing...' : 'Refresh Data'} 
-              </button>
-            </div>
-            
-            {/* Add debug information */}
-            <div className="mb-4 text-xs text-gray-500">
-              <details>
-                <summary>Debug Info</summary>
-                <pre className="mt-2 p-2 bg-gray-100 rounded overflow-auto max-h-40">
-                  {JSON.stringify({
-                    dataPresent: !!agenticData,
-                    useCases: agenticData?.use_cases?.length || 0,
-                    firstUseCase: agenticData?.use_cases?.[0]?.name || 'None'
-                  }, null, 2)}
-                </pre>
-              </details>
-            </div>
-
-            <div style={{ height: 'calc(100vh - 150px)', width: '100%', position: 'relative' }}>
-              <ReactFlowProvider>
-                <FlowVisualizer onError={handleError} />
-              </ReactFlowProvider>
-            </div>
-          </>
+          <div style={{ height: 'calc(100vh - 120px)', width: '100%', position: 'relative' }}>
+            <ReactFlowProvider>
+              <FlowVisualizer 
+                onError={handleError} 
+                layoutDirection={layoutDirection}
+                autoFitOnChange={autoFitEnabled}
+                ref={flowVisualizerRef}
+              />
+            </ReactFlowProvider>
+          </div>
         )}
       </div>
     </main>

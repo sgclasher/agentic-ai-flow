@@ -28,14 +28,8 @@ export function generateServiceNowUrl(baseUrl, nodeType, sysId, toolType) {
       return `${cleanBaseUrl}/now/nav/ui/classic/params/target/sn_aia_trigger_configuration.do%3Fsys_id%3D${sysId}%26sysparm_view%3D%26sysparm_record_target%3Dsn_aia_trigger_configuration%26sysparm_record_row%3D1%26sysparm_record_list%3DORDERBYusecase%26sysparm_record_rows%3D5`;
       
     case 'tool':
-      // Different URLs based on tool type
-      if (toolType === 'subflow') {
-        return `${cleanBaseUrl}/now/workflow-studio/builder?table=sys_hub_flow&sysId=${sysId}`;
-      } else if (toolType === 'capability') {
-        return `${cleanBaseUrl}/now/now-assist-skillkit/skill/${sysId}/params/config-id/undefined`;
-      }
-      // Default tool URL if type is unknown
-      return `${cleanBaseUrl}/now/workspace/agent/record/sn_aia_tool/${sysId}`;
+      // Use the standardized format for all tool types to match the example URL format
+      return `${cleanBaseUrl}/now/nav/ui/classic/params/target/sn_aia_tool.do%3Fsys_id%3D${sysId}`;
       
     default:
       return null;

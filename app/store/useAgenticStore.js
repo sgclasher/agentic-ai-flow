@@ -9,6 +9,7 @@ const useAgenticStore = create(
     (set, get) => ({
       agenticData: null, // Initial state is null
       connectionDetails: null, // Store connection details for refresh
+      serviceNowUrl: '', // Base ServiceNow instance URL for opening links
       isLoading: false,
       error: null,
 
@@ -16,12 +17,26 @@ const useAgenticStore = create(
       setAgenticData: (data) => set({ agenticData: data }),
 
       // Store connection details for later refresh
-      setConnectionDetails: (details) => set({ connectionDetails: details }),
+      setConnectionDetails: (details) => {
+        // Extract the instance URL and store it for node links
+        const { instanceUrl } = details;
+        set({ 
+          connectionDetails: details,
+          serviceNowUrl: instanceUrl // Set the serviceNowUrl for external links
+        });
+      },
 
       // Action to clear the data
       clearAgenticData: () => set({ 
         agenticData: null, 
         connectionDetails: null,
+        serviceNowUrl: '',
+        error: null 
+      }),
+      
+      // Action to reset just the flow data, keeping connection details for refresh
+      resetData: () => set({ 
+        agenticData: null,
         error: null 
       }),
 
@@ -37,6 +52,9 @@ const useAgenticStore = create(
         
         try {
           const { instanceUrl, username, password, scopeId } = connectionDetails;
+          
+          // Keep or update the serviceNowUrl
+          set({ serviceNowUrl: instanceUrl });
           
           const response = await fetch('/api/servicenow/fetch-agentic-data', {
             method: 'POST',
@@ -91,6 +109,7 @@ const useAgenticStore = create(
       // Don't persist sensitive data like passwords
       partialize: (state) => ({
         layoutDirection: state.layoutDirection,
+        serviceNowUrl: state.serviceNowUrl, // Persist the serviceNowUrl
         // Only store the most recent connection details but not the password
         connectionDetails: state.connectionDetails ? {
           ...state.connectionDetails,

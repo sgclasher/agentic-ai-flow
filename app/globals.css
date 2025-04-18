@@ -7,6 +7,10 @@
   --trigger-color: #e74c3c;
   --agent-color: #2ecc71;
   --tool-color: #f39c12;
+  
+  /* Font styles */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 }
 
 * {
@@ -20,11 +24,207 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   height: 100vh;
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+  background: #f5f5f5;
+}
+
+/* Header styles */
+.app-header {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 12px 20px;
+  z-index: 100;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.logo-and-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0px;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 0px;
+  margin-top: 0;
+  height: 28px;
+}
+
+.nowgentic-logo {
+  height: 20px;
+  width: auto;
+  position: relative;
+  top: 1px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.header-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.button-group {
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.button-group button {
+  border-radius: 0;
+  margin: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.button-group button:last-child {
+  border-right: none;
+}
+
+/* Modern button styles */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-family);
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+}
+
+.btn-secondary {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.btn-secondary:hover {
+  background-color: #e2e8f0;
+}
+
+.btn-success {
+  background-color: #10b981;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #059669;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.btn-neutral {
+  background-color: #94a3b8;
+  color: white;
+}
+
+.btn-neutral:hover {
+  background-color: #64748b;
+}
+
+.btn-icon {
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Status badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 2px 8px;
+}
+
+.status-badge-on {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge-off {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+/* Debug info */
+.debug-info {
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  color: #64748b;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.debug-info summary {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.debug-info pre {
+  padding: 12px;
+  border-top: 1px solid #e2e8f0;
+  overflow: auto;
+  font-family: var(--font-family-mono);
 }
 
 /* React Flow styles - the component will be 100% of its parent container */
@@ -36,14 +236,16 @@ body {
 /* Common node styles */
 .node {
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 8px;
   min-width: 150px;
   max-width: 300px;
   background: white;
   border: 1px solid #ddd;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   cursor: default;
+  font-family: var(--font-family);
+  letter-spacing: -0.01em;
 }
 
 .node.collapsed {
@@ -89,16 +291,19 @@ body {
 }
 
 .node .node-title {
-  font-weight: bold;
+  font-weight: 600;
   margin: 0;
   margin-top: 2px;
   line-height: 1.2;
+  font-size: 0.95rem;
 }
 
 .node .node-type {
   color: #666;
-  font-size: 0.8em;
+  font-size: 0.75rem;
   text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.05em;
 }
 
 .node .node-content {
@@ -106,17 +311,18 @@ body {
 }
 
 .node .node-description {
-  font-size: 0.9em;
+  font-size: 0.85rem;
   color: #333;
+  line-height: 1.4;
 }
 
 .node .node-field {
-  font-size: 0.9em;
+  font-size: 0.85rem;
   margin-bottom: 5px;
 }
 
 .node .field-label {
-  font-weight: bold;
+  font-weight: 600;
   color: #555;
 }
 
@@ -131,15 +337,16 @@ body {
 }
 
 .node .section-title {
-  font-weight: bold;
-  font-size: 0.9em;
+  font-weight: 600;
+  font-size: 0.85rem;
   color: #555;
   margin-bottom: 3px;
 }
 
 .node .section-content {
-  font-size: 0.9em;
+  font-size: 0.85rem;
   white-space: pre-wrap;
+  font-family: var(--font-family-mono);
 }
 
 .node .expand-button,
@@ -147,7 +354,7 @@ body {
   background: none;
   border: 1px solid #ddd;
   color: #666;
-  border-radius: 3px;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
   width: 24px;
@@ -203,6 +410,7 @@ body {
   margin: 20px;
   cursor: pointer;
   transition: all 0.3s;
+  font-family: var(--font-family);
 }
 
 .file-uploader:hover {
@@ -211,6 +419,7 @@ body {
 
 .uploader-text {
   margin-top: 10px;
+  font-size: 1rem;
 }
 
 .sample-data-button {
@@ -222,6 +431,8 @@ body {
   margin-top: 10px;
   cursor: pointer;
   font-size: 14px;
+  font-family: var(--font-family);
+  font-weight: 500;
 }
 
 .sample-data-button:hover {
@@ -231,6 +442,7 @@ body {
 .error-message {
   color: #e74c3c;
   margin-top: 10px;
+  font-size: 0.9rem;
 }
 
 /* Sidebar Styles */
@@ -241,10 +453,12 @@ body {
   padding: 20px;
   overflow-y: auto;
   border-right: 1px solid #e0e0e0;
+  font-family: var(--font-family);
 }
 
 .sidebar-header {
-  font-size: 18px;
+  font-size: 1.1rem;
+  font-weight: 600;
   margin-bottom: 15px;
   padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
@@ -259,22 +473,24 @@ body {
 /* Details panel */
 .details-panel {
   background: white;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 12px;
+  border-radius: 8px;
   border: 1px solid #ddd;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   max-width: 300px;
+  font-family: var(--font-family);
 }
 
 .details-title {
-  font-weight: bold;
+  font-weight: 600;
   margin-bottom: 10px;
   padding-bottom: 5px;
   border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
 }
 
 .details-content {
-  font-size: 0.9em;
+  font-size: 0.85rem;
 }
 
 .details-field {
@@ -282,7 +498,7 @@ body {
 }
 
 .details-label {
-  font-weight: bold;
+  font-weight: 600;
   color: #555;
   margin-right: 5px;
 }
@@ -293,7 +509,7 @@ body {
 
 /* Add styles for node hierarchy indicators and children info */
 .node .node-children-info {
-  font-size: 0.8em;
+  font-size: 0.75rem;
   color: #666;
   margin-top: 5px;
   font-style: italic;
@@ -318,20 +534,21 @@ body {
 
 /* Node condition styles */
 .node .node-condition {
-  font-size: 0.9em;
+  font-size: 0.85rem;
   margin: 5px 0;
 }
 
 .node .condition-label {
-  font-weight: bold;
+  font-weight: 600;
   color: #555;
   margin-right: 4px;
 }
 
 .node .condition-value {
-  font-family: monospace;
+  font-family: var(--font-family-mono);
   word-break: break-word;
   color: #333;
+  font-size: 0.8rem;
 }
 
 /* ServiceNow URL input styles */
@@ -339,6 +556,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  font-family: var(--font-family);
 }
 
 .url-input-container {
@@ -351,8 +569,9 @@ body {
 .url-input-container label {
   display: block;
   margin-bottom: 5px;
-  font-weight: bold;
+  font-weight: 600;
   color: #333;
+  font-size: 0.9rem;
 }
 
 .url-input-group {
@@ -366,6 +585,7 @@ body {
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
+  font-family: var(--font-family);
 }
 
 .url-submit-button {
@@ -376,6 +596,8 @@ body {
   padding: 8px 16px;
   cursor: pointer;
   font-size: 14px;
+  font-family: var(--font-family);
+  font-weight: 500;
 }
 
 .url-submit-button:hover {
@@ -431,4 +653,227 @@ body {
   gap: 8px;
   align-items: center;
   margin-left: 10px;
+}
+
+/* Add styling for the login screen */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  background: #f5f5f5;
+  width: 100%;
+  height: 100%;
+}
+
+.login-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 500px;
+  overflow: hidden;
+  padding: 2rem;
+  transition: transform 0.3s ease;
+}
+
+.login-card:hover {
+  /* transform removed to disable animation */
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 1rem;
+  background: #3498db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-icon svg {
+  width: 40px;
+  height: 40px;
+  color: white;
+}
+
+.login-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.login-subtitle {
+  color: #718096;
+  font-size: 0.95rem;
+  max-width: 80%;
+  margin: 0 auto;
+}
+
+.login-form {
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+  position: relative;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+}
+
+.form-group label svg {
+  width: 18px;
+  height: 18px;
+  color: #3498db;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background-color: #f7fafc;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  color: #2d3748;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+.form-group input:read-only {
+  background-color: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.form-note {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #718096;
+  font-style: italic;
+}
+
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #fef2f2;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-bottom: 1.2rem;
+}
+
+.login-error svg {
+  width: 20px;
+  height: 20px;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-button:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+.login-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.login-button:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner {
+  animation: rotate 2s linear infinite;
+  width: 20px;
+  height: 20px;
+  margin-right: 0.5rem;
+}
+
+.spinner .path {
+  stroke: white;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+/* Add styling for the login-branding section */
+.login-branding {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.nowgentic-logo {
+  display: flex;
+  align-items: center;
 } 
