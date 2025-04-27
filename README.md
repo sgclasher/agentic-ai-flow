@@ -22,6 +22,7 @@ The Agentic AI Flow Visualizer was designed to provide a clear visual representa
 - **Expand/Collapse All**: Options to expand or collapse all nodes at once
 - **Customizable Layouts**: Arrange nodes automatically based on hierarchy
 - **Sequence Numbering**: Displays use cases in operational order
+- **Secure ServiceNow Integration**: Connect directly to ServiceNow instances using secure credentials
 
 ## Architecture Overview
 
@@ -31,6 +32,26 @@ The application is built using Next.js with React Flow for the visualization. It
 - **Data Transformation Layer**: Utilities to convert ServiceNow data to React Flow format
 - **Automatic Layout Engine**: Uses Dagre for intelligent node positioning
 - **State Management**: Uses Zustand for application state
+- **Secure API Layer**: Next.js API routes provide secure proxying to ServiceNow
+
+## ServiceNow Integration
+
+The application connects securely to ServiceNow to retrieve agentic AI data:
+
+1. **Authentication Flow**:
+   - The application uses a dedicated service account with limited permissions
+   - Credentials are securely passed through the Next.js API route
+   - Basic authentication is used with proper encoding
+
+2. **Data Access Layer**:
+   - A scripted REST API on the ServiceNow side encapsulates data access logic
+   - The API endpoint (`/api/x_nowge_rfx_ai/ai_relationship_explorer/relationships`) returns pre-formatted data
+   - This approach follows the principle of least privilege - no admin access required
+
+3. **Data Transformation**:
+   - The Next.js API route normalizes the data structure to match visualization requirements
+   - The FlowVisualizer component transforms the data into React Flow nodes and edges
+   - The Dagre layout algorithm intelligently positions nodes based on relationships
 
 ## File Structure
 
@@ -40,11 +61,18 @@ agentic-ai-flow/
 │   ├── components/        # React components
 │   │   ├── FileUploader.js        # File upload component
 │   │   ├── FlowVisualizer.js      # Main visualization component
+│   │   ├── NodeIcons.js           # Icon components for nodes
+│   │   ├── ServiceNowConnector.js # ServiceNow integration component
+│   │   ├── ReactFlowProvider.js   # React Flow context provider
 │   │   ├── nodes/                 # Custom node components
 │   │   │   ├── AgentNode.js       # Agent node component
 │   │   │   ├── ToolNode.js        # Tool node component
 │   │   │   ├── TriggerNode.js     # Trigger node component
 │   │   │   └── UseCaseNode.js     # Use Case node component
+│   ├── api/                # Next.js API routes
+│   │   ├── servicenow/               # ServiceNow API endpoints
+│   │   │   └── fetch-agentic-data/   # API route for fetching data
+│   │   ├── sample-data/              # Sample data endpoints
 │   ├── globals.css        # Global styles
 │   ├── layout.js          # Root layout component
 │   ├── page.js            # Main page component
@@ -75,18 +103,25 @@ Key functions:
 - `updateChildNodesVisibility`: Updates visibility of child nodes
 - `applyLayout`: Re-applies the layout algorithm after node visibility changes
 
-### Node Components
-Custom React Flow node components for different entity types, each sharing:
-- A common structure with header and content sections
-- Collapse/expand functionality via a toggle button
-- Dynamic handle positioning based on layout direction
-- Customized styling for each node type
+### ServiceNowConnector.js
+Handles the connection to ServiceNow instances:
+- Provides a form UI for connection credentials
+- Makes POST requests to the Next.js API route
+- Securely passes credentials for authentication
+- Stores connection details in the app state
+- Displays connection status and errors
+- Initiates data fetching process
 
-Specific node components:
-- **UseCaseNode.js**: Represents use cases with sequence information
-- **TriggerNode.js**: Represents triggers with objective information
-- **AgentNode.js**: Represents agents with role and description fields
-- **ToolNode.js**: Represents tools with capability details
+### API Routes
+The application uses Next.js API routes to securely proxy requests to ServiceNow:
+- `/api/servicenow/fetch-agentic-data`: Handles authentication and data retrieval
+- `/api/sample-data`: Provides sample data for testing without ServiceNow
+
+The API route layer:
+- Keeps credentials secure (server-side only)
+- Normalizes data structure for the frontend
+- Handles error states and status codes
+- Follows security best practices
 
 ### transformAgenticData.js
 The core data transformation utility that:
@@ -104,55 +139,36 @@ Provides intelligent node positioning using Dagre:
 - Processes only visible nodes
 - Returns positioned nodes and edges ready for React Flow rendering
 
-## Component Interaction Flow
+## Data Flow
 
-1. **Data Entry**: User uploads JSON via `FileUploader` or loads sample data
-2. **Data Processing**:
-   - `transformAgenticData.js` converts the JSON to React Flow format
+1. **Data Source**: Data originates from ServiceNow's agentic AI platform
+2. **Retrieval**: The data is accessed through:
+   - Direct ServiceNow API integration using the ServiceNowConnector
+   - File upload using the FileUploader component
+   - Sample data loaded from the API routes
+3. **Processing**:
+   - Raw data is normalized by the API route if necessary
+   - `transformAgenticData.js` converts normalized data to React Flow format
    - Node hierarchies and relationships are established
    - Default collapse states are applied
-3. **Visualization**:
-   - `FlowVisualizer` renders the initial graph
-   - `layoutGraph.js` positions the nodes
+4. **Visualization**:
+   - FlowVisualizer initializes React Flow with the processed data
+   - `layoutGraph.js` positions the nodes based on relationships
    - React Flow renders the interactive diagram
-4. **User Interaction**:
-   - Node collapse/expand triggers child visibility updates
-   - Layout changes trigger repositioning of all nodes
-   - Node selection shows additional information
+5. **User Interaction**:
+   - User can expand/collapse nodes to explore the hierarchy
+   - Clicking nodes reveals detailed information
+   - Layout can be toggled between horizontal and vertical
 
-## Node Collapse Behavior
+## Security Considerations
 
-Nodes implement a custom collapsibility system:
-- Each node has an `isCollapsed` state property
-- When collapsed, child nodes are hidden but the node itself remains visible
-- Toggle buttons (`+`/`−`) control this state
-- Parent nodes track child counts and show indicators
-- The `FlowVisualizer` component maintains a mapping of which nodes should be visible
-
-## CSS Architecture
-
-The styling system uses:
-- Global CSS with class-based styling
-- Distinct visual styling for each node type
-- Responsive sizing for node contents
-- Vertical stacking layout for header contents (node type and title)
-- Collapsible content areas
-
-Key style features:
-- Header/content separation within nodes
-- Dynamic margins and padding
-- Consistent UI elements across node types
-- Responsive text sizing
-
-## Data Format Requirements
-
-The application expects ServiceNow agentic AI data in JSON format with:
-- A hierarchical structure of use cases, triggers, agents, and tools
-- Name and description fields for nodes
-- Objective information for triggers
-- Role information for agents
-
-For operational sequencing, use cases should be named with a prefix number (e.g., "1. First Use Case").
+The application implements several security best practices:
+- Uses a dedicated service account with limited permissions
+- Credentials are never exposed to the client
+- API route proxies requests to ServiceNow, keeping authentication server-side
+- Basic authentication headers are properly encoded
+- ServiceNow's script include pattern encapsulates data access logic
+- Follows principle of least privilege
 
 ## Installation
 
@@ -174,12 +190,28 @@ npm run dev
 
 1. Start the application using `npm run dev`
 2. Navigate to the application in your browser (default: http://localhost:3000)
-3. Upload a ServiceNow agentic AI data file using the file uploader
+3. Connect to ServiceNow:
+   - Enter instance URL, username, password, and scope ID
+   - Click "Connect & Visualize"
+   - Or upload a ServiceNow agentic AI data file
 4. Interact with the diagram:
    - Click on nodes to view details
    - Use the +/- buttons to expand/collapse nodes
    - Use the layout buttons to switch between horizontal and vertical layouts
    - Use the Expand All/Collapse All buttons to show or hide all nodes
+
+## ServiceNow Configuration
+
+To integrate with ServiceNow, you'll need:
+1. A ServiceNow instance with the Agentic AI framework installed
+2. A user account with access to the agentic AI tables
+3. A scripted REST API configured to return the agentic AI relationship data
+4. The sys_id of the scope containing your agentic AI configurations
+
+The scripted REST API should:
+- Accept a scope ID parameter
+- Return a structured JSON response with use cases, triggers, agents and tools
+- Be accessible via basic authentication
 
 ## Technologies Used
 

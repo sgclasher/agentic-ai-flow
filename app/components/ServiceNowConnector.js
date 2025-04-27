@@ -19,9 +19,9 @@ const get = (obj, path, defaultValue = undefined) => {
 
 export default function ServiceNowConnector() {
   // Hardcoded values for testing
-  const [instanceUrl, setInstanceUrl] = useState('https://nowgenticllcdemo1.service-now.com');
-  const [username, setUsername] = useState('integrationUser');
-  const [password, setPassword] = useState('J5)F{b!L]3hPkrU]V_j:c[({h4QV@iQn7Ob!@o+rne0A<VV+*U.z^[r)e&@mO.o7}E1{xJSyAfDhd:A&?*LUa4TCYl;QZXNF@]_a');
+  const [instanceUrl, setInstanceUrl] = useState('https://ven07942.service-now.com');
+  const [username, setUsername] = useState('ai_explorer');
+  const [password, setPassword] = useState('2pnC2OdWk^:}ZidQuUALxV;]B0ju3b+%eTDW6tUZna4b0A6p^?ZH@w=Xq?CUk[z*Mj;BTcZV)g&p2&6f;fKF3j0VS;=K{eMH;d@L');
   const [scopeId, setScopeId] = useState('33df17ef47d8ea10d93447c4416d43cd');
   
   const [isLoading, setIsLoading] = useState(false);
