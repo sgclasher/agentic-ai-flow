@@ -1,5 +1,9 @@
 # Agentic AI Flow Visualizer
 
+**🤖 AI Assistant Context:** This is an Agentic AI Flow Visualizer built with Next.js that connects to ServiceNow to visualize AI workflows. The project is expanding into a comprehensive business AI advisory platform with digital twin capabilities. Key focus areas: React Flow visualizations, ServiceNow integration, business process automation, and AI-powered insights. Current tech stack: Next.js 15, React 19, ReactFlow, Zustand, Dagre. Follow React/JavaScript best practices, prioritize modular components, and maintain security-first approach for ServiceNow connections.
+
+**🎯 Vision:** Evolving from a ServiceNow visualization tool into a free lead-generation platform for AI advisory services, featuring business digital twins, agentic workflow recommendations, and multi-platform blueprints (ServiceNow, Salesforce, etc.).
+
 A Next.js application for visualizing ServiceNow agentic AI data as interactive flow diagrams. This tool transforms structured JSON data from ServiceNow's agentic AI platform into an interactive, collapsible node graph that helps users understand the relationships between use cases, triggers, agents, and tools.
 
 ## Purpose
@@ -61,11 +65,11 @@ agentic-ai-flow/
 │   │   ├── FlowVisualizer.js      # Main visualization component
 │   │   ├── NodeIcons.js           # Icon components for nodes
 │   │   ├── ServiceNowConnector.js # ServiceNow integration component
-│   │   ├── nodes/                 # Custom node components
-│   │   │   ├── AgentNode.js       # Agent node component
-│   │   │   ├── ToolNode.js        # Tool node component
-│   │   │   ├── TriggerNode.js     # Trigger node component
-│   │   │   └── UseCaseNode.js     # Use Case node component
+│   │   └── nodes/                 # Custom node components
+│   │       ├── AgentNode.js       # Agent node component
+│   │       ├── ToolNode.js        # Tool node component
+│   │       ├── TriggerNode.js     # Trigger node component
+│   │       └── UseCaseNode.js     # Use Case node component
 │   ├── api/                # Next.js API routes
 │   │   └── servicenow/               # ServiceNow API endpoints
 │   │       ├── fetch-agentic-data/   # API route for fetching data
@@ -164,6 +168,95 @@ The application implements several security best practices:
 - ServiceNow's script include pattern encapsulates data access logic
 - Follows principle of least privilege
 
+## AI Assistant Development Guide
+
+### **Development Philosophy**
+- **Modular First**: Break large components into focused, single-responsibility pieces
+- **Security by Design**: Always validate inputs, secure API calls, never expose credentials
+- **User Experience**: Prioritize intuitive interfaces and progressive disclosure
+- **Performance**: Minimize re-renders, optimize large data visualizations
+- **Accessibility**: Ensure keyboard navigation and screen reader compatibility
+
+### **Code Standards**
+- Use functional components with hooks (no class components)
+- Implement proper TypeScript types when adding TS files
+- Follow consistent naming: `camelCase` for variables/functions, `PascalCase` for components
+- Keep components under 200 lines; extract hooks for complex logic
+- Add JSDoc comments for complex functions
+- Use descriptive variable names that explain intent
+
+### **State Management Patterns**
+- **Global State**: Use Zustand for cross-component data (see `useAgenticStore.js`)
+- **Local State**: Use `useState` for component-specific state
+- **Server State**: Implement proper loading/error states for API calls
+- **Form State**: Consider React Hook Form for complex forms
+
+### **Component Architecture Guidelines**
+- **Container/Presentation**: Separate data logic from UI rendering
+- **Custom Hooks**: Extract reusable logic into custom hooks
+- **Prop Drilling**: Avoid more than 2 levels; use context or state management
+- **Event Handling**: Use `useCallback` for event handlers passed to children
+
+### **Performance Optimization**
+- Use `React.memo` for expensive re-renders
+- Implement `useMemo` for expensive calculations
+- Use `useCallback` for stable function references
+- Lazy load large components with `React.lazy`
+- Optimize React Flow with `nodesDraggable={false}` when appropriate
+
+### **ServiceNow Integration Best Practices**
+- Always use API routes as proxy layer (never direct client connections)
+- Implement proper error handling and user feedback
+- Use connection pooling for multiple API calls
+- Validate ServiceNow response structure before processing
+- Handle authentication failures gracefully
+
+### **React Flow Specific Guidelines**
+- Use custom node components for different data types
+- Implement proper node memorization to prevent unnecessary re-renders
+- Handle large datasets with virtualization if needed
+- Use `fitView()` appropriately for user experience
+- Implement proper edge routing for complex layouts
+
+### **Future Feature Considerations**
+- **Digital Twin Builder**: Form-based business profile creation
+- **Agentic Workflow Generator**: AI-powered workflow recommendations
+- **Multi-platform Support**: Salesforce, Microsoft, etc. integrations
+- **ROI Calculator**: Business impact measurement tools
+- **Template Library**: Pre-built workflow templates
+- **Collaboration Features**: Team sharing and commenting
+
+### **Common Pitfalls to Avoid**
+- Don't mutate state directly (use spread operators or state setters)
+- Avoid inline object creation in JSX (causes unnecessary re-renders)
+- Don't use array indices as keys for dynamic lists
+- Avoid large useEffect dependency arrays
+- Don't forget to cleanup subscriptions and timers
+- Avoid deeply nested conditional rendering in JSX
+
+### **Testing Strategy**
+- Unit tests for utility functions (transformAgenticData, layoutGraph)
+- Integration tests for API routes
+- Component tests for user interactions
+- E2E tests for critical user flows (ServiceNow connection, visualization)
+- Mock ServiceNow API responses for consistent testing
+
+### **Quick Development Commands**
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Check code style
+npm run lint:fix     # Auto-fix linting issues
+npm run clean        # Clean build artifacts
+```
+
+### **Environment Setup**
+- Node.js 18+ required
+- ServiceNow instance with Agentic AI framework for testing
+- Use `.env.local` for local development secrets (never commit!)
+- Consider Docker for consistent development environments
+
 ## Installation
 
 ```bash
@@ -229,3 +322,21 @@ The scripted REST API should:
 ## Browser Compatibility
 
 The application works best in modern browsers (Chrome, Firefox, Safari, Edge).
+
+## Recent Improvements
+
+### **Code Cleanup (Latest)**
+The codebase has been recently cleaned up to improve maintainability and performance:
+
+- **Removed Dead Code**: Eliminated unused FileUploader component and sample-data API
+- **Eliminated Duplicates**: Removed duplicate UseCaseNode.js and unnecessary ReactFlowProvider wrapper  
+- **Enhanced Security**: Improved .gitignore with comprehensive exclusions for environment files, logs, and build artifacts
+- **Optimized CSS**: Removed unused styles related to removed components
+- **Better Documentation**: Enhanced package.json with proper metadata, keywords, and improved scripts
+- **Streamlined Architecture**: Simplified component imports and reduced unnecessary abstractions
+
+### **Performance Optimizations**
+- Removed redundant wrapper components that caused extra re-renders
+- Cleaned up unused CSS rules that impacted bundle size
+- Simplified import paths for better tree-shaking
+- Enhanced component modularity for better maintainability
