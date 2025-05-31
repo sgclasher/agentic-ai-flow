@@ -17,12 +17,11 @@ The Agentic AI Flow Visualizer was designed to provide a clear visual representa
 - **Collapsible Nodes**: Expand/collapse nodes to show or hide child elements
 - **Layout Options**: Toggle between horizontal (LR) and vertical (TB) layouts
 - **Node Types**: Distinct styling for different node types (Use Cases, Triggers, Agents, Tools)
-- **File Upload**: Upload ServiceNow agentic AI data files to visualize
+- **ServiceNow Integration**: Connect directly to ServiceNow instances using secure credentials
 - **Detailed Information**: View detailed node information by clicking on nodes
 - **Expand/Collapse All**: Options to expand or collapse all nodes at once
 - **Customizable Layouts**: Arrange nodes automatically based on hierarchy
 - **Sequence Numbering**: Displays use cases in operational order
-- **Secure ServiceNow Integration**: Connect directly to ServiceNow instances using secure credentials
 
 ## Architecture Overview
 
@@ -59,20 +58,18 @@ The application connects securely to ServiceNow to retrieve agentic AI data:
 agentic-ai-flow/
 ├── app/                   # Next.js app directory
 │   ├── components/        # React components
-│   │   ├── FileUploader.js        # File upload component
 │   │   ├── FlowVisualizer.js      # Main visualization component
 │   │   ├── NodeIcons.js           # Icon components for nodes
 │   │   ├── ServiceNowConnector.js # ServiceNow integration component
-│   │   ├── ReactFlowProvider.js   # React Flow context provider
 │   │   ├── nodes/                 # Custom node components
 │   │   │   ├── AgentNode.js       # Agent node component
 │   │   │   ├── ToolNode.js        # Tool node component
 │   │   │   ├── TriggerNode.js     # Trigger node component
 │   │   │   └── UseCaseNode.js     # Use Case node component
 │   ├── api/                # Next.js API routes
-│   │   ├── servicenow/               # ServiceNow API endpoints
-│   │   │   └── fetch-agentic-data/   # API route for fetching data
-│   │   ├── sample-data/              # Sample data endpoints
+│   │   └── servicenow/               # ServiceNow API endpoints
+│   │       ├── fetch-agentic-data/   # API route for fetching data
+│   │       └── get-credentials/      # API route for credential management
 │   ├── globals.css        # Global styles
 │   ├── layout.js          # Root layout component
 │   ├── page.js            # Main page component
@@ -115,7 +112,7 @@ Handles the connection to ServiceNow instances:
 ### API Routes
 The application uses Next.js API routes to securely proxy requests to ServiceNow:
 - `/api/servicenow/fetch-agentic-data`: Handles authentication and data retrieval
-- `/api/sample-data`: Provides sample data for testing without ServiceNow
+- `/api/servicenow/get-credentials`: Manages credential validation
 
 The API route layer:
 - Keeps credentials secure (server-side only)
@@ -142,10 +139,7 @@ Provides intelligent node positioning using Dagre:
 ## Data Flow
 
 1. **Data Source**: Data originates from ServiceNow's agentic AI platform
-2. **Retrieval**: The data is accessed through:
-   - Direct ServiceNow API integration using the ServiceNowConnector
-   - File upload using the FileUploader component
-   - Sample data loaded from the API routes
+2. **Retrieval**: The data is accessed through direct ServiceNow API integration using the ServiceNowConnector
 3. **Processing**:
    - Raw data is normalized by the API route if necessary
    - `transformAgenticData.js` converts normalized data to React Flow format
@@ -193,12 +187,10 @@ npm run dev
 3. Connect to ServiceNow:
    - Enter instance URL, username, password, and scope ID
    - Click "Connect & Visualize"
-   - Or upload a ServiceNow agentic AI data file
 4. Interact with the diagram:
    - Click on nodes to view details
    - Use the +/- buttons to expand/collapse nodes
    - Use the layout buttons to switch between horizontal and vertical layouts
-   - Use the Expand All/Collapse All buttons to show or hide all nodes
 
 ## ServiceNow Configuration
 

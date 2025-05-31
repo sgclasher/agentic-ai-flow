@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useAgenticStore from '../store/useAgenticStore';
 import Image from 'next/image';
 
@@ -18,12 +18,26 @@ const get = (obj, path, defaultValue = undefined) => {
 };
 
 export default function ServiceNowConnector() {
-  // Hardcoded values for testing
-  const [instanceUrl, setInstanceUrl] = useState('https://ven07942.service-now.com');
-  const [username, setUsername] = useState('ai_explorer');
-  const [password, setPassword] = useState('2pnC2OdWk^:}ZidQuUALxV;]B0ju3b+%eTDW6tUZna4b0A6p^?ZH@w=Xq?CUk[z*Mj;BTcZV)g&p2&6f;fKF3j0VS;=K{eMH;d@L');
-  const [scopeId, setScopeId] = useState('33df17ef47d8ea10d93447c4416d43cd');
-  
+  // Fetch credentials from API on mount
+  const [instanceUrl, setInstanceUrl] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [scopeId, setScopeId] = useState('');
+
+  useEffect(() => {
+    fetch('/api/servicenow/get-credentials')
+      .then(res => res.json())
+      .then(data => {
+        setInstanceUrl(data.instanceUrl || '');
+        setUsername(data.username || '');
+        setPassword(data.password || '');
+        setScopeId(data.scopeId || '');
+      })
+      .catch(() => {
+        // fallback to empty/defaults if fetch fails
+      });
+  }, []);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const setAgenticData = useAgenticStore((state) => state.setAgenticData);
@@ -146,7 +160,6 @@ export default function ServiceNowConnector() {
               value={instanceUrl}
               onChange={(e) => setInstanceUrl(e.target.value)}
               placeholder="your-instance.service-now.com"
-              readOnly
               style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '0.9rem', color: '#444' }}
             />
           </div>

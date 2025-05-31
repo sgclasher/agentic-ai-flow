@@ -1,18 +1,19 @@
 {
   "name": "agentic-ai-flow",
   "version": "1.0.0",
+  "description": "A Next.js application for visualizing ServiceNow agentic AI data as interactive flow diagrams",
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint:fix": "next lint --fix",
+    "clean": "rm -rf .next out"
   },
-  "keywords": [],
+  "keywords": ["servicenow", "agentic-ai", "flow-visualization", "react-flow", "next.js"],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "dagre": "^0.8.5",
     "nanoid": "^5.1.5",

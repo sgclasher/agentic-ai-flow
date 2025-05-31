@@ -2,10 +2,9 @@
 
 import React, { useState, useRef } from 'react';
 import useAgenticStore from './store/useAgenticStore';
-// import FileUploader from './components/FileUploader'; // Remove FileUploader
-import ServiceNowConnector from './components/ServiceNowConnector'; // Import ServiceNowConnector
+import ServiceNowConnector from './components/ServiceNowConnector';
 import FlowVisualizer from './components/FlowVisualizer';
-import { ReactFlowProvider } from 'reactflow'; // Import ReactFlowProvider
+import { ReactFlowProvider } from 'reactflow';
 
 export default function Home() {
   const agenticData = useAgenticStore((state) => state.agenticData);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo, memo, useLayoutEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, memo, useLayoutEffect, forwardRef, useImperativeHandle } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -16,7 +16,6 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import FileUploader from './FileUploader';
 import UseCaseNode from './nodes/UseCaseNode';
 import TriggerNode from './nodes/TriggerNode';
 import AgentNode from './nodes/AgentNode';
@@ -646,7 +645,9 @@ const FlowVisualizer = forwardRef(({ onError, layoutDirection: externalLayoutDir
     }}>
       {!agenticData ? (
         <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <FileUploader />
+          <div style={{ textAlign: 'center', color: '#666', fontSize: '1.1rem' }}>
+            <p>No data available. Please connect to ServiceNow to visualize agentic AI flows.</p>
+          </div>
         </div>
       ) : (
         <ReactFlow
