@@ -26,11 +26,43 @@ The Agentic AI Flow Visualizer was designed to provide a clear visual representa
 - **Expand/Collapse All**: Options to expand or collapse all nodes at once
 - **Customizable Layouts**: Arrange nodes automatically based on hierarchy
 - **Sequence Numbering**: Displays use cases in operational order
+- **Interactive Flow Visualization**: 
+  - Drag and drop nodes for custom layouts
+  - Zoom and pan controls
+  - Responsive design
+- **Architecture Modes**:
+  - Toggle between horizontal and vertical flow orientations
+  - Real-time layout switching
+- **Node Types**:
+  - Triggers (API, Schedule, User Events)
+  - Agents (with customizable AI capabilities)
+  - Tools (various integrations)
+  - Use Cases (business outcomes)
+- **Dynamic Styling**: Visual feedback for connections and node interactions
+- **Export Capabilities**: Download workflows as images
+- **AI Transformation Timeline**: Interactive business AI advisory tool
+  - Three-column layout inspired by ai-2027.com
+  - Dynamic metrics that update based on scroll position
+  - Personalized AI adoption roadmap
+  - ROI projections and phase-based planning
+  - Mobile-responsive design
 
-## Architecture Overview
+## AI Timeline Feature
 
-The application is built using Next.js with React Flow for the visualization. It follows a modular component structure with:
+The AI Timeline is a comprehensive business planning tool that helps organizations visualize their AI transformation journey. Access it via the "AI Timeline" button in the header or directly at `/timeline`.
 
+### Key Components:
+- **Business Profile Form**: Multi-step wizard to capture company information
+- **Interactive Timeline**: Scroll-based navigation from current state to future vision
+- **Dynamic Metrics Widget**: Real-time KPIs that change as you progress through phases
+- **Phase-based Planning**: Foundation → Implementation → Expansion → Optimization → Future State
+
+### Timeline Sections:
+1. **Current State Analysis**: Baseline assessment of AI readiness
+2. **Foundation Phase (Q1-Q2)**: Building core capabilities and infrastructure
+3. **Implementation Phase (Q3-Q4)**: Deploying initial AI solutions
+4. **Expansion Phase (Year 2)**: Scaling across the enterprise
+5. **Optimization Phase (Year 3)**: Refining and maximizing value
 - **Component-based UI**: Each node type has its own React component
 - **Data Transformation Layer**: Utilities to convert ServiceNow data to React Flow format
 - **Automatic Layout Engine**: Uses Dagre for intelligent node positioning

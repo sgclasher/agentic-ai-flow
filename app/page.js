@@ -91,6 +91,16 @@ export default function Home() {
             </div>
             <div className="header-actions">
               <button 
+                onClick={() => window.location.href = '/timeline'}
+                className="btn btn-success"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="2" x2="12" y2="22"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                AI Timeline
+              </button>
+              <button 
                 onClick={clearAgenticData}
                 className="btn btn-secondary"
               >

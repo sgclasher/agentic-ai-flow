@@ -269,6 +269,33 @@ export default function ServiceNowConnector() {
             </>
           )}
         </button>
+        
+        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+          <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+            Or explore our AI transformation tools:
+          </p>
+          <button
+            type="button"
+            onClick={() => window.location.href = '/timeline'}
+            className="btn btn-secondary"
+            style={{
+              width: 'auto',
+              margin: '0 auto',
+              padding: '0.75rem 2rem',
+              backgroundColor: '#10b981',
+              color: 'white',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="2" x2="12" y2="22"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            Create AI Timeline
+          </button>
+        </div>
       </div>
     </div>
   );
