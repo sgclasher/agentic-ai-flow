@@ -83,10 +83,43 @@ export class ProfileService {
   }
 
   /**
+   * Estimate budget range based on profile
+   */
+  static estimateBudgetRange(profile) {
+    const budget = profile.valueSellingFramework?.decisionMakers?.economicBuyer?.budget;
+    if (budget) {
+      return budget;
+    }
+    
+    // Estimate based on company size and impact
+    const impact = profile.valueSellingFramework?.impact?.totalAnnualImpact || 0;
+    if (impact > 5000000) return '>5m';
+    if (impact > 1000000) return '1m-5m';
+    if (impact > 500000) return '500k-1m';
+    if (impact > 100000) return '100k-500k';
+    return '<100k';
+  }
+
+  /**
+   * Extract timeframe from profile
+   */
+  static extractTimeframe(profile) {
+    const timeline = profile.valueSellingFramework?.buyingProcess?.timeline;
+    if (timeline) {
+      const months = parseInt(timeline);
+      if (months <= 3) return '3months';
+      if (months <= 6) return '6months';
+      if (months <= 12) return '1year';
+      return '2years+';
+    }
+    return '1year'; // Default
+  }
+
+  /**
    * Determine AI adoption scenario based on profile characteristics
    */
   static determineScenarioType(profile) {
-    const aiReadiness = profile.aiReadinessScore || 5;
+    const aiReadiness = profile.aiOpportunityAssessment?.aiReadinessScore || profile.aiReadinessScore || 5;
     const decisionTimeline = profile.decisionTimeline || 12;
     const riskTolerance = profile.riskTolerance || 'medium';
     
@@ -187,6 +220,28 @@ export class ProfileService {
   }
 
   /**
+   * Calculate impact methods
+   */
+  static calculateFinanceImpact(profile) {
+    const laborCosts = profile.valueSellingFramework?.impact?.laborCosts || 0;
+    const errorCosts = profile.valueSellingFramework?.impact?.errorCosts || 0;
+    // Estimate 30% reduction in finance labor and 80% reduction in errors
+    return Math.round((laborCosts * 0.3) + (errorCosts * 0.8));
+  }
+
+  static calculateHRImpact(profile) {
+    const employeeCount = parseInt(profile.employeeCount) || 100;
+    // Estimate savings based on hiring volume
+    return Math.round(employeeCount * 1000); // $1000 per employee per year in hiring efficiency
+  }
+
+  static calculateServiceImpact(profile) {
+    const totalImpact = profile.valueSellingFramework?.impact?.totalAnnualImpact || 0;
+    // Customer service typically represents 20-30% of operational impact
+    return Math.round(totalImpact * 0.25);
+  }
+
+  /**
    * Utility methods
    */
   static generateProfileId(companyName) {
@@ -206,7 +261,7 @@ export class ProfileService {
   }
 
   static calculateAIMaturity(profile) {
-    const score = profile.aiReadinessScore || 5;
+    const score = profile.aiOpportunityAssessment?.aiReadinessScore || profile.aiReadinessScore || 5;
     if (score <= 3) return 'beginner';
     if (score <= 6) return 'emerging';
     if (score <= 8) return 'developing';
@@ -242,8 +297,9 @@ export class ProfileService {
 
   static identifyRiskFactors(profile) {
     const risks = [];
+    const aiReadiness = profile.aiOpportunityAssessment?.aiReadinessScore || profile.aiReadinessScore || 5;
     
-    if (profile.aiReadinessScore < 4) {
+    if (aiReadiness < 4) {
       risks.push({
         type: 'Technical Readiness',
         level: 'High',

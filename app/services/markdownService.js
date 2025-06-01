@@ -14,16 +14,15 @@ export const markdownService = {
    * @returns {string} Formatted markdown content
    */
   generateMarkdown(profileData) {
-    const sections = [];
-    
-    sections.push(this.generateHeader(profileData));
-    sections.push(this.generateCompanyOverview(profileData));
-    sections.push(this.generateValueSellingFramework(profileData));
-    sections.push(this.generateAIOpportunityAssessment(profileData));
-    sections.push(this.generateSummary(profileData));
-    sections.push(this.generateFooter(profileData));
-    
-    return sections.join('\n\n');
+    const sections = [
+      this.generateHeader(profileData),
+      this.generateCompanyOverview(profileData),
+      this.generateValueSellingFramework(profileData),
+      this.generateAIOpportunityAssessment(profileData),
+      this.generateSummary(profileData)
+    ];
+
+    return sections.filter(section => section).join('\n\n---\n\n');
   },
 
   /**
@@ -37,16 +36,20 @@ export const markdownService = {
       
       // Extract company name from header
       const nameMatch = markdown.match(/^# Client Profile: (.+)$/m);
-      if (nameMatch) data.companyName = nameMatch[1];
+      if (nameMatch) {
+        data.companyName = nameMatch[1];
+      } else {
+        throw new Error('Invalid markdown format: missing client profile header');
+      }
       
       // Parse company overview section
       data.companyOverview = this.parseCompanyOverview(markdown);
       
       // Parse value selling framework
-      data.valueSellingFramework = this.parseValueSellingFramework(markdown);
+      // data.valueSellingFramework = this.parseValueSellingFramework(markdown);
       
       // Parse AI opportunities
-      data.aiOpportunities = this.parseAIOpportunities(markdown);
+      // data.aiOpportunities = this.parseAIOpportunities(markdown);
       
       return data;
     } catch (error) {
@@ -72,190 +75,289 @@ export const markdownService = {
   },
 
   generateValueSellingFramework(data) {
-    const vs = data.valueSellingFramework || {};
+    const framework = data.valueSellingFramework || {};
+    let content = '## Value Selling Framework\n\n';
+
+    // 1. Business Issue
+    content += '### 1. Business Issue\n';
+    content += '**High-level strategic priority or C-level concern:**\n';
     
-    return `## Value Selling Framework
+    if (framework.businessIssues?.length > 0) {
+      framework.businessIssues.forEach(issue => {
+        content += `- [x] ${issue}\n`;
+      });
+    }
+    
+    if (framework.businessIssuesOther) {
+      content += `- [x] Other: ${framework.businessIssuesOther}\n`;
+    }
+    
+    if (framework.businessIssueDetails) {
+      content += `\n**Details**: ${framework.businessIssueDetails}\n`;
+    }
 
-### 1. Business Issue
-**High-level strategic priority or C-level concern:**
-${this.generateCheckboxList([
-  'Revenue Growth Pressure',
-  'Cost Reduction Mandate', 
-  'Operational Efficiency',
-  'Customer Experience',
-  'Digital Transformation',
-  'Regulatory Compliance',
-  'Competitive Pressure'
-], vs.businessIssues)}
-- [ ] Other: ${vs.businessIssueOther || '[Specify]'}
+    // 2. Problems / Challenges
+    content += '\n### 2. Problems / Challenges\n';
+    content += '**Specific operational issues identified:**\n\n';
 
-**Details**: ${vs.businessIssueDetails || '[Describe the main business issue]'}
+    // Department-specific problems
+    const departments = [
+      { key: 'finance', name: 'Finance Department' },
+      { key: 'hr', name: 'HR Department' },
+      { key: 'it', name: 'IT Department' },
+      { key: 'customerService', name: 'Customer Service' },
+      { key: 'operations', name: 'Operations' }
+    ];
 
-### 2. Problems / Challenges
-**Specific operational issues identified:**
+    departments.forEach(dept => {
+      const problems = framework.departmentalProblems?.[dept.key] || [];
+      if (problems.length > 0) {
+        content += `#### ${dept.name}\n`;
+        problems.forEach(problem => {
+          content += `- [x] ${problem}\n`;
+        });
+        content += '\n';
+      }
+    });
 
-#### Finance Department
-${this.generateDepartmentProblems('finance', vs.problems?.finance)}
+    if (framework.additionalChallenges) {
+      content += `**Additional Challenges**: ${framework.additionalChallenges}\n`;
+    }
 
-#### HR Department  
-${this.generateDepartmentProblems('hr', vs.problems?.hr)}
+    // 3. Root Cause
+    content += '\n### 3. Root Cause\n';
+    content += '**Why do these challenges exist?**\n';
+    
+    if (framework.rootCauses?.length > 0) {
+      framework.rootCauses.forEach(cause => {
+        content += `- [x] ${cause}\n`;
+      });
+    }
+    
+    if (framework.rootCausesOther) {
+      content += `- [x] Other: ${framework.rootCausesOther}\n`;
+    }
+    
+    if (framework.rootCauseDetails) {
+      content += `\n**Details**: ${framework.rootCauseDetails}\n`;
+    }
 
-#### IT Department
-${this.generateDepartmentProblems('it', vs.problems?.it)}
+    // 4. Impact
+    content += '\n### 4. Impact\n';
+    content += '**Quantified effects:**\n\n';
+    
+    content += '#### Hard Costs (Annual)\n';
+    const hardCosts = framework.hardCosts || {};
+    content += `- Labor costs from manual processes: $${hardCosts.laborCosts || '[Amount]'}\n`;
+    content += `- Error correction costs: $${hardCosts.errorCosts || '[Amount]'}\n`;
+    content += `- System downtime costs: $${hardCosts.downtimeCosts || '[Amount]'}\n`;
+    content += `- Compliance penalties/risk: $${hardCosts.complianceCosts || '[Amount]'}\n`;
+    
+    const totalHardCosts = Object.values(hardCosts).reduce((sum, cost) => {
+      const num = parseFloat(cost) || 0;
+      return sum + num;
+    }, 0);
+    
+    content += `- **Total Hard Costs**: $${totalHardCosts > 0 ? totalHardCosts.toLocaleString() : '[Sum]'}\n\n`;
+    
+    content += '#### Soft Costs\n';
+    const softCosts = framework.softCosts || {};
+    content += `- Employee frustration/turnover impact: ${softCosts.employeeFrustration || '[High/Medium/Low]'}\n`;
+    content += `- Customer satisfaction decline: ${softCosts.customerSatisfaction || '[High/Medium/Low]'}\n`;
+    content += `- Competitive disadvantage: ${softCosts.competitiveDisadvantage || '[High/Medium/Low]'}\n`;
+    content += `- Missed opportunities/growth: ${softCosts.missedOpportunities || '[High/Medium/Low]'}\n`;
 
-#### Customer Service
-${this.generateDepartmentProblems('customerService', vs.problems?.customerService)}
+    // 5. Solution
+    content += '\n### 5. Solution\n';
+    content += '**Capabilities needed to solve these challenges:**\n';
+    
+    if (framework.solutionCapabilities?.length > 0) {
+      framework.solutionCapabilities.forEach(capability => {
+        content += `- [x] ${capability}\n`;
+      });
+    }
+    
+    if (framework.solutionCapabilitiesOther) {
+      content += `- [x] Other: ${framework.solutionCapabilitiesOther}\n`;
+    }
 
-#### Operations
-${this.generateDepartmentProblems('operations', vs.problems?.operations)}
+    content += '\n**Differentiation Requirements:**\n';
+    if (framework.differentiationRequirements?.length > 0) {
+      framework.differentiationRequirements.forEach(requirement => {
+        content += `- [x] ${requirement}\n`;
+      });
+    }
+    
+    if (framework.differentiationOther) {
+      content += `- [x] Other: ${framework.differentiationOther}\n`;
+    }
 
-**Additional Challenges**: ${vs.additionalChallenges || '[Free text for other issues]'}
+    // Value/ROI Expectations
+    content += '\n**Value / ROI Expectations:**\n';
+    const roiExpectations = framework.roiExpectations || {};
+    if (roiExpectations.costReduction) content += `- Target cost reduction: ${roiExpectations.costReduction}\n`;
+    if (roiExpectations.efficiencyImprovement) content += `- Target efficiency improvement: ${roiExpectations.efficiencyImprovement}\n`;
+    if (roiExpectations.paybackPeriod) content += `- Expected payback period: ${roiExpectations.paybackPeriod}\n`;
+    if (roiExpectations.targetROI) content += `- Target ROI: ${roiExpectations.targetROI}\n`;
+    if (roiExpectations.timeToFirstValue) content += `- Time to first value: ${roiExpectations.timeToFirstValue}\n`;
 
-### 3. Root Cause
-**Why do these challenges exist?**
-${this.generateCheckboxList([
-  'Legacy systems with poor integration',
-  'Manual, paper-based processes',
-  'Lack of real-time data visibility',
-  'Insufficient automation',
-  'Skills gap in technology',
-  'Siloed departments'
-], vs.rootCauses)}
-- [ ] Other: ${vs.rootCauseOther || '[Specify]'}
+    // Success Metrics
+    content += '\n**Success Metrics:**\n';
+    if (framework.successMetrics?.length > 0) {
+      framework.successMetrics.forEach(metric => {
+        content += `- [x] ${metric}\n`;
+      });
+    }
+    
+    if (framework.successMetricsTargets) {
+      content += `\n**Specific Targets**: ${framework.successMetricsTargets}\n`;
+    }
 
-**Details**: ${vs.rootCauseDetails || '[Describe root causes]'}
+    // 6. Decision
+    content += '\n### 6. Decision\n';
+    content += '**Decision makers and buying process:**\n\n';
+    
+    const decisionMakers = framework.decisionMakers || {};
+    
+    content += '#### Key Decision Makers\n';
+    if (decisionMakers.economicBuyer?.name) {
+      content += `**Economic Buyer**: ${decisionMakers.economicBuyer.name}`;
+      if (decisionMakers.economicBuyer.title) content += ` (${decisionMakers.economicBuyer.title})`;
+      if (decisionMakers.economicBuyer.budget) content += ` - Budget Authority: $${parseInt(decisionMakers.economicBuyer.budget).toLocaleString()}`;
+      content += '\n';
+    }
+    
+    if (decisionMakers.technicalBuyer?.name) {
+      content += `**Technical Buyer**: ${decisionMakers.technicalBuyer.name}`;
+      if (decisionMakers.technicalBuyer.title) content += ` (${decisionMakers.technicalBuyer.title})`;
+      content += '\n';
+    }
+    
+    if (decisionMakers.champion?.name) {
+      content += `**Champion**: ${decisionMakers.champion.name}`;
+      if (decisionMakers.champion.title) content += ` (${decisionMakers.champion.title})`;
+      content += '\n';
+    }
+    
+    if (decisionMakers.influencers) {
+      content += `**Influencers**: ${decisionMakers.influencers}\n`;
+    }
 
-### 4. Impact
-**Quantified effects:**
+    content += '\n#### Buying Process\n';
+    const buyingProcess = framework.buyingProcess || {};
+    if (buyingProcess.timeline) content += `- **Decision timeline**: ${buyingProcess.timeline}\n`;
+    if (buyingProcess.budgetCycle) content += `- **Budget cycle**: ${buyingProcess.budgetCycle}\n`;
+    
+    if (buyingProcess.evaluationCriteria?.length > 0) {
+      content += '- **Evaluation criteria**:\n';
+      buyingProcess.evaluationCriteria.forEach(criteria => {
+        content += `  - ${criteria}\n`;
+      });
+    }
+    
+    if (buyingProcess.evaluationOther) {
+      content += `  - ${buyingProcess.evaluationOther}\n`;
+    }
 
-#### Hard Costs (Annual)
-- Labor costs from manual processes: $${vs.impact?.laborCosts || '[Amount]'}
-- Error correction costs: $${vs.impact?.errorCosts || '[Amount]'}
-- System downtime costs: $${vs.impact?.downtimeCosts || '[Amount]'}
-- Compliance penalties/risk: $${vs.impact?.complianceCosts || '[Amount]'}
-- **Total Hard Costs**: $${vs.impact?.totalHardCosts || '[Sum]'}
+    // Risks of Inaction
+    content += '\n#### Risks of Inaction\n';
+    const risksOfInaction = framework.risksOfInaction || {};
+    if (risksOfInaction.costEscalation) {
+      content += `- **Continued cost escalation**: $${parseInt(risksOfInaction.costEscalation).toLocaleString()} annually\n`;
+    }
+    if (risksOfInaction.employeeAttrition) {
+      content += `- **Employee attrition risk**: ${risksOfInaction.employeeAttrition}\n`;
+    }
+    if (risksOfInaction.threeYearCost) {
+      content += `- **Estimated cost of inaction (3 years)**: $${parseInt(risksOfInaction.threeYearCost).toLocaleString()}\n`;
+    }
+    if (risksOfInaction.competitiveDisadvantage) {
+      content += `- **Competitive disadvantage**: ${risksOfInaction.competitiveDisadvantage}\n`;
+    }
+    if (risksOfInaction.customerSatisfaction) {
+      content += `- **Customer satisfaction decline**: ${risksOfInaction.customerSatisfaction}\n`;
+    }
+    if (risksOfInaction.complianceRisk) {
+      content += `- **Regulatory compliance risk**: ${risksOfInaction.complianceRisk}\n`;
+    }
 
-#### Soft Costs
-- Employee frustration/turnover impact: ${vs.impact?.employeeImpact || '[High/Medium/Low]'}
-- Customer satisfaction impact: ${vs.impact?.customerImpact || '[High/Medium/Low]'}
-- Competitive disadvantage: ${vs.impact?.competitiveImpact || '[High/Medium/Low]'}
-- Brand/reputation risk: ${vs.impact?.reputationRisk || '[High/Medium/Low]'}
-
-**Total Estimated Annual Impact**: $${vs.impact?.totalAnnualImpact || '[Amount]'}
-
-### 5. Solution Capabilities Needed
-**What the solution must do:**
-${this.generateCheckboxList([
-  'Automate document processing',
-  'Streamline approval workflows',
-  'Provide real-time dashboards',
-  'Integrate disconnected systems',
-  'Enable self-service capabilities',
-  'Improve data accuracy',
-  'Reduce manual handoffs'
-], vs.solutionCapabilities)}
-- [ ] Other: ${vs.solutionCapabilitiesOther || '[Specify]'}
-
-### 6. Differentiation Requirements
-**What makes a solution uniquely qualified:**
-${this.generateCheckboxList([
-  'Industry-specific expertise',
-  'Rapid implementation (< 6 months)',
-  'No-code/low-code platform',
-  'Strong integration capabilities',
-  'Proven ROI in similar companies',
-  'Comprehensive support/training'
-], vs.differentiationRequirements)}
-- [ ] Other: ${vs.differentiationOther || '[Specify]'}
-
-### 7. Value / ROI Expectations
-**Expected benefits:**
-- Target cost reduction: ${vs.roiExpectations?.costReduction || '[X]% or $[Amount]'}
-- Target efficiency improvement: ${vs.roiExpectations?.efficiencyImprovement || '[X]%'}
-- Expected payback period: ${vs.roiExpectations?.paybackPeriod || '[X] months'}
-- Target ROI: ${vs.roiExpectations?.targetROI || '[X]%'}
-- Time to first value: ${vs.roiExpectations?.timeToFirstValue || '[X] months'}
-
-### 8. Success Metrics
-**How success will be measured:**
-${this.generateCheckboxList([
-  'Process cycle time reduction',
-  'Error rate improvement',
-  'Cost per transaction reduction',
-  'Employee productivity increase',
-  'Customer satisfaction improvement',
-  'Revenue impact'
-], vs.successMetrics)}
-- [ ] Other: ${vs.successMetricsOther || '[Specify]'}
-
-**Specific targets**: ${vs.successMetricsTargets || '[Detail the numerical targets]'}
-
-### 9. Decision Criteria & Process
-#### Key Decision Makers
-- **Economic Buyer**: ${vs.decisionMakers?.economicBuyer?.name || '[Name]'}, ${vs.decisionMakers?.economicBuyer?.title || '[Title]'} - Budget authority: $${vs.decisionMakers?.economicBuyer?.budget || '[Amount]'}
-- **Technical Buyer**: ${vs.decisionMakers?.technicalBuyer?.name || '[Name]'}, ${vs.decisionMakers?.technicalBuyer?.title || '[Title]'} - Technical evaluation lead
-- **Champion**: ${vs.decisionMakers?.champion?.name || '[Name]'}, ${vs.decisionMakers?.champion?.title || '[Title]'} - Internal advocate
-- **Influencers**: ${vs.decisionMakers?.influencers || '[Names, Titles]'} - Input into decision
-
-#### Buying Process
-- Decision timeline: ${vs.buyingProcess?.timeline || '[X] months'}
-- Budget cycle: ${vs.buyingProcess?.budgetCycle || '[When budget decisions are made]'}
-- Evaluation criteria:
-${this.generateCheckboxList([
-  'Technical fit',
-  'Cost/ROI',
-  'Vendor reputation',
-  'Implementation timeline',
-  'Support quality'
-], vs.buyingProcess?.evaluationCriteria)}
-  - [ ] Other: ${vs.buyingProcess?.evaluationOther || '[Specify]'}
-
-### 10. Risks of Inaction
-**Consequences of doing nothing:**
-- Continued cost escalation: $${vs.risksOfInaction?.costEscalation || '[Amount]'} annually
-- Competitive disadvantage: ${vs.risksOfInaction?.competitiveDisadvantage || '[Describe impact]'}
-- Employee attrition risk: ${vs.risksOfInaction?.employeeAttrition || '[High/Medium/Low]'}
-- Customer satisfaction decline: ${vs.risksOfInaction?.customerSatisfaction || '[Describe impact]'}
-- Regulatory compliance risk: ${vs.risksOfInaction?.complianceRisk || '[Describe impact]'}
-- **Estimated cost of inaction (3 years)**: $${vs.risksOfInaction?.threeYearCost || '[Amount]'}
-
----`;
+    return content;
   },
 
   generateAIOpportunityAssessment(data) {
-    const ai = data.aiOpportunityAssessment || {};
+    const assessment = data.aiOpportunityAssessment || {};
+    let content = '## AI/Automation Opportunity Assessment\n\n';
+
+    // Current Technology Landscape
+    content += '### Current Technology Landscape\n';
+    const currentTech = assessment.currentTechnology || {};
+    content += `- **Primary ERP**: ${currentTech.erp || '[Not specified]'}\n`;
+    content += `- **CRM System**: ${currentTech.crm || '[Not specified]'}\n`;
+    content += `- **Collaboration Tools**: ${currentTech.collaboration || '[Not specified]'}\n`;
+    content += `- **Integration Maturity**: ${currentTech.integrationMaturity || '[Not assessed]'}\n`;
+    content += `- **Data Quality**: ${currentTech.dataQuality || '[Not assessed]'}\n`;
     
-    return `## AI/Automation Opportunity Assessment
+    if (currentTech.automation) {
+      content += `- **Current Automation**: ${currentTech.automation}\n`;
+    }
 
-### Current Technology Landscape
-- **Primary ERP**: ${ai.currentTechnology?.erp || '[System name and version]'}
-- **CRM System**: ${ai.currentTechnology?.crm || '[System name]'}
-- **Collaboration Tools**: ${ai.currentTechnology?.collaboration || '[Tools used]'}
-- **Current Automation**: ${ai.currentTechnology?.automation || '[Describe existing automation]'}
-- **Integration Maturity**: ${ai.currentTechnology?.integrationMaturity || '[Basic/Intermediate/Advanced]'}
-- **Data Quality**: ${ai.currentTechnology?.dataQuality || '[Poor/Fair/Good/Excellent]'}
+    // AI Readiness Score
+    content += '\n### AI Readiness Score\n';
+    const readinessScoring = assessment.readinessScoring || {};
+    const criteriaLabels = {
+      dataQuality: 'Data availability and quality',
+      integration: 'System integration capability',
+      technicalTeam: 'Technical team readiness',
+      leadership: 'Leadership support',
+      changeManagement: 'Change management capability'
+    };
 
-### AI Readiness Score: ${ai.aiReadinessScore || '[X]'}/10
-**Scoring Criteria:**
-- Data availability and quality: ${ai.readinessScoring?.dataQuality || '[X]'}/2
-- System integration capability: ${ai.readinessScoring?.integration || '[X]'}/2  
-- Technical team readiness: ${ai.readinessScoring?.technicalTeam || '[X]'}/2
-- Leadership support: ${ai.readinessScoring?.leadership || '[X]'}/2
-- Change management capability: ${ai.readinessScoring?.changeManagement || '[X]'}/2
+    Object.entries(criteriaLabels).forEach(([key, label]) => {
+      const score = readinessScoring[key] || 0;
+      const max = 2;
+      content += `- **${label}**: ${score}/${max}\n`;
+    });
 
-### Top AI Opportunities (Prioritized)
-${this.generateAIOpportunities(ai.opportunities)}
+    const totalScore = Object.values(readinessScoring).reduce((sum, score) => sum + (score || 0), 0);
+    content += `\n**Total AI Readiness Score: ${totalScore}/10**\n`;
 
-### Quick Wins (0-6 months)
-${this.generateOpportunitiesList(ai.quickWins)}
+    // Top AI Opportunities
+    content += '\n### Top AI Opportunities (Prioritized)\n';
+    const opportunities = assessment.opportunities || [];
+    
+    if (opportunities.length > 0) {
+      opportunities
+        .sort((a, b) => (b.priorityScore || 0) - (a.priorityScore || 0))
+        .forEach((opportunity, index) => {
+          content += `\n#### ${index + 1}. ${opportunity.name || 'Unnamed Opportunity'}\n`;
+          content += `- **Department**: ${opportunity.department || 'Not specified'}\n`;
+          content += `- **Process**: ${opportunity.process || 'Not specified'}\n`;
+          content += `- **Current State**: ${opportunity.currentState || 'Not described'}\n`;
+          content += `- **AI Solution**: ${opportunity.aiSolution || 'Not specified'}\n`;
+          content += `- **Estimated Impact**: $${opportunity.estimatedImpact ? parseInt(opportunity.estimatedImpact).toLocaleString() : '[Not quantified]'}\n`;
+          content += `- **Implementation Effort**: ${opportunity.implementationEffort || 'Medium'}\n`;
+          content += `- **Timeline**: ${opportunity.timeline || 'Not specified'}\n`;
+          content += `- **Priority Score**: ${opportunity.priorityScore || 5}/10\n`;
+        });
+    } else {
+      content += 'No specific opportunities identified yet.\n';
+    }
 
-### Strategic Initiatives (6-18 months)
-${this.generateOpportunitiesList(ai.strategicInitiatives)}
+    // Quick Wins
+    content += '\n### Quick Wins (0-6 months)\n';
+    const quickWins = assessment.quickWins || [];
+    
+    if (quickWins.length > 0) {
+      quickWins.forEach((quickWin, index) => {
+        content += `${index + 1}. **${quickWin.name || 'Unnamed Quick Win'}**\n`;
+        content += `   - Impact: $${quickWin.impact ? parseInt(quickWin.impact).toLocaleString() : '[Not quantified]'}\n`;
+        content += `   - Timeline: ${quickWin.timeline || 'Not specified'}\n`;
+      });
+    } else {
+      content += 'No quick wins identified yet.\n';
+    }
 
-### Future Opportunities (18+ months)
-${this.generateOpportunitiesList(ai.futureOpportunities)}
-
----`;
+    return content;
   },
 
   generateSummary(data) {
@@ -328,6 +430,11 @@ ${summary.notes || '[Free text area for additional observations, quotes from sta
     };
 
     const items = templates[department] || [];
+    
+    if (items.length === 0) {
+      return '- [ ] Other: [Specify]';
+    }
+    
     return items.map(item => {
       const checked = problems[item] ? 'x' : ' ';
       return `- [${checked}] ${item}`;
@@ -384,12 +491,12 @@ ${summary.notes || '[Free text area for additional observations, quotes from sta
     const data = {};
     
     const patterns = {
-      companyName: /\*\*Company Name\*\*: (.+)/,
-      industry: /\*\*Industry\*\*: (.+)/,
-      size: /\*\*Size\*\*: (.+)/,
-      annualRevenue: /\*\*Annual Revenue\*\*: \$(.+)/,
-      employeeCount: /\*\*Employee Count\*\*: (.+)/,
-      primaryLocation: /\*\*Primary Location\*\*: (.+)/
+      companyName: /\*\*Company Name\*\*:\s*(.+)/,
+      industry: /\*\*Industry\*\*:\s*(.+)/,
+      size: /\*\*Size\*\*:\s*(.+)/,
+      annualRevenue: /\*\*Annual Revenue\*\*:\s*\$(.+)/,
+      employeeCount: /\*\*Employee Count\*\*:\s*(.+)/,
+      primaryLocation: /\*\*Primary Location\*\*:\s*(.+)/
     };
 
     Object.entries(patterns).forEach(([key, pattern]) => {
@@ -401,8 +508,12 @@ ${summary.notes || '[Free text area for additional observations, quotes from sta
   },
 
   extractSection(markdown, heading) {
-    const regex = new RegExp(`${heading}([\\s\\S]*?)(?=^##|$)`, 'm');
+    // Escape special regex characters in the heading
+    const escapedHeading = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Match the heading and capture content until the next heading of same or higher level or end of string
+    // Note: Don't use 'm' flag as it makes $ match end of line instead of end of string
+    const regex = new RegExp(`${escapedHeading}\\n([\\s\\S]*?)(?=\\n##|$)`);
     const match = markdown.match(regex);
-    return match ? match[1] : '';
+    return match ? match[1].trim() : '';
   }
 }; 

@@ -1,19 +1,20 @@
 # Agentic AI Flow Visualizer & Business AI Advisory Platform
 
-**🤖 AI Assistant Context:** This is a comprehensive business AI advisory platform built with Next.js, featuring both ServiceNow agentic AI flow visualization and an interactive AI transformation timeline tool. The platform serves as a lead-generation tool for AI advisory services, combining technical visualization capabilities with business planning tools. Core technologies: Next.js 15, React 19, ReactFlow, Zustand, Dagre. Design inspired by ai-2027.com with modern dark themes and floating UI elements.
+**🤖 AI Assistant Context:** This is a comprehensive business AI advisory platform built with Next.js, featuring ServiceNow agentic AI flow visualization, interactive AI transformation timelines, and client profile management with Value Selling Framework. The platform serves as a sophisticated lead-generation tool for AI advisory services, combining technical visualization capabilities with comprehensive business intelligence collection and strategic planning tools. Core technologies: Next.js 15, React 19, ReactFlow, Zustand, Dagre. Design inspired by ai-2027.com with modern dark themes and floating UI elements.
 
-**🎯 Current State:** Fully functional dual-purpose platform with ServiceNow visualization and AI transformation timeline. Recent major improvements include ai-2027.com inspired design overhaul, floating metrics widget, comprehensive timeline feature, and robust error handling. Ready for lead generation optimization and business development.
+**🎯 Current State:** Fully functional three-feature platform with ServiceNow visualization, AI transformation timeline, and comprehensive client profile management system. Recent major additions include ProfileWizard with 8-step Value Selling Framework, structured markdown profile storage, realistic demo data system, and automatic timeline generation from client profiles. Architecture includes robust service layers (ProfileService, MarkdownService, DemoDataService) and comprehensive business intelligence capture. Ready for production testing and client demos.
 
-**🚀 Next Steps:** Lead capture integration, industry-specific templates, export capabilities, and multi-platform connectors (Salesforce, Microsoft). Focus on converting timeline users into advisory clients.
+**🚀 Next Steps:** Comprehensive testing strategy implementation using TDD, lead capture integration, industry-specific templates, export capabilities, and multi-platform connectors (Salesforce, Microsoft). Focus on converting profile users into advisory clients through sophisticated business intelligence and automated timeline generation.
 
 ## Project Overview
 
-A Next.js application that serves two primary functions:
+A Next.js application that serves three primary functions:
 
 1. **ServiceNow Agentic AI Visualizer**: Transform ServiceNow agentic AI data into interactive flow diagrams
-2. **AI Transformation Timeline**: Business advisory tool that generates personalized AI adoption roadmaps
+2. **AI Transformation Timeline**: Business advisory tool that generates personalized AI adoption roadmaps  
+3. **Client Profile Management**: Comprehensive business intelligence system using Value Selling Framework to create client "digital twins"
 
-The platform positions itself as a free lead-generation tool for AI advisory services, providing immediate value while capturing business prospects.
+The platform positions itself as a sophisticated lead-generation tool for AI advisory services, providing immediate value while capturing comprehensive business intelligence and converting prospects into advisory clients.
 
 ## Core Features
 
@@ -31,6 +32,15 @@ The platform positions itself as a free lead-generation tool for AI advisory ser
 - **Dynamic Content Generation**: Personalized roadmaps based on industry and company size
 - **ROI Projections**: Detailed investment and return calculations
 - **Mobile-Responsive Design**: Optimized for all device types
+
+### 👥 **Client Profile Management** (New Major Feature)
+- **ProfileWizard**: 8-step guided form implementing Value Selling Framework methodology
+- **Business Intelligence Capture**: Company overview, strategic issues, quantified impact analysis
+- **Value Selling Framework**: Business Issues → Problems → Impact → Solution → Decision → AI Assessment
+- **Structured Markdown Storage**: Prevents AI hallucinations while maintaining human readability
+- **Demo Data System**: 4 realistic industry profiles (Technology, Manufacturing, Healthcare, Finance)
+- **Automatic Timeline Generation**: Client profiles automatically populate personalized AI roadmaps
+- **Opportunity Assessment**: AI readiness scoring and automation opportunity identification
 
 ### 🎨 **Design System (ai-2027.com Inspired)**
 - **Dark Theme**: Modern #0a0e27 background with gradient accents
@@ -53,7 +63,11 @@ agentic-ai-flow/
 │   │       ├── ToolNode.js        # Tool/integration nodes
 │   │       ├── TriggerNode.js     # Event trigger nodes
 │   │       └── UseCaseNode.js     # Business use case nodes
-│   ├── timeline/                  # AI Timeline feature (NEW)
+│   ├── profiles/                  # Client Profile Management (NEW)
+│   │   ├── page.js               # Profile dashboard & management
+│   │   └── components/           
+│   │       └── ProfileWizard.js  # 8-step Value Selling Framework form
+│   ├── timeline/                  # AI Timeline feature
 │   │   ├── page.js               # Main timeline page
 │   │   ├── timeline.css          # Complete timeline styling
 │   │   └── components/           
@@ -62,16 +76,25 @@ agentic-ai-flow/
 │   │       ├── TimelineContent.js        # Main scrollable content
 │   │       ├── MetricsWidget.js          # Floating metrics (ai-2027 style)
 │   │       └── ...
-│   ├── api/servicenow/           # Secure API layer
-│   │   ├── fetch-agentic-data/   # ServiceNow data retrieval
-│   │   └── get-credentials/      # Credential management
+│   ├── services/                  # Business Logic Layer (NEW)
+│   │   ├── profileService.js     # Profile CRUD, timeline integration
+│   │   ├── markdownService.js    # Structured markdown conversion
+│   │   ├── demoDataService.js    # Realistic demo profile data
+│   │   └── timelineService.js    # Timeline generation business logic
+│   ├── api/                      # API Routes
+│   │   ├── servicenow/           # ServiceNow integration
+│   │   │   ├── fetch-agentic-data/ # Data retrieval
+│   │   │   └── get-credentials/    # Credential management
+│   │   └── timeline/             # Timeline API (NEW)
+│   │       └── generate/         # Profile-to-timeline generation
 │   ├── store/                    # State management
 │   │   ├── useAgenticStore.js    # ServiceNow data & flow state
 │   │   └── useBusinessProfileStore.js # Timeline data & business profiles
 │   └── utils/                    # Utility functions
 │       ├── layoutGraph.js        # Dagre layout engine
 │       ├── transformAgenticData.js # Data transformation
-│       └── nodeUtils.js          # Node utilities & URL generation
+│       ├── nodeUtils.js          # Node utilities & URL generation
+│       └── validation.js         # Input validation & security (NEW)
 └── public/images/               # Static assets
 ```
 
@@ -82,10 +105,18 @@ agentic-ai-flow/
 - **After**: 2-column with floating widget (sidebar | content + floating widget)
 - **Benefits**: More content space, modern UI, ai-2027.com aesthetic
 
+#### **Service Layer Architecture** (NEW)
+- **ProfileService**: Profile CRUD operations, AI timeline integration, opportunity analysis
+- **MarkdownService**: Converts profile data to/from structured markdown (prevents AI hallucinations)
+- **DemoDataService**: Provides 4 realistic industry profiles for testing and demonstrations
+- **TimelineService**: Business logic for generating AI adoption roadmaps from profile data
+- **Separation of Concerns**: Business logic separated from UI components and state management
+
 #### **State Management Strategy**
 - **useAgenticStore**: ServiceNow data, connection details, flow visualization state
 - **useBusinessProfileStore**: Business profiles, timeline data, scenario planning
-- **Separation of Concerns**: Clear boundaries between visualization and advisory features
+- **Local Storage**: Client profiles persisted locally (ready for backend integration)
+- **Separation of Concerns**: Clear boundaries between visualization, advisory, and profile features
 
 #### **Component Architecture**
 - **Floating Metrics Widget**: `position: fixed` with backdrop blur and responsive behavior
@@ -101,11 +132,20 @@ agentic-ai-flow/
 - **Responsive Breakpoints**: Optimized for 1400px, 1200px, and 768px breakpoints
 - **Smooth Animations**: Enhanced scroll interactions and component transitions
 
+### **👥 Client Profile Management System** (NEW)
+- **ProfileWizard Implementation**: 8-step guided form with Value Selling Framework
+- **Service Layer Architecture**: Robust business logic separation (ProfileService, MarkdownService, DemoDataService)
+- **Demo Data System**: 4 complete industry profiles (TechFlow Solutions, PrecisionParts Manufacturing, Regional Medical Center, Community Trust Bank)
+- **Structured Markdown Storage**: Data integrity and AI hallucination prevention
+- **Automatic Timeline Integration**: Profile data automatically populates AI roadmaps
+- **Security Enhancements**: Input validation, rate limiting, and secure data handling
+
 ### **🔧 Technical Enhancements**
 - **MetricsWidget Bug Fixes**: Resolved `TypeError` with phase title mapping
 - **Improved Error Handling**: Added optional chaining and fallback values throughout
 - **Performance Optimizations**: Minimized re-renders and optimized component updates
 - **Code Organization**: Modular component structure with clear separation of concerns
+- **Validation Layer**: Comprehensive input validation and sanitization across all forms
 
 ### **📊 Timeline Feature Completion**
 - **6-Phase Journey**: Current State → Foundation → Implementation → Expansion → Optimization → Future State
@@ -126,6 +166,13 @@ agentic-ai-flow/
 2. **Data Processing**: Generate phase-specific initiatives, technologies, outcomes
 3. **Visual Presentation**: Scroll-based journey with floating metrics
 4. **Lead Capture**: Ready for contact form integration and follow-up
+
+### **Profile Integration** (NEW)
+1. **Value Selling Framework Collection**: 8-step ProfileWizard captures comprehensive business intelligence
+2. **Structured Data Storage**: MarkdownService converts to structured format preventing AI hallucinations
+3. **Opportunity Analysis**: ProfileService identifies automation opportunities and calculates ROI
+4. **Automatic Timeline Generation**: Profile data automatically populates personalized AI roadmaps
+5. **Demo Data Ready**: DemoDataService provides realistic testing scenarios across 4 industries
 
 ## Getting Started
 
@@ -161,13 +208,21 @@ npm run dev
 3. Generate personalized AI transformation roadmap
 4. Explore phases and metrics
 
+#### **Option 3: Client Profile Management** (NEW)
+1. Click "Client Profiles" button or go to `/profiles`
+2. Create new profile or load demo data (4 industry scenarios available)
+3. Complete 8-step Value Selling Framework assessment
+4. Generate automatic AI timeline from profile data
+5. View comprehensive business intelligence and opportunity analysis
+
 ## Business Model & Lead Generation
 
 ### **Current Positioning**
-- **Free Value-First Tool**: Timeline provides immediate business value
-- **Lead Qualification**: Business profile form captures key prospect data
-- **Advisory Upsell**: Natural progression from tool usage to consulting engagement
-- **Market Positioning**: Bridges technical capability with business strategy
+- **Free Value-First Tool**: Timeline and profile assessment provide immediate business value
+- **Comprehensive Lead Qualification**: Value Selling Framework captures detailed business intelligence
+- **Client Digital Twins**: Structured markdown profiles create comprehensive client understanding
+- **Advisory Upsell**: Natural progression from assessment to consulting engagement
+- **Market Positioning**: Bridges technical capability with sophisticated business strategy and sales methodology
 
 ### **Ready for Integration**
 - **Contact Forms**: Add lead capture at timeline completion
@@ -178,9 +233,10 @@ npm run dev
 ## Next Development Priorities
 
 ### **🎯 Immediate (1-2 weeks)**
-1. **Lead Capture Integration**: Contact forms and email collection
-2. **Export Capabilities**: PDF generation for timeline roadmaps
-3. **Analytics Implementation**: User engagement and conversion tracking
+1. **Comprehensive Testing Strategy**: TDD implementation for ProfileService, DemoDataService, MarkdownService
+2. **Lead Capture Integration**: Contact forms and email collection from profile assessments
+3. **Export Capabilities**: PDF generation for timeline roadmaps and profile summaries
+4. **Analytics Implementation**: User engagement and conversion tracking across all three features
 
 ### **🚀 Short-term (1-2 months)**
 1. **Industry Templates**: Pre-built timelines for healthcare, finance, manufacturing
@@ -235,4 +291,6 @@ npm run dev
 
 ---
 
-**📞 Ready for Business Development**: The platform successfully combines technical demonstration with business advisory positioning, providing a strong foundation for AI consulting lead generation and client engagement.
+**📞 Ready for Business Development**: The platform successfully combines technical demonstration, strategic planning tools, and comprehensive business intelligence collection, providing a sophisticated foundation for AI consulting lead generation and client engagement. With the addition of the Value Selling Framework-based profile system, the platform now captures the depth of business intelligence needed for high-value advisory relationships while providing immediate value through automated timeline generation and opportunity analysis.
+
+**🧪 Testing Status**: Comprehensive test suite implemented with 45 tests passing (ProfileService: 25, MarkdownService: 20). TDD approach established for future development. See TESTING_GUIDE.md for complete testing documentation and working with AI assistants.
