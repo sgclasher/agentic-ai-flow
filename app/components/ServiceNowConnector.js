@@ -18,10 +18,8 @@ const get = (obj, path, defaultValue = undefined) => {
 };
 
 export default function ServiceNowConnector() {
-  // Fetch credentials from API on mount
+  // Fetch non-sensitive connection details from API on mount
   const [instanceUrl, setInstanceUrl] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [scopeId, setScopeId] = useState('');
 
   useEffect(() => {
@@ -29,8 +27,6 @@ export default function ServiceNowConnector() {
       .then(res => res.json())
       .then(data => {
         setInstanceUrl(data.instanceUrl || '');
-        setUsername(data.username || '');
-        setPassword(data.password || '');
         setScopeId(data.scopeId || '');
       })
       .catch(() => {
@@ -46,10 +42,10 @@ export default function ServiceNowConnector() {
   const handleFetchData = async () => {
     setIsLoading(true);
     setError(null);
-    console.log('Fetching data using proxy API...');
+    console.log('Fetching data using server-side credentials...');
 
-    if (!instanceUrl || !username || !password || !scopeId) {
-      setError('Please fill in all fields.');
+    if (!instanceUrl || !scopeId) {
+      setError('Instance URL and Scope ID are required.');
       setIsLoading(false);
       return;
     }
@@ -64,17 +60,16 @@ export default function ServiceNowConnector() {
         formattedUrl = formattedUrl.slice(0, -1);
       }
 
-      // Store connection details for refresh operations
+      // Store connection details for refresh operations (no sensitive data)
       const connectionDetails = {
         instanceUrl: formattedUrl,
-        username,
-        password,
         scopeId
       };
       
       console.log('Setting connection details with instance URL:', formattedUrl);
 
       // Use our API route to fetch all the data at once
+      // Credentials are handled server-side via environment variables
       const response = await fetch('/api/servicenow/fetch-agentic-data', {
         method: 'POST',
         headers: {
@@ -164,43 +159,6 @@ export default function ServiceNowConnector() {
             />
           </div>
           
-          <div className="form-group" style={{ marginBottom: '1rem' }}>
-            <label htmlFor="username" style={{ display: 'flex', alignItems: 'center', fontWeight: '500', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}>
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              readOnly
-              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '0.9rem', color: '#444' }}
-            />
-          </div>
-          
-          <div className="form-group" style={{ marginBottom: '1rem' }}>
-            <label htmlFor="password" style={{ display: 'flex', alignItems: 'center', fontWeight: '500', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}>
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              Password / Token
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              readOnly
-              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '0.9rem', color: '#444' }}
-            />
-            <p className="form-note" style={{ fontSize: '0.75rem', color: '#666', margin: '0.25rem 0 0 0' }}>Note: Server-side authentication is used for security.</p>
-          </div>
-          
           <div className="form-group" style={{ marginBottom: '1.5rem' }}>
             <label htmlFor="scopeId" style={{ display: 'flex', alignItems: 'center', fontWeight: '500', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}>
@@ -218,6 +176,16 @@ export default function ServiceNowConnector() {
               readOnly
               style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd', fontSize: '0.9rem', color: '#444' }}
             />
+          </div>
+          
+          <div style={{ backgroundColor: '#f8f9fa', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+            <p style={{ fontSize: '0.85rem', color: '#666', margin: '0', display: 'flex', alignItems: 'center' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+              </svg>
+              <strong>Secure Connection:</strong> Authentication is handled server-side using environment variables.
+            </p>
           </div>
         </div>
         
@@ -271,30 +239,51 @@ export default function ServiceNowConnector() {
         </button>
         
         <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-          <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
-            Or explore our AI transformation tools:
+          <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1rem' }}>
+            Or explore our client intelligence tools:
           </p>
-          <button
-            type="button"
-            onClick={() => window.location.href = '/timeline'}
-            className="btn btn-secondary"
-            style={{
-              width: 'auto',
-              margin: '0 auto',
-              padding: '0.75rem 2rem',
-              backgroundColor: '#10b981',
-              color: 'white',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="2" x2="12" y2="22"></line>
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-            </svg>
-            Create AI Timeline
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => window.location.href = '/profiles'}
+              className="btn btn-secondary"
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#3498db',
+                color: 'white',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              Client Profiles
+            </button>
+            <button
+              type="button"
+              onClick={() => window.location.href = '/timeline'}
+              className="btn btn-secondary"
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#10b981',
+                color: 'white',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="2" x2="12" y2="22"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+              AI Timeline
+            </button>
+          </div>
         </div>
       </div>
     </div>

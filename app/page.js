@@ -15,10 +15,6 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   
-  // Flow control states
-  const [layoutDirection, setLayoutDirection] = useState('LR');
-  const [autoFitEnabled, setAutoFitEnabled] = useState(false);
-  
   // Refs for flow control methods
   const flowVisualizerRef = useRef({
     expandAllNodes: () => {},
@@ -46,20 +42,12 @@ export default function Home() {
   };
   
   // Flow control handlers
-  const handleLayoutChange = (direction) => {
-    setLayoutDirection(direction);
-  };
-  
   const handleExpandAll = () => {
     flowVisualizerRef.current.expandAllNodes();
   };
   
   const handleCollapseAll = () => {
     flowVisualizerRef.current.collapseAllNodes();
-  };
-  
-  const handleAutoFitToggle = () => {
-    setAutoFitEnabled(!autoFitEnabled);
   };
   
   const handleResetFlow = () => {
@@ -90,6 +78,18 @@ export default function Home() {
               </div>
             </div>
             <div className="header-actions">
+              <button 
+                onClick={() => window.location.href = '/profiles'}
+                className="btn btn-primary"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Client Profiles
+              </button>
               <button 
                 onClick={() => window.location.href = '/timeline'}
                 className="btn btn-success"
@@ -145,20 +145,6 @@ export default function Home() {
           <div className="header-tabs">
             <div className="button-group">
               <button 
-                className={`btn ${layoutDirection === 'LR' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => handleLayoutChange('LR')}
-              >
-                Horizontal Layout
-              </button>
-              <button 
-                className={`btn ${layoutDirection === 'TB' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => handleLayoutChange('TB')}
-              >
-                Vertical Layout
-              </button>
-            </div>
-            <div className="button-group">
-              <button 
                 className="btn btn-neutral"
                 onClick={handleCollapseAll}
               >
@@ -171,15 +157,6 @@ export default function Home() {
                 Expand All
               </button>
             </div>
-            <button 
-              className="btn btn-secondary"
-              onClick={handleAutoFitToggle}
-            >
-              Auto-Fit: 
-              <span className={`status-badge ${autoFitEnabled ? 'status-badge-on' : 'status-badge-off'}`}>
-                {autoFitEnabled ? 'ON' : 'OFF'}
-              </span>
-            </button>
             <button 
               className="btn btn-danger"
               onClick={handleResetFlow}
@@ -211,8 +188,6 @@ export default function Home() {
             <ReactFlowProvider>
               <FlowVisualizer 
                 onError={handleError} 
-                layoutDirection={layoutDirection}
-                autoFitOnChange={autoFitEnabled}
                 ref={flowVisualizerRef}
               />
             </ReactFlowProvider>

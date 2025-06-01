@@ -1,4 +1,4 @@
-/* Timeline Page - Three Column Layout */
+/* Timeline Page - Two Column Layout with Floating Widget */
 .timeline-container {
   display: flex;
   height: 100vh;
@@ -6,6 +6,7 @@
   background: #0a0e27;
   color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
 }
 
 /* Left Sidebar - Timeline Navigation */
@@ -147,13 +148,14 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Main Content Area */
+/* Main Content Area - Now takes full remaining width */
 .timeline-main {
   flex: 1;
   overflow-y: auto;
   scroll-behavior: smooth;
   padding: 0;
   background: #0a0e27;
+  position: relative;
 }
 
 .timeline-empty {
@@ -184,6 +186,8 @@
   padding: 0;
   background: #0a0e27;
   min-height: 100vh;
+  /* Add padding-right to avoid content going under the floating widget */
+  padding-right: 380px;
 }
 
 .timeline-section {
@@ -405,28 +409,67 @@
   color: #ccd6f6;
 }
 
-/* Right Sidebar - Metrics Widget */
+/* Right Sidebar - Metrics Widget - Now floating */
 .metrics-widget {
-  width: 280px;
-  background: #0f1729;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  position: fixed;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 320px;
+  background: rgba(15, 23, 41, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  max-height: 80vh;
+  z-index: 20;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transition: width 0.3s ease, transform 0.3s ease;
+}
+
+.metrics-widget.minimized {
+  width: 60px;
+  transform: translateY(-50%) translateX(20px);
+}
+
+.widget-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.widget-toggle {
+  background: none;
+  border: none;
+  color: #8892b0;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.widget-toggle:hover {
+  color: #ffffff;
+}
+
+.metrics-widget.minimized .widget-header {
+  border-bottom: none;
+}
+
+.metrics-widget.minimized .widget-header h3 {
+  display: none;
 }
 
 .widget-header {
-  padding: 2rem;
+  padding: 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .widget-header h3 {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   color: #ffffff;
 }
 
@@ -452,7 +495,14 @@
 .widget-metrics {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem;
+  padding: 1.5rem;
+}
+
+.widget-metrics h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #8892b0;
+  margin-bottom: 1.5rem;
 }
 
 .metric-item {
@@ -494,6 +544,11 @@
   color: #3498db;
 }
 
+.metric-trend.achieved {
+  background: rgba(155, 89, 182, 0.2);
+  color: #9b59b6;
+}
+
 .metric-value {
   font-size: 1.75rem;
   font-weight: 700;
@@ -501,7 +556,7 @@
 }
 
 .widget-footer {
-  padding: 2rem;
+  padding: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -899,6 +954,16 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1400px) {
+  .metrics-widget {
+    width: 280px;
+  }
+  
+  .timeline-content {
+    padding-right: 340px;
+  }
+}
+
 @media (max-width: 1200px) {
   .timeline-sidebar,
   .metrics-widget {
@@ -907,6 +972,14 @@
   
   .section-body {
     margin-left: 0;
+  }
+  
+  .timeline-content {
+    padding-right: 310px;
+  }
+  
+  .metrics-widget {
+    right: 1rem;
   }
 }
 
@@ -924,6 +997,10 @@
   
   .timeline-main {
     order: 1;
+  }
+  
+  .timeline-content {
+    padding-right: 1rem;
   }
   
   .metrics-widget {

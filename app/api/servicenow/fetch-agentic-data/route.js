@@ -1,6 +1,7 @@
 // Specialized API route to fetch all ServiceNow agentic AI data in one go
 
 import { NextResponse } from 'next/server';
+import { validateInstanceUrl, validateScopeId, checkRateLimit } from '../../../utils/validation';
 
 // Helper to safely get nested properties
 const get = (obj, path, defaultValue = undefined) => {
@@ -17,32 +18,72 @@ const get = (obj, path, defaultValue = undefined) => {
 
 export async function POST(request) {
   try {
-    // Parse request body
-    const body = await request.json();
-    const { instanceUrl, username, password, scopeId } = body;
-
-    // Validate required parameters
-    if (!instanceUrl || !username || !password || !scopeId) {
+    // Rate limiting (basic implementation)
+    const clientIP = request.headers.get('x-forwarded-for') || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
+    
+    const rateLimitCheck = checkRateLimit(clientIP, 20, 60000); // 20 requests per minute
+    if (!rateLimitCheck.allowed) {
       return NextResponse.json(
-        { error: 'Missing required parameters: instanceUrl, username, password, scopeId' },
+        { error: 'Rate limit exceeded', retryAfter: rateLimitCheck.retryAfter },
+        { status: 429, headers: { 'Retry-After': rateLimitCheck.retryAfter.toString() } }
+      );
+    }
+
+    // Parse and validate request body
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
         { status: 400 }
       );
     }
 
-    // Make sure instanceUrl is properly formatted
-    let formattedUrl = instanceUrl.trim();
-    if (!formattedUrl.startsWith('https://') && !formattedUrl.startsWith('http://')) {
-      formattedUrl = 'https://' + formattedUrl;
-    }
-    if (formattedUrl.endsWith('/')) {
-      formattedUrl = formattedUrl.slice(0, -1);
+    const { instanceUrl, scopeId } = body;
+
+    // Validate instanceUrl
+    const urlValidation = validateInstanceUrl(instanceUrl);
+    if (!urlValidation.isValid) {
+      return NextResponse.json(
+        { error: `Invalid instance URL: ${urlValidation.error}` },
+        { status: 400 }
+      );
     }
 
-    // Create authorization header
+    // Validate scopeId
+    const scopeValidation = validateScopeId(scopeId);
+    if (!scopeValidation.isValid) {
+      return NextResponse.json(
+        { error: `Invalid scope ID: ${scopeValidation.error}` },
+        { status: 400 }
+      );
+    }
+
+    // Get credentials from environment variables (server-side only)
+    const username = process.env.SERVICENOW_USERNAME;
+    const password = process.env.SERVICENOW_PASSWORD;
+
+    // Validate server-side credentials
+    if (!username || !password) {
+      console.error('Server configuration error: ServiceNow credentials not found in environment variables');
+      return NextResponse.json(
+        { error: 'Server configuration error: Authentication credentials not configured' },
+        { status: 500 }
+      );
+    }
+
+    // Use validated and sanitized values
+    const formattedUrl = urlValidation.sanitized;
+    const sanitizedScopeId = scopeValidation.sanitized;
+
+    // Create authorization header using server-side credentials
     const authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
 
-    // Use the new scripted REST API endpoint
-    const apiUrl = `${formattedUrl}/api/x_nowge_rfx_ai/ai_relationship_explorer/relationships?app_scope_id=${scopeId}`;
+    // Use the new scripted REST API endpoint with sanitized scope ID
+    const apiUrl = `${formattedUrl}/api/x_nowge_rfx_ai/ai_relationship_explorer/relationships?app_scope_id=${sanitizedScopeId}`;
     
     console.log(`Fetching from: ${apiUrl}`);
     

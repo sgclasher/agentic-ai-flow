@@ -51,11 +51,13 @@ const useAgenticStore = create(
         set({ isLoading: true, error: null });
         
         try {
-          const { instanceUrl, username, password, scopeId } = connectionDetails;
+          const { instanceUrl, scopeId } = connectionDetails;
           
           // Keep or update the serviceNowUrl
           set({ serviceNowUrl: instanceUrl });
           
+          // Only send non-sensitive connection details
+          // Credentials are handled server-side via environment variables
           const response = await fetch('/api/servicenow/fetch-agentic-data', {
             method: 'POST',
             headers: {
@@ -63,8 +65,6 @@ const useAgenticStore = create(
             },
             body: JSON.stringify({
               instanceUrl,
-              username,
-              password,
               scopeId
             }),
           });
@@ -106,15 +106,12 @@ const useAgenticStore = create(
     {
       name: 'agentic-flow-storage', // Name for local storage key
       storage: createJSONStorage(() => localStorage), // Use local storage
-      // Don't persist sensitive data like passwords
+      // Only persist non-sensitive data
       partialize: (state) => ({
         layoutDirection: state.layoutDirection,
         serviceNowUrl: state.serviceNowUrl, // Persist the serviceNowUrl
-        // Only store the most recent connection details but not the password
-        connectionDetails: state.connectionDetails ? {
-          ...state.connectionDetails,
-          password: undefined // Exclude password from localStorage
-        } : null
+        // Store connection details (no sensitive data included)
+        connectionDetails: state.connectionDetails
       }),
     }
   )

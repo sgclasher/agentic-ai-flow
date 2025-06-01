@@ -1,374 +1,238 @@
-# Agentic AI Flow Visualizer
+# Agentic AI Flow Visualizer & Business AI Advisory Platform
 
-**🤖 AI Assistant Context:** This is an Agentic AI Flow Visualizer built with Next.js that connects to ServiceNow to visualize AI workflows. The project is expanding into a comprehensive business AI advisory platform with digital twin capabilities. Key focus areas: React Flow visualizations, ServiceNow integration, business process automation, and AI-powered insights. Current tech stack: Next.js 15, React 19, ReactFlow, Zustand, Dagre. Follow React/JavaScript best practices, prioritize modular components, and maintain security-first approach for ServiceNow connections.
+**🤖 AI Assistant Context:** This is a comprehensive business AI advisory platform built with Next.js, featuring both ServiceNow agentic AI flow visualization and an interactive AI transformation timeline tool. The platform serves as a lead-generation tool for AI advisory services, combining technical visualization capabilities with business planning tools. Core technologies: Next.js 15, React 19, ReactFlow, Zustand, Dagre. Design inspired by ai-2027.com with modern dark themes and floating UI elements.
 
-**🎯 Vision:** Evolving from a ServiceNow visualization tool into a free lead-generation platform for AI advisory services, featuring business digital twins, agentic workflow recommendations, and multi-platform blueprints (ServiceNow, Salesforce, etc.).
+**🎯 Current State:** Fully functional dual-purpose platform with ServiceNow visualization and AI transformation timeline. Recent major improvements include ai-2027.com inspired design overhaul, floating metrics widget, comprehensive timeline feature, and robust error handling. Ready for lead generation optimization and business development.
 
-A Next.js application for visualizing ServiceNow agentic AI data as interactive flow diagrams. This tool transforms structured JSON data from ServiceNow's agentic AI platform into an interactive, collapsible node graph that helps users understand the relationships between use cases, triggers, agents, and tools.
+**🚀 Next Steps:** Lead capture integration, industry-specific templates, export capabilities, and multi-platform connectors (Salesforce, Microsoft). Focus on converting timeline users into advisory clients.
 
-## Purpose
+## Project Overview
 
-The Agentic AI Flow Visualizer was designed to provide a clear visual representation of complex agentic AI systems, making it easier to:
+A Next.js application that serves two primary functions:
 
-- Understand the hierarchical structure of agentic AI components
-- Visualize relationships between different elements in the system
-- Explore complex architectures through interactive node expansion/collapse
-- Present architecture diagrams in both horizontal and vertical layouts
+1. **ServiceNow Agentic AI Visualizer**: Transform ServiceNow agentic AI data into interactive flow diagrams
+2. **AI Transformation Timeline**: Business advisory tool that generates personalized AI adoption roadmaps
 
-## Features
+The platform positions itself as a free lead-generation tool for AI advisory services, providing immediate value while capturing business prospects.
 
-- **Interactive Visualization**: Drag, zoom, and pan to explore the flow diagram
-- **Collapsible Nodes**: Expand/collapse nodes to show or hide child elements
-- **Layout Options**: Toggle between horizontal (LR) and vertical (TB) layouts
-- **Node Types**: Distinct styling for different node types (Use Cases, Triggers, Agents, Tools)
-- **ServiceNow Integration**: Connect directly to ServiceNow instances using secure credentials
-- **Detailed Information**: View detailed node information by clicking on nodes
-- **Expand/Collapse All**: Options to expand or collapse all nodes at once
-- **Customizable Layouts**: Arrange nodes automatically based on hierarchy
-- **Sequence Numbering**: Displays use cases in operational order
-- **Interactive Flow Visualization**: 
-  - Drag and drop nodes for custom layouts
-  - Zoom and pan controls
-  - Responsive design
-- **Architecture Modes**:
-  - Toggle between horizontal and vertical flow orientations
-  - Real-time layout switching
-- **Node Types**:
-  - Triggers (API, Schedule, User Events)
-  - Agents (with customizable AI capabilities)
-  - Tools (various integrations)
-  - Use Cases (business outcomes)
-- **Dynamic Styling**: Visual feedback for connections and node interactions
-- **Export Capabilities**: Download workflows as images
-- **AI Transformation Timeline**: Interactive business AI advisory tool
-  - Three-column layout inspired by ai-2027.com
-  - Dynamic metrics that update based on scroll position
-  - Personalized AI adoption roadmap
-  - ROI projections and phase-based planning
-  - Mobile-responsive design
+## Core Features
 
-## AI Timeline Feature
+### 🔄 **ServiceNow Flow Visualization**
+- **Interactive Node Graph**: Drag, zoom, and pan through complex AI workflows
+- **Hierarchical Exploration**: Expand/collapse nodes to explore use cases → agents → tools
+- **Dynamic Layouts**: Toggle between horizontal (LR) and vertical (TB) orientations
+- **Real-time Collaboration**: Multiple layout options and live data refresh
+- **Secure Integration**: Direct connection to ServiceNow instances with credential management
 
-The AI Timeline is a comprehensive business planning tool that helps organizations visualize their AI transformation journey. Access it via the "AI Timeline" button in the header or directly at `/timeline`.
+### 📈 **AI Transformation Timeline** (New Major Feature)
+- **Business Profile Collection**: Multi-step form capturing company details, AI maturity, goals
+- **Interactive Timeline**: Scroll-based journey through 6 transformation phases
+- **Floating Metrics Widget**: Real-time KPIs that update based on scroll position (ai-2027.com inspired)
+- **Dynamic Content Generation**: Personalized roadmaps based on industry and company size
+- **ROI Projections**: Detailed investment and return calculations
+- **Mobile-Responsive Design**: Optimized for all device types
 
-### Key Components:
-- **Business Profile Form**: Multi-step wizard to capture company information
-- **Interactive Timeline**: Scroll-based navigation from current state to future vision
-- **Dynamic Metrics Widget**: Real-time KPIs that change as you progress through phases
-- **Phase-based Planning**: Foundation → Implementation → Expansion → Optimization → Future State
+### 🎨 **Design System (ai-2027.com Inspired)**
+- **Dark Theme**: Modern #0a0e27 background with gradient accents
+- **Floating UI Elements**: Metrics widget positioned absolutely with backdrop blur
+- **Smooth Animations**: Scroll-based progress indicators and smooth transitions
+- **Responsive Layout**: 2-column design with floating widget on desktop, stacked on mobile
+- **Visual Storytelling**: Phase-based progression with icons and visual hierarchy
 
-### Timeline Sections:
-1. **Current State Analysis**: Baseline assessment of AI readiness
-2. **Foundation Phase (Q1-Q2)**: Building core capabilities and infrastructure
-3. **Implementation Phase (Q3-Q4)**: Deploying initial AI solutions
-4. **Expansion Phase (Year 2)**: Scaling across the enterprise
-5. **Optimization Phase (Year 3)**: Refining and maximizing value
-- **Component-based UI**: Each node type has its own React component
-- **Data Transformation Layer**: Utilities to convert ServiceNow data to React Flow format
-- **Automatic Layout Engine**: Uses Dagre for intelligent node positioning
-- **State Management**: Uses Zustand for application state
-- **Secure API Layer**: Next.js API routes provide secure proxying to ServiceNow
+## Architecture Overview
 
-## ServiceNow Integration
-
-The application connects securely to ServiceNow to retrieve agentic AI data:
-
-1. **Authentication Flow**:
-   - The application uses a dedicated service account with limited permissions
-   - Credentials are securely passed through the Next.js API route
-   - Basic authentication is used with proper encoding
-
-2. **Data Access Layer**:
-   - A scripted REST API on the ServiceNow side encapsulates data access logic
-   - The API endpoint (`/api/x_nowge_rfx_ai/ai_relationship_explorer/relationships`) returns pre-formatted data
-   - This approach follows the principle of least privilege - no admin access required
-
-3. **Data Transformation**:
-   - The Next.js API route normalizes the data structure to match visualization requirements
-   - The FlowVisualizer component transforms the data into React Flow nodes and edges
-   - The Dagre layout algorithm intelligently positions nodes based on relationships
-
-## File Structure
-
+### **Application Structure**
 ```
 agentic-ai-flow/
-├── app/                   # Next.js app directory
-│   ├── components/        # React components
-│   │   ├── FlowVisualizer.js      # Main visualization component
-│   │   ├── NodeIcons.js           # Icon components for nodes
-│   │   ├── ServiceNowConnector.js # ServiceNow integration component
-│   │   └── nodes/                 # Custom node components
-│   │       ├── AgentNode.js       # Agent node component
-│   │       ├── ToolNode.js        # Tool node component
-│   │       ├── TriggerNode.js     # Trigger node component
-│   │       └── UseCaseNode.js     # Use Case node component
-│   ├── api/                # Next.js API routes
-│   │   └── servicenow/               # ServiceNow API endpoints
-│   │       ├── fetch-agentic-data/   # API route for fetching data
-│   │       └── get-credentials/      # API route for credential management
-│   ├── globals.css        # Global styles
-│   ├── layout.js          # Root layout component
-│   ├── page.js            # Main page component
-│   ├── store/             # State management
-│   │   └── useAgenticStore.js    # Zustand store for agentic data
-│   └── utils/             # Utility functions
-│       ├── layoutGraph.js        # Graph layout utilities
-│       └── transformAgenticData.js # Data transformation utilities
-├── public/               # Static assets
-├── next.config.js        # Next.js configuration
-└── package.json          # Project dependencies
+├── app/
+│   ├── components/                 # Core visualization components
+│   │   ├── FlowVisualizer.js      # Main ServiceNow flow renderer
+│   │   ├── ServiceNowConnector.js # Authentication and data fetching
+│   │   └── nodes/                 # Custom node types
+│   │       ├── AgentNode.js       # AI agent visualization
+│   │       ├── ToolNode.js        # Tool/integration nodes
+│   │       ├── TriggerNode.js     # Event trigger nodes
+│   │       └── UseCaseNode.js     # Business use case nodes
+│   ├── timeline/                  # AI Timeline feature (NEW)
+│   │   ├── page.js               # Main timeline page
+│   │   ├── timeline.css          # Complete timeline styling
+│   │   └── components/           
+│   │       ├── BusinessProfileModal.js    # Multi-step business form
+│   │       ├── TimelineSidebar.js        # Left navigation
+│   │       ├── TimelineContent.js        # Main scrollable content
+│   │       ├── MetricsWidget.js          # Floating metrics (ai-2027 style)
+│   │       └── ...
+│   ├── api/servicenow/           # Secure API layer
+│   │   ├── fetch-agentic-data/   # ServiceNow data retrieval
+│   │   └── get-credentials/      # Credential management
+│   ├── store/                    # State management
+│   │   ├── useAgenticStore.js    # ServiceNow data & flow state
+│   │   └── useBusinessProfileStore.js # Timeline data & business profiles
+│   └── utils/                    # Utility functions
+│       ├── layoutGraph.js        # Dagre layout engine
+│       ├── transformAgenticData.js # Data transformation
+│       └── nodeUtils.js          # Node utilities & URL generation
+└── public/images/               # Static assets
 ```
 
-## Core Components Explained
+### **Key Technical Decisions**
 
-### FlowVisualizer.js
-The main component responsible for rendering the flow diagram. It handles:
-- Initialization of React Flow with custom node and edge types
-- State management for nodes and edges
-- Layout direction toggling (horizontal/vertical)
-- Node expansion/collapse functionality
-- Updating node visibility based on collapse state
-- Applying the Dagre layout to visible nodes
-- UI controls for layout manipulation
+#### **Layout Evolution**
+- **Before**: 3-column fixed layout (sidebar | content | widget)
+- **After**: 2-column with floating widget (sidebar | content + floating widget)
+- **Benefits**: More content space, modern UI, ai-2027.com aesthetic
 
-Key functions:
-- `toggleNodeExpansion`: Toggles the expansion state of a node
-- `updateChildNodesVisibility`: Updates visibility of child nodes
-- `applyLayout`: Re-applies the layout algorithm after node visibility changes
+#### **State Management Strategy**
+- **useAgenticStore**: ServiceNow data, connection details, flow visualization state
+- **useBusinessProfileStore**: Business profiles, timeline data, scenario planning
+- **Separation of Concerns**: Clear boundaries between visualization and advisory features
 
-### ServiceNowConnector.js
-Handles the connection to ServiceNow instances:
-- Provides a form UI for connection credentials
-- Makes POST requests to the Next.js API route
-- Securely passes credentials for authentication
-- Stores connection details in the app state
-- Displays connection status and errors
-- Initiates data fetching process
+#### **Component Architecture**
+- **Floating Metrics Widget**: `position: fixed` with backdrop blur and responsive behavior
+- **Scroll-Spy Navigation**: Timeline sidebar updates based on scroll position
+- **Dynamic Content Generation**: Timeline phases generated based on business profile
+- **Error Boundary Implementation**: Robust error handling throughout
 
-### API Routes
-The application uses Next.js API routes to securely proxy requests to ServiceNow:
-- `/api/servicenow/fetch-agentic-data`: Handles authentication and data retrieval
-- `/api/servicenow/get-credentials`: Manages credential validation
+## Recent Major Improvements
 
-The API route layer:
-- Keeps credentials secure (server-side only)
-- Normalizes data structure for the frontend
-- Handles error states and status codes
-- Follows security best practices
+### **🎨 UI/UX Overhaul (ai-2027.com Inspired)**
+- **Floating Metrics Widget**: Replaced fixed 3-column layout with modern floating design
+- **Dark Theme Consistency**: Unified #0a0e27 background across all timeline components
+- **Responsive Breakpoints**: Optimized for 1400px, 1200px, and 768px breakpoints
+- **Smooth Animations**: Enhanced scroll interactions and component transitions
 
-### transformAgenticData.js
-The core data transformation utility that:
-- Parses ServiceNow agentic AI JSON data
-- Creates React Flow nodes with appropriate data and styling
-- Establishes parent-child relationships as edges
-- Adds interactive properties like collapse/expand functionality
-- Sorts use cases by name (which can include sequence numbers)
-- Maps data fields to appropriate node properties
+### **🔧 Technical Enhancements**
+- **MetricsWidget Bug Fixes**: Resolved `TypeError` with phase title mapping
+- **Improved Error Handling**: Added optional chaining and fallback values throughout
+- **Performance Optimizations**: Minimized re-renders and optimized component updates
+- **Code Organization**: Modular component structure with clear separation of concerns
 
-### layoutGraph.js
-Provides intelligent node positioning using Dagre:
-- `applyDagreLayout`: Organizes nodes in either horizontal or vertical layouts
-- Sets node dimensions and spacing
-- Processes only visible nodes
-- Returns positioned nodes and edges ready for React Flow rendering
+### **📊 Timeline Feature Completion**
+- **6-Phase Journey**: Current State → Foundation → Implementation → Expansion → Optimization → Future State
+- **Business Profile Integration**: Company size, industry, AI maturity level collection
+- **ROI Calculations**: Investment projections from $250K to $3M+ with 425% total ROI
+- **Dynamic Metrics**: Real-time KPIs that change based on current timeline section
 
-## Data Flow
+## Data Flow & Integration
 
-1. **Data Source**: Data originates from ServiceNow's agentic AI platform
-2. **Retrieval**: The data is accessed through direct ServiceNow API integration using the ServiceNowConnector
-3. **Processing**:
-   - Raw data is normalized by the API route if necessary
-   - `transformAgenticData.js` converts normalized data to React Flow format
-   - Node hierarchies and relationships are established
-   - Default collapse states are applied
-4. **Visualization**:
-   - FlowVisualizer initializes React Flow with the processed data
-   - `layoutGraph.js` positions the nodes based on relationships
-   - React Flow renders the interactive diagram
-5. **User Interaction**:
-   - User can expand/collapse nodes to explore the hierarchy
-   - Clicking nodes reveals detailed information
-   - Layout can be toggled between horizontal and vertical
+### **ServiceNow Integration**
+1. **Secure Authentication**: API routes proxy all ServiceNow requests
+2. **Data Transformation**: Convert ServiceNow JSON to React Flow nodes/edges
+3. **Visual Rendering**: Dagre layout algorithm positions nodes intelligently
+4. **Interactive Features**: Node expansion/collapse with real-time layout updates
 
-## Security Considerations
+### **Timeline Generation**
+1. **Profile Collection**: Multi-step modal captures business requirements
+2. **Data Processing**: Generate phase-specific initiatives, technologies, outcomes
+3. **Visual Presentation**: Scroll-based journey with floating metrics
+4. **Lead Capture**: Ready for contact form integration and follow-up
 
-The application implements several security best practices:
-- Uses a dedicated service account with limited permissions
-- Credentials are never exposed to the client
-- API route proxies requests to ServiceNow, keeping authentication server-side
-- Basic authentication headers are properly encoded
-- ServiceNow's script include pattern encapsulates data access logic
-- Follows principle of least privilege
+## Getting Started
 
-## AI Assistant Development Guide
+### **Prerequisites**
+- Node.js 18+
+- ServiceNow instance with Agentic AI framework (for visualization features)
+- Modern browser (Chrome, Firefox, Safari, Edge)
 
-### **Development Philosophy**
-- **Modular First**: Break large components into focused, single-responsibility pieces
-- **Security by Design**: Always validate inputs, secure API calls, never expose credentials
-- **User Experience**: Prioritize intuitive interfaces and progressive disclosure
-- **Performance**: Minimize re-renders, optimize large data visualizations
-- **Accessibility**: Ensure keyboard navigation and screen reader compatibility
-
-### **Code Standards**
-- Use functional components with hooks (no class components)
-- Implement proper TypeScript types when adding TS files
-- Follow consistent naming: `camelCase` for variables/functions, `PascalCase` for components
-- Keep components under 200 lines; extract hooks for complex logic
-- Add JSDoc comments for complex functions
-- Use descriptive variable names that explain intent
-
-### **State Management Patterns**
-- **Global State**: Use Zustand for cross-component data (see `useAgenticStore.js`)
-- **Local State**: Use `useState` for component-specific state
-- **Server State**: Implement proper loading/error states for API calls
-- **Form State**: Consider React Hook Form for complex forms
-
-### **Component Architecture Guidelines**
-- **Container/Presentation**: Separate data logic from UI rendering
-- **Custom Hooks**: Extract reusable logic into custom hooks
-- **Prop Drilling**: Avoid more than 2 levels; use context or state management
-- **Event Handling**: Use `useCallback` for event handlers passed to children
-
-### **Performance Optimization**
-- Use `React.memo` for expensive re-renders
-- Implement `useMemo` for expensive calculations
-- Use `useCallback` for stable function references
-- Lazy load large components with `React.lazy`
-- Optimize React Flow with `nodesDraggable={false}` when appropriate
-
-### **ServiceNow Integration Best Practices**
-- Always use API routes as proxy layer (never direct client connections)
-- Implement proper error handling and user feedback
-- Use connection pooling for multiple API calls
-- Validate ServiceNow response structure before processing
-- Handle authentication failures gracefully
-
-### **React Flow Specific Guidelines**
-- Use custom node components for different data types
-- Implement proper node memorization to prevent unnecessary re-renders
-- Handle large datasets with virtualization if needed
-- Use `fitView()` appropriately for user experience
-- Implement proper edge routing for complex layouts
-
-### **Future Feature Considerations**
-- **Digital Twin Builder**: Form-based business profile creation
-- **Agentic Workflow Generator**: AI-powered workflow recommendations
-- **Multi-platform Support**: Salesforce, Microsoft, etc. integrations
-- **ROI Calculator**: Business impact measurement tools
-- **Template Library**: Pre-built workflow templates
-- **Collaboration Features**: Team sharing and commenting
-
-### **Common Pitfalls to Avoid**
-- Don't mutate state directly (use spread operators or state setters)
-- Avoid inline object creation in JSX (causes unnecessary re-renders)
-- Don't use array indices as keys for dynamic lists
-- Avoid large useEffect dependency arrays
-- Don't forget to cleanup subscriptions and timers
-- Avoid deeply nested conditional rendering in JSX
-
-### **Testing Strategy**
-- Unit tests for utility functions (transformAgenticData, layoutGraph)
-- Integration tests for API routes
-- Component tests for user interactions
-- E2E tests for critical user flows (ServiceNow connection, visualization)
-- Mock ServiceNow API responses for consistent testing
-
-### **Quick Development Commands**
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Check code style
-npm run lint:fix     # Auto-fix linting issues
-npm run clean        # Clean build artifacts
-```
-
-### **Environment Setup**
-- Node.js 18+ required
-- ServiceNow instance with Agentic AI framework for testing
-- Use `.env.local` for local development secrets (never commit!)
-- Consider Docker for consistent development environments
-
-## Installation
-
+### **Installation**
 ```bash
 # Clone the repository
 git clone <repository-url>
-
-# Navigate to the project directory
 cd agentic-ai-flow
 
 # Install dependencies
 npm install
 
-# Start the development server
+# Start development server
 npm run dev
 ```
 
-## Usage
+### **Usage Options**
 
-1. Start the application using `npm run dev`
-2. Navigate to the application in your browser (default: http://localhost:3000)
-3. Connect to ServiceNow:
-   - Enter instance URL, username, password, and scope ID
-   - Click "Connect & Visualize"
-4. Interact with the diagram:
-   - Click on nodes to view details
-   - Use the +/- buttons to expand/collapse nodes
-   - Use the layout buttons to switch between horizontal and vertical layouts
+#### **Option 1: ServiceNow Visualization**
+1. Navigate to `http://localhost:3000`
+2. Enter ServiceNow instance details
+3. Connect and explore agentic AI flows
+4. Use layout controls and node interactions
 
-## ServiceNow Configuration
+#### **Option 2: AI Timeline Planning**
+1. Click "AI Timeline" button or go to `/timeline`
+2. Complete business profile form
+3. Generate personalized AI transformation roadmap
+4. Explore phases and metrics
 
-To integrate with ServiceNow, you'll need:
-1. A ServiceNow instance with the Agentic AI framework installed
-2. A user account with access to the agentic AI tables
-3. A scripted REST API configured to return the agentic AI relationship data
-4. The sys_id of the scope containing your agentic AI configurations
+## Business Model & Lead Generation
 
-The scripted REST API should:
-- Accept a scope ID parameter
-- Return a structured JSON response with use cases, triggers, agents and tools
-- Be accessible via basic authentication
+### **Current Positioning**
+- **Free Value-First Tool**: Timeline provides immediate business value
+- **Lead Qualification**: Business profile form captures key prospect data
+- **Advisory Upsell**: Natural progression from tool usage to consulting engagement
+- **Market Positioning**: Bridges technical capability with business strategy
 
-## Technologies Used
+### **Ready for Integration**
+- **Contact Forms**: Add lead capture at timeline completion
+- **Email Marketing**: Integrate with SendGrid, Mailchimp for nurture campaigns
+- **CRM Integration**: Connect to Salesforce, HubSpot for lead management
+- **Analytics**: Google Analytics ready for user behavior tracking
 
-- **Next.js**: React framework for the application
-- **React Flow**: Library for rendering node-based graphs
-- **Dagre**: Graph layout engine for organizing nodes
-- **Zustand**: State management library
-- **CSS Modules**: For component styling
+## Next Development Priorities
 
-## React Flow Implementation Notes
+### **🎯 Immediate (1-2 weeks)**
+1. **Lead Capture Integration**: Contact forms and email collection
+2. **Export Capabilities**: PDF generation for timeline roadmaps
+3. **Analytics Implementation**: User engagement and conversion tracking
 
-- Custom node types are defined outside component bodies to prevent React warnings
-- Node and edge types are passed to React Flow via the `nodeTypes` and `edgeTypes` props
-- Nodes use the React Flow `Handle` component for connecting edges
-- Position and layout are managed via the Dagre algorithm
+### **🚀 Short-term (1-2 months)**
+1. **Industry Templates**: Pre-built timelines for healthcare, finance, manufacturing
+2. **Enhanced ROI Calculator**: More sophisticated financial modeling
+3. **Multi-scenario Planning**: Conservative vs. aggressive vs. innovative paths
 
-## Known Considerations
+### **🌟 Long-term (3-6 months)**
+1. **Multi-platform Connectors**: Salesforce, Microsoft 365, Azure integration
+2. **AI-Powered Recommendations**: Smart suggestions based on industry patterns
+3. **Digital Twin Capabilities**: Business process mapping and optimization
 
-- Node labels with excessive length may need adjustments for optimal display
-- Complex hierarchies with many nodes may require scrolling or zooming
-- For best performance, limit extremely large datasets
+## Technical Considerations
 
-## Browser Compatibility
+### **Performance**
+- React Flow optimized for large datasets
+- Zustand for minimal re-renders
+- CSS optimizations for smooth animations
+- Mobile-responsive design patterns
 
-The application works best in modern browsers (Chrome, Firefox, Safari, Edge).
+### **Security**
+- Server-side credential handling
+- API route proxy layer
+- No client-side authentication exposure
+- Secure data transformation pipeline
 
-## Recent Improvements
+### **Scalability**
+- Modular component architecture
+- Extensible state management
+- Clear separation between visualization and advisory features
+- Ready for multi-tenant deployment
 
-### **Code Cleanup (Latest)**
-The codebase has been recently cleaned up to improve maintainability and performance:
+## Development Guidelines
 
-- **Removed Dead Code**: Eliminated unused FileUploader component and sample-data API
-- **Eliminated Duplicates**: Removed duplicate UseCaseNode.js and unnecessary ReactFlowProvider wrapper  
-- **Enhanced Security**: Improved .gitignore with comprehensive exclusions for environment files, logs, and build artifacts
-- **Optimized CSS**: Removed unused styles related to removed components
-- **Better Documentation**: Enhanced package.json with proper metadata, keywords, and improved scripts
-- **Streamlined Architecture**: Simplified component imports and reduced unnecessary abstractions
+### **Code Standards**
+- Functional components with hooks
+- Consistent naming conventions
+- Modular 200-line component limit
+- Comprehensive error handling
+- JSDoc for complex functions
 
-### **Performance Optimizations**
-- Removed redundant wrapper components that caused extra re-renders
-- Cleaned up unused CSS rules that impacted bundle size
-- Simplified import paths for better tree-shaking
-- Enhanced component modularity for better maintainability
+### **Testing Strategy**
+- Unit tests for utility functions
+- Integration tests for API routes
+- Component tests for user interactions
+- E2E tests for critical flows
+
+### **Deployment Considerations**
+- Next.js optimized build
+- Environment variable management
+- CDN-ready static assets
+- Production monitoring ready
+
+---
+
+**📞 Ready for Business Development**: The platform successfully combines technical demonstration with business advisory positioning, providing a strong foundation for AI consulting lead generation and client engagement.
