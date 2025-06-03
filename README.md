@@ -360,3 +360,141 @@ npm run dev
 **📞 Ready for Business Development**: The platform successfully combines technical demonstration, strategic planning tools, and comprehensive business intelligence collection, providing a sophisticated foundation for AI consulting lead generation and client engagement. With the addition of the Value Selling Framework-based profile system, the platform now captures the depth of business intelligence needed for high-value advisory relationships while providing immediate value through automated timeline generation and opportunity analysis.
 
 **🧪 Testing Status**: Comprehensive test suite implemented with **164 tests passing** (ProfileService: 35, MarkdownService: 20, TimelineService: 41, DemoDataService: 46, **Core Supabase Services: 37**). TDD approach established and maintained throughout backend integration. Full test coverage for authentication, database operations, AI services, feature flags, audit logging, real-time capabilities, and comprehensive demo data management. Phase 2 migration complete with 100% backward compatibility. See TESTING_GUIDE.md for complete testing documentation and working with AI assistants.
+
+## API Reference
+
+### AI Provider Models (Updated May 2025)
+
+#### OpenAI Models
+**Latest Models (Current):**
+- **GPT-4.5** (gpt-4.5-preview): $75/$150 per 1M tokens - Most capable model for complex tasks
+- **GPT-4.1** (gpt-4.1): $2/$8 per 1M tokens - Latest production model with 1M context window
+- **GPT-4o** (gpt-4o): $2.50/$10 per 1M tokens - Current primary model with vision support
+- **GPT-4o mini** (gpt-4o-mini): $0.15/$0.60 per 1M tokens - Cost-effective option
+
+**Reasoning Models:**
+- **o3** (o3): $60/$240 per 1M tokens - Advanced reasoning capabilities
+- **o3-mini** (o3-mini): $1.10/$4.40 per 1M tokens - Cost-effective reasoning
+- **o1** (o1): $15/$60 per 1M tokens - Previous generation reasoning
+
+**Legacy Models (Deprecated):**
+- GPT-4 Turbo: $10/$30 per 1M tokens
+- GPT-3.5 Turbo: $0.50/$1.50 per 1M tokens
+
+#### Anthropic Claude Models
+**Claude 4 Series (New - May 2025):**
+- **Claude 4 Opus** (claude-4-opus): $15/$75 per 1M tokens - Most capable Claude model
+- **Claude 4 Sonnet** (claude-4-sonnet): $3/$15 per 1M tokens - Balanced performance
+
+**Claude 3.7 Series (Current Production):**
+- **Claude 3.7 Sonnet** (claude-3.7-sonnet): $3/$15 per 1M tokens - Latest production model
+
+**Claude 3.5 Series:**
+- **Claude 3.5 Sonnet** (claude-3.5-sonnet): $3/$15 per 1M tokens
+- **Claude 3.5 Haiku** (claude-3.5-haiku): $0.80/$4 per 1M tokens - Fast and cost-effective
+
+#### Google Gemini Models
+**Gemini 2.5 Series (Latest):**
+- **Gemini 2.5 Pro** (gemini-2.5-pro): $1.25-$2.50/$10-$15 per 1M tokens (context-based pricing)
+
+**Gemini 2.0 Series (Current):**
+- **Gemini 2.0 Flash** (gemini-2.0-flash): $0.10/$0.40 per 1M tokens - Production model with 1M context
+- **Gemini 2.0 Flash Lite** (gemini-2.0-flash-lite): $0.075/$0.30 per 1M tokens - Lightweight option
+
+**Gemini 1.5 Series (Stable):**
+- **Gemini 1.5 Pro** (gemini-1.5-pro): $1.25-$2.50/$5-$10 per 1M tokens - 2M context window
+- **Gemini 1.5 Flash** (gemini-1.5-flash): $0.075-$0.15/$0.30-$0.60 per 1M tokens
+- **Gemini 1.5 Flash 8B** (gemini-1.5-flash-8b): $0.0375-$0.075/$0.15-$0.30 per 1M tokens
+
+### Key Changes from Previous Versions
+
+1. **Pricing Structure**: All models now priced per **million tokens** (not thousands)
+2. **Massive Context Windows**: Some models support 1M+ tokens
+3. **Cached Input Discounts**: Up to 75% discount for cached content
+4. **Reasoning Models**: New category with specialized capabilities
+5. **Multimodal Support**: Vision, audio, and video capabilities
+6. **Significant Price Increases**: Premium models are much more expensive
+
+### Usage Examples
+
+#### Basic Text Generation with Updated Models
+```javascript
+// Using the latest GPT-4.1 model
+const response = await aiService.generate({
+  model: 'gpt-4.1',
+  messages: [
+    { role: 'user', content: 'Explain quantum computing in simple terms' }
+  ],
+  provider: 'openai'
+});
+
+// Using Claude 4 Sonnet
+const response = await aiService.generate({
+  model: 'claude-4-sonnet',
+  messages: [
+    { role: 'user', content: 'Write a detailed analysis of market trends' }
+  ],
+  provider: 'anthropic'
+});
+
+// Using Gemini 2.0 Flash with multimodal input
+const response = await aiService.generate({
+  model: 'gemini-2.0-flash',
+  messages: [
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: 'What do you see in this image?' },
+        { type: 'image', data: base64ImageData }
+      ]
+    }
+  ],
+  provider: 'google'
+});
+```
+
+#### Cost-Optimized Model Selection
+```javascript
+// Get budget-friendly recommendation
+const budgetModel = aiService.getProvider('openai').getRecommendedModel({
+  budget: 'budget',
+  needsVision: false,
+  contextLength: 50000
+});
+console.log(budgetModel); // 'gpt-4o-mini'
+
+// Get premium model for complex reasoning
+const premiumModel = aiService.getProvider('openai').getRecommendedModel({
+  budget: 'premium',
+  needsReasoning: true
+});
+console.log(premiumModel); // 'o3' or 'gpt-4.5-preview'
+
+// Cost estimation
+const costs = aiService.getProvider('openai').estimateCosts({
+  inputTokensPerMonth: 1000000,  // 1M tokens
+  outputTokensPerMonth: 250000,  // 250K tokens
+  cachedInputRatio: 0.3          // 30% cached
+});
+```
+
+### Provider-Specific Features
+
+#### OpenAI Features
+- **Cached Input Pricing**: Up to 75% discount for repeated prompts
+- **Batch Processing**: 50% discount for batch jobs
+- **Function Calling**: Available on all models
+- **Vision Support**: GPT-4.1, GPT-4o, GPT-4.5
+- **Reasoning Models**: o1, o3 series for complex problem-solving
+
+#### Anthropic Features
+- **Prompt Caching**: Up to 90% discount for cached content
+- **200K Context Window**: Standard across all models
+- **Tool Support**: Native function calling
+- **Constitutional AI**: Built-in safety features
+
+#### Google Features
+- **Context-Based Pricing**: Different rates for long vs short contexts
+- **Multimodal Support**: Text, images, audio, and video
+- **Massive Context**: Up to 2M tokens on some models
+- **Audio Pricing**: Separate rates for audio input

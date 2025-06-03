@@ -18,13 +18,13 @@ const FlowVisualizer = forwardRef(({ onError, layoutDirection: externalLayoutDir
   console.log('Are there use_cases?', agenticData?.use_cases?.length);
   
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [edges, setEdges, onEdgesState] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
   
   // Use our custom hooks for layout and data management
   const {
-    layoutDirection,
-    autoFitEnabled,
+    layoutDirection: internalLayoutDirection,
+    autoFitEnabled: internalAutoFitEnabled,
     lastUpdate,
     setAutoFitEnabled,
     toggleNodeExpansion,
@@ -33,13 +33,35 @@ const FlowVisualizer = forwardRef(({ onError, layoutDirection: externalLayoutDir
     handleLayoutChange
   } = useFlowLayout(nodes, setNodes, edges, setEdges);
   
-  // Load and transform data
-  useFlowData(agenticData, layoutDirection, setNodes, setEdges, onError);
+  // Use external props if provided, otherwise fall back to internal state
+  const activeLayoutDirection = externalLayoutDirection || internalLayoutDirection;
+  const activeAutoFitEnabled = externalAutoFitOnChange !== undefined ? externalAutoFitOnChange : internalAutoFitEnabled;
+  
+  // Load and transform data with the active layout direction
+  useFlowData(agenticData, activeLayoutDirection, setNodes, setEdges, onError);
+  
+  // Update internal auto-fit state when external prop changes
+  React.useEffect(() => {
+    if (externalAutoFitOnChange !== undefined && externalAutoFitOnChange !== internalAutoFitEnabled) {
+      setAutoFitEnabled(externalAutoFitOnChange);
+    }
+  }, [externalAutoFitOnChange, internalAutoFitEnabled, setAutoFitEnabled]);
+  
+  // Update internal layout direction when external prop changes
+  React.useEffect(() => {
+    if (externalLayoutDirection && externalLayoutDirection !== internalLayoutDirection) {
+      handleLayoutChange(externalLayoutDirection);
+    }
+  }, [externalLayoutDirection, internalLayoutDirection, handleLayoutChange]);
   
   // Expose methods to parent component via ref
   useImperativeHandle(ref, () => ({
     expandAllNodes,
-    collapseAllNodes
+    collapseAllNodes,
+    setLayoutDirection: handleLayoutChange,
+    getLayoutDirection: () => activeLayoutDirection,
+    setAutoFit: setAutoFitEnabled,
+    getAutoFit: () => activeAutoFitEnabled
   }));
 
   // Handle node clicks
@@ -74,7 +96,7 @@ const FlowVisualizer = forwardRef(({ onError, layoutDirection: externalLayoutDir
           onNodeClick={onNodeClick}
           selectedNode={selectedNode}
           lastUpdate={lastUpdate}
-          layoutDirection={layoutDirection}
+          layoutDirection={activeLayoutDirection}
           toggleNodeExpansion={toggleNodeExpansion}
         />
       )}

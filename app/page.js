@@ -16,6 +16,10 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   
+  // Layout direction state (restored)
+  const [layoutDirection, setLayoutDirection] = useState('LR'); // 'LR' for horizontal, 'TB' for vertical
+  const [autoFitEnabled, setAutoFitEnabled] = useState(false);
+  
   // Refs for flow control methods
   const flowVisualizerRef = useRef({
     expandAllNodes: () => {},
@@ -53,6 +57,15 @@ export default function Home() {
   
   const handleResetFlow = () => {
     resetData();
+  };
+
+  // Layout control handlers (restored)
+  const handleLayoutChange = (direction) => {
+    setLayoutDirection(direction);
+  };
+
+  const toggleAutoFit = () => {
+    setAutoFitEnabled(!autoFitEnabled);
   };
 
   return (
@@ -124,7 +137,9 @@ export default function Home() {
                   {JSON.stringify({
                     dataPresent: !!agenticData,
                     useCases: agenticData?.use_cases?.length || 0,
-                    firstUseCase: agenticData?.use_cases?.[0]?.name || 'None'
+                    firstUseCase: agenticData?.use_cases?.[0]?.name || 'None',
+                    layoutDirection,
+                    autoFitEnabled
                   }, null, 2)}
                 </pre>
               </details>
@@ -132,6 +147,25 @@ export default function Home() {
           )}
           
           <div className="header-tabs">
+            {/* Layout Controls (restored) */}
+            <div className="button-group">
+              <button 
+                className={`btn ${layoutDirection === 'LR' ? 'btn-primary' : 'btn-neutral'}`}
+                onClick={() => handleLayoutChange('LR')}
+                title="Horizontal Layout"
+              >
+                Horizontal Layout
+              </button>
+              <button 
+                className={`btn ${layoutDirection === 'TB' ? 'btn-primary' : 'btn-neutral'}`}
+                onClick={() => handleLayoutChange('TB')}
+                title="Vertical Layout"
+              >
+                Vertical Layout
+              </button>
+            </div>
+            
+            {/* Node Controls */}
             <div className="button-group">
               <button 
                 className="btn btn-neutral"
@@ -146,6 +180,16 @@ export default function Home() {
                 Expand All
               </button>
             </div>
+            
+            {/* Auto-fit Toggle */}
+            <button 
+              className={`btn ${autoFitEnabled ? 'btn-success' : 'btn-neutral'}`}
+              onClick={toggleAutoFit}
+              title={autoFitEnabled ? 'Auto-Fit: ON' : 'Auto-Fit: OFF'}
+            >
+              Auto-Fit: {autoFitEnabled ? 'ON' : 'OFF'}
+            </button>
+            
             <button 
               className="btn btn-danger"
               onClick={handleResetFlow}
@@ -178,6 +222,8 @@ export default function Home() {
               <FlowVisualizer 
                 onError={handleError} 
                 ref={flowVisualizerRef}
+                layoutDirection={layoutDirection}
+                autoFitOnChange={autoFitEnabled}
               />
             </ReactFlowProvider>
           </div>
