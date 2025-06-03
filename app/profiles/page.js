@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ProfileService } from '../services/profileService';
 import { demoDataService } from '../services/demoDataService';
 import ProfileWizard from './components/ProfileWizard';
+import { ArrowLeft, Plus, Users, BarChart, Building2, Briefcase, GraduationCap, Home, Truck, Zap, Store, TrendingUp, Eye, FileText } from 'lucide-react';
 
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState([]);
@@ -83,20 +84,7 @@ export default function ProfilesPage() {
             onClick={() => window.location.href = '/'}
             aria-label="Back to Flow Visualizer"
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5"></path>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
+            <ArrowLeft size={20} />
           </button>
           
           <div className="header-title-section">
@@ -109,10 +97,7 @@ export default function ProfilesPage() {
               className="btn btn-primary"
               onClick={handleCreateProfile}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 5v14"></path>
-                <path d="M5 12h14"></path>
-              </svg>
+              <Plus size={18} />
               New Profile
             </button>
           </div>
@@ -127,7 +112,7 @@ export default function ProfilesPage() {
           </div>
         ) : profiles.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">👥</div>
+            <Users size={48} className="empty-icon-lucide" />
             <h2>No Client Profiles Yet</h2>
             <p>Create your first client profile to start building comprehensive business intelligence and AI transformation roadmaps.</p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>
@@ -141,7 +126,7 @@ export default function ProfilesPage() {
                 className="btn btn-secondary btn-large"
                 onClick={loadDemoProfiles}
               >
-                📊 Load Demo Profiles
+                <BarChart size={20} style={{ marginRight: '0.5rem' }} /> Load Demo Profiles
               </button>
             </div>
           </div>
@@ -172,19 +157,18 @@ function ProfileCard({ profile, onView, onGenerateTimeline }) {
   };
 
   const getIndustryIcon = (industry) => {
-    const icons = {
-      'Technology': '💻',
-      'Healthcare': '🏥',
-      'Finance': '🏦',
-      'Manufacturing': '🏭',
-      'Retail': '🛍️',
-      'Education': '🎓',
-      'Real Estate': '🏢',
-      'Transportation': '🚛',
-      'Energy': '⚡',
-      'Other': '🏪'
-    };
-    return icons[industry] || '🏪';
+    switch (industry) {
+      case 'Technology': return <Briefcase size={24} />;
+      case 'Healthcare': return <Building2 size={24} />;
+      case 'Finance': return <BarChart size={24} />;
+      case 'Manufacturing': return <Building2 size={24} />;
+      case 'Retail': return <Store size={24} />;
+      case 'Education': return <GraduationCap size={24} />;
+      case 'Real Estate': return <Home size={24} />;
+      case 'Transportation': return <Truck size={24} />;
+      case 'Energy': return <Zap size={24} />;
+      default: return <Store size={24} />;
+    }
   };
 
   const getSizeLabel = (size) => {
@@ -246,16 +230,14 @@ function ProfileCard({ profile, onView, onGenerateTimeline }) {
           className="btn btn-secondary btn-small"
           onClick={onView}
         >
+          <Eye size={16} style={{ marginRight: '0.25rem' }} />
           View Details
         </button>
         <button 
           className="btn btn-primary btn-small"
           onClick={onGenerateTimeline}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="2" x2="12" y2="22"></line>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-          </svg>
+          <TrendingUp size={16} style={{ marginRight: '0.25rem' }} />
           AI Timeline
         </button>
       </div>

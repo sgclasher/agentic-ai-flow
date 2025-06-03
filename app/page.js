@@ -5,6 +5,7 @@ import useAgenticStore from './store/useAgenticStore';
 import ServiceNowConnector from './components/ServiceNowConnector';
 import FlowVisualizer from './components/FlowVisualizer';
 import { ReactFlowProvider } from 'reactflow';
+import { Users, TrendingUp, Info } from 'lucide-react';
 
 export default function Home() {
   const agenticData = useAgenticStore((state) => state.agenticData);
@@ -82,22 +83,14 @@ export default function Home() {
                 onClick={() => window.location.href = '/profiles'}
                 className="btn btn-primary"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
+                <Users size={18} />
                 Client Profiles
               </button>
               <button 
                 onClick={() => window.location.href = '/timeline'}
                 className="btn btn-success"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="2" x2="12" y2="22"></line>
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg>
+                <TrendingUp size={18} />
                 AI Timeline
               </button>
               <button 
@@ -118,11 +111,7 @@ export default function Home() {
                 className="btn btn-secondary btn-icon"
                 aria-label="Toggle debug info"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-                  <path d="M12 16v.01"></path>
-                  <path d="M12 8v4"></path>
-                </svg>
+                <Info size={18} />
               </button>
             </div>
           </div>

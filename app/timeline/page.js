@@ -9,6 +9,7 @@ import TimelineContent from './components/TimelineContent';
 import MetricsWidget from './components/MetricsWidget';
 import BusinessProfileModal from './components/BusinessProfileModal';
 import './timeline.css';
+import { MapPin, Building, Rocket, TrendingUp, Zap, Target } from 'lucide-react';
 
 export default function TimelinePage() {
   const { 
@@ -29,49 +30,49 @@ export default function TimelinePage() {
   const contentRef = useRef(null);
   const sectionRefs = useRef({});
   
-  // Define timelineSections before hooks that might use its length or content
+  // Generate timeline sections based on business journey
   const timelineSections = timelineData ? [
     {
       id: 'current-state',
       year: 'Today',
       title: 'Current State',
       subtitle: 'Where you are now',
-      icon: '📍'
+      icon: <MapPin size={24} />
     },
     {
       id: 'phase-1',
       year: 'Q1-Q2',
       title: 'Foundation',
       subtitle: 'Building AI capabilities',
-      icon: '🏗️'
+      icon: <Building size={24} />
     },
     {
       id: 'phase-2',
       year: 'Q3-Q4',
       title: 'Implementation',
       subtitle: 'Deploying solutions',
-      icon: '🚀'
+      icon: <Rocket size={24} />
     },
     {
       id: 'phase-3',
       year: 'Year 2',
       title: 'Expansion',
       subtitle: 'Scaling operations',
-      icon: '📈'
+      icon: <TrendingUp size={24} />
     },
     {
       id: 'phase-4',
       year: 'Year 3',
       title: 'Optimization',
       subtitle: 'Maximizing value',
-      icon: '⚡'
+      icon: <Zap size={24} />
     },
     {
       id: 'future-state',
-      year: 'Year 4',
+      year: 'Year 5',
       title: 'Future State',
       subtitle: 'Vision realized',
-      icon: '🎯'
+      icon: <Target size={24} />
     }
   ] : [];
   

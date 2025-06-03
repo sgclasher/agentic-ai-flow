@@ -1,31 +1,32 @@
 'use client';
 
 import React from 'react';
+import { CircleDollarSign, LineChart, Clock, AlertTriangle } from 'lucide-react';
 
 export default function MetricsCards({ summary }) {
   const metrics = [
     {
       label: 'Total Investment',
       value: summary.totalInvestment,
-      icon: '💰',
+      icon: <CircleDollarSign size={24} />,
       color: '#3498db',
     },
     {
       label: 'Expected ROI',
       value: summary.expectedROI,
-      icon: '📈',
+      icon: <LineChart size={24} />,
       color: '#10b981',
     },
     {
       label: 'Time to Value',
       value: summary.timeToValue,
-      icon: '⏱️',
+      icon: <Clock size={24} />,
       color: '#f39c12',
     },
     {
       label: 'Risk Level',
       value: summary.riskLevel,
-      icon: '⚡',
+      icon: <AlertTriangle size={24} />,
       color: '#ef4444',
     },
   ];
