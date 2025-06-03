@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ProfileService } from '../../services/profileService';
 import { markdownService } from '../../services/markdownService';
-import { demoDataService } from '../../services/demoDataService';
+import { DemoDataService } from '../../services/demoDataService';
 
 const WIZARD_STEPS = [
   { id: 'company', title: 'Company Overview', icon: '🏢' },
@@ -131,7 +131,7 @@ export default function ProfileWizard({ onComplete, onCancel, initialData }) {
   };
 
   const loadDemoData = (demoType) => {
-    const demoProfile = demoDataService.getDemoProfile(demoType);
+    const demoProfile = DemoDataService.getDemoProfile(demoType);
     setProfileData(demoProfile);
     setCurrentStep(0); // Reset to first step to see the data
   };

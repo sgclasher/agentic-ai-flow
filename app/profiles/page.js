@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ProfileService } from '../services/profileService';
-import { demoDataService } from '../services/demoDataService';
+import { DemoDataService } from '../services/demoDataService';
 import ProfileWizard from './components/ProfileWizard';
 import { ArrowLeft, Plus, Users, BarChart, Building2, Briefcase, GraduationCap, Home, Truck, Zap, Store, TrendingUp, Eye, FileText } from 'lucide-react';
 
@@ -32,7 +32,7 @@ export default function ProfilesPage() {
 
   const loadDemoProfiles = async () => {
     try {
-      const demoProfiles = demoDataService.getDemoProfiles();
+      const demoProfiles = DemoDataService.getDemoProfiles();
       
       // Convert demo data to saved profiles
       for (const demoData of demoProfiles) {

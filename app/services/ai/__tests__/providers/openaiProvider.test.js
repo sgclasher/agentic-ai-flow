@@ -13,8 +13,44 @@ global.fetch = jest.fn();
 describe('OpenAIProvider', () => {
   let provider;
 
+  // Helper function to set up successful fetch mock
+  const mockSuccessfulResponse = (responseData) => {
+    fetch.mockImplementation(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(responseData)
+    }));
+  };
+
+  // Helper function to set up streaming response mock
+  const mockStreamingResponse = () => {
+    const mockResponse = {
+      ok: true,
+      body: {
+        getReader: () => ({
+          read: jest.fn()
+            .mockResolvedValueOnce({
+              done: false,
+              value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":"Hello"}}]}\n\n')
+            })
+            .mockResolvedValueOnce({
+              done: false,
+              value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":" world"}}]}\n\n')
+            })
+            .mockResolvedValueOnce({
+              done: true
+            }),
+          releaseLock: jest.fn()
+        })
+      }
+    };
+    
+    fetch.mockImplementation(() => Promise.resolve(mockResponse));
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset fetch mock to clean state
+    fetch.mockReset();
     provider = new OpenAIProvider({
       apiKey: 'sk-test-key-12345'
     });
@@ -132,7 +168,8 @@ describe('OpenAIProvider', () => {
     });
 
     it('should handle API key validation', async () => {
-      fetch.mockResolvedValueOnce({
+      // Mock all retry attempts to return the same 401 error
+      fetch.mockResolvedValue({
         ok: false,
         status: 401,
         json: () => Promise.resolve({
@@ -150,9 +187,13 @@ describe('OpenAIProvider', () => {
     });
 
     it('should handle rate limiting', async () => {
-      fetch.mockResolvedValueOnce({
+      // Mock all retry attempts to return the same 429 error
+      fetch.mockResolvedValue({
         ok: false,
         status: 429,
+        headers: {
+          get: jest.fn().mockReturnValue(null)
+        },
         json: () => Promise.resolve({
           error: {
             message: 'Rate limit exceeded',
@@ -168,7 +209,8 @@ describe('OpenAIProvider', () => {
     });
 
     it('should handle server errors', async () => {
-      fetch.mockResolvedValueOnce({
+      // Mock all retry attempts to return the same 500 error
+      fetch.mockResolvedValue({
         ok: false,
         status: 500,
         json: () => Promise.resolve({
@@ -186,7 +228,8 @@ describe('OpenAIProvider', () => {
     });
 
     it('should handle network errors', async () => {
-      fetch.mockRejectedValueOnce(new Error('Network error'));
+      // Mock all retry attempts to throw the same network error
+      fetch.mockRejectedValue(new Error('Network error'));
 
       const messages = [{ role: 'user', content: 'Test' }];
 
@@ -196,18 +239,18 @@ describe('OpenAIProvider', () => {
   });
 
   describe('Request Formatting', () => {
-         it('should format messages correctly', async () => {
-       const mockResponse = {
-         id: 'chatcmpl-123',
-         model: 'gpt-4',
-         choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }],
-         usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 }
-       };
+    it('should format messages correctly', async () => {
+      const mockResponse = {
+        id: 'chatcmpl-123',
+        model: 'gpt-4',
+        choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }],
+        usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 }
+      };
 
-       fetch.mockResolvedValueOnce({
-         ok: true,
-         json: () => Promise.resolve(mockResponse)
-       });
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      });
 
       const messages = [
         { role: 'system', content: 'You are a helpful assistant.' },
@@ -224,18 +267,18 @@ describe('OpenAIProvider', () => {
       expect(requestBody.model).toBe('gpt-4o');
     });
 
-         it('should include custom options in request', async () => {
-       const mockResponse = {
-         id: 'chatcmpl-123',
-         model: 'gpt-3.5-turbo',
-         choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }],
-         usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 }
-       };
+    it('should include custom options in request', async () => {
+      const mockResponse = {
+        id: 'chatcmpl-123',
+        model: 'gpt-3.5-turbo',
+        choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }],
+        usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 }
+      };
 
-       fetch.mockResolvedValueOnce({
-         ok: true,
-         json: () => Promise.resolve(mockResponse)
-       });
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      });
 
       const messages = [{ role: 'user', content: 'Test' }];
       const options = {
@@ -259,27 +302,24 @@ describe('OpenAIProvider', () => {
       expect(requestBody.presence_penalty).toBe(0.1);
     });
 
-         it('should handle function calling', async () => {
-       const mockResponse = {
-         id: 'chatcmpl-123',
-         model: 'gpt-4',
-         choices: [{
-           message: {
-             content: null,
-             function_call: {
-               name: 'get_weather',
-               arguments: '{"location": "New York"}'
-             }
-           },
-           finish_reason: 'function_call'
-         }],
-         usage: { prompt_tokens: 20, completion_tokens: 10, total_tokens: 30 }
-       };
+    it('should handle function calling', async () => {
+      const mockResponse = {
+        id: 'chatcmpl-123',
+        model: 'gpt-4',
+        choices: [{
+          message: {
+            content: null,
+            function_call: {
+              name: 'get_weather',
+              arguments: '{"location": "New York"}'
+            }
+          },
+          finish_reason: 'function_call'
+        }],
+        usage: { prompt_tokens: 20, completion_tokens: 10, total_tokens: 30 }
+      };
 
-       fetch.mockResolvedValueOnce({
-         ok: true,
-         json: () => Promise.resolve(mockResponse)
-       });
+      mockSuccessfulResponse(mockResponse);
 
       const messages = [{ role: 'user', content: 'What\'s the weather in New York?' }];
       const options = {
@@ -389,28 +429,7 @@ describe('OpenAIProvider', () => {
     });
 
     it('should handle streaming responses', async () => {
-      // Mock streaming response
-      const mockResponse = {
-        ok: true,
-        body: {
-          getReader: () => ({
-            read: jest.fn()
-              .mockResolvedValueOnce({
-                done: false,
-                value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":"Hello"}}]}\n\n')
-              })
-              .mockResolvedValueOnce({
-                done: false,
-                value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":" world"}}]}\n\n')
-              })
-              .mockResolvedValueOnce({
-                done: true
-              })
-          })
-        }
-      };
-
-      fetch.mockResolvedValueOnce(mockResponse);
+      mockStreamingResponse();
 
       const messages = [{ role: 'user', content: 'Test streaming' }];
       const options = { stream: true };
@@ -424,12 +443,21 @@ describe('OpenAIProvider', () => {
 
   describe('Error Handling', () => {
     it('should sanitize API keys in error messages', async () => {
-      fetch.mockRejectedValueOnce(new Error('API key sk-test-key-12345 is invalid'));
+      // Clear any previous mocks and set up specific error
+      jest.clearAllMocks();
+      fetch.mockReset();
+      
+      // Mock a network error that contains the API key
+      const errorWithApiKey = new Error('API key sk-test-key-12345 is invalid');
+      fetch.mockRejectedValueOnce(errorWithApiKey);
+      fetch.mockRejectedValueOnce(errorWithApiKey); 
+      fetch.mockRejectedValueOnce(errorWithApiKey); // For all retry attempts
 
       const messages = [{ role: 'user', content: 'Test' }];
 
       try {
         await provider.generateCompletion(messages);
+        fail('Expected an error to be thrown');
       } catch (error) {
         expect(error.message).not.toContain('sk-test-key-12345');
         expect(error.message).toContain('[REDACTED]');
@@ -448,18 +476,15 @@ describe('OpenAIProvider', () => {
         .rejects.toThrow('Invalid response format');
     });
 
-         it('should handle empty response content', async () => {
-       const mockResponse = {
-         id: 'chatcmpl-123',
-         model: 'gpt-4',
-         choices: [{ message: { content: '' }, finish_reason: 'stop' }],
-         usage: { prompt_tokens: 10, completion_tokens: 0, total_tokens: 10 }
-       };
+    it('should handle empty response content', async () => {
+      const mockResponse = {
+        id: 'chatcmpl-123',
+        model: 'gpt-4',
+        choices: [{ message: { content: '' }, finish_reason: 'stop' }],
+        usage: { prompt_tokens: 10, completion_tokens: 0, total_tokens: 10 }
+      };
 
-       fetch.mockResolvedValueOnce({
-         ok: true,
-         json: () => Promise.resolve(mockResponse)
-       });
+      mockSuccessfulResponse(mockResponse);
 
       const messages = [{ role: 'user', content: 'Test' }];
       const result = await provider.generateCompletion(messages);
@@ -477,18 +502,18 @@ describe('OpenAIProvider', () => {
       expect(typeof provider.resetUsageStats).toBe('function');
     });
 
-         it('should track usage across multiple requests', async () => {
-       const mockResponse = {
-         id: 'chatcmpl-123',
-         model: 'gpt-4',
-         choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }],
-         usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 }
-       };
+    it('should track usage across multiple requests', async () => {
+      const mockResponse = {
+        id: 'chatcmpl-123',
+        model: 'gpt-4',
+        choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }],
+        usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 }
+      };
 
-       fetch.mockResolvedValue({
-         ok: true,
-         json: () => Promise.resolve(mockResponse)
-       });
+      fetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      });
 
       const messages = [{ role: 'user', content: 'Test' }];
 

@@ -46,6 +46,19 @@ global.localStorage = localStorageMock
 // Mock fetch for API calls
 global.fetch = jest.fn()
 
+// Mock TextEncoder/TextDecoder for streaming tests
+global.TextEncoder = class TextEncoder {
+  encode(input) {
+    return new Uint8Array(Buffer.from(input, 'utf8'))
+  }
+}
+
+global.TextDecoder = class TextDecoder {
+  decode(input) {
+    return Buffer.from(input).toString('utf8')
+  }
+}
+
 // Suppress console errors during tests (optional)
 // global.console.error = jest.fn()
 // global.console.warn = jest.fn() 

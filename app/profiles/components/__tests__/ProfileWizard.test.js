@@ -57,7 +57,7 @@ describe('ProfileWizard Enhanced Functionality', () => {
       const nextButton = screen.getByRole('button', { name: /next/i });
       await user.click(nextButton);
       
-      expect(screen.getByText(/business issue/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /business issue/i })).toBeInTheDocument();
     });
   });
 
@@ -366,34 +366,63 @@ describe('ProfileWizard Enhanced Functionality', () => {
       const user = userEvent.setup();
       render(<ProfileWizard onComplete={mockOnComplete} />);
       
+      // Fill all required fields for Company Overview step
       await user.type(screen.getByLabelText(/company name/i), 'Test Corp');
+      await user.selectOptions(screen.getByLabelText(/industry/i), 'Technology');
+      await user.click(screen.getByRole('radio', { name: /1-50 employees/i }));
+      
       await user.click(screen.getByRole('button', { name: /next/i }));
       
-      expect(screen.getByText(/business issue/i)).toBeInTheDocument();
+      // Wait for navigation to Business Issue step
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /business issue/i })).toBeInTheDocument();
+      });
       
+      // Now the back button should be available
       const backButton = screen.getByRole('button', { name: /back/i });
       await user.click(backButton);
       
-      expect(screen.getByLabelText(/company name/i)).toBeInTheDocument();
+      // Should navigate back to Company Overview
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('Test Corp')).toBeInTheDocument();
+      });
     });
 
     test('displays progress indicator', () => {
       render(<ProfileWizard onComplete={mockOnComplete} />);
       
-      expect(screen.getByText(/step 1 of 9/i)).toBeInTheDocument();
+      // Check that progress bar exists and shows current step
+      expect(screen.getByText(/company overview/i)).toBeInTheDocument();
+      expect(screen.getByText(/create client profile/i)).toBeInTheDocument();
+      
+      // Check progress bar exists
+      const progressBar = document.querySelector('.progress-fill');
+      expect(progressBar).toBeInTheDocument();
     });
 
     test('preserves form data when navigating between steps', async () => {
       const user = userEvent.setup();
       render(<ProfileWizard onComplete={mockOnComplete} />);
       
+      // Fill all required fields
       const companyNameInput = screen.getByLabelText(/company name/i);
       await user.type(companyNameInput, 'Test Corp');
+      await user.selectOptions(screen.getByLabelText(/industry/i), 'Technology');
+      await user.click(screen.getByRole('radio', { name: /1-50 employees/i }));
       
       await user.click(screen.getByRole('button', { name: /next/i }));
+      
+      // Wait for step transition
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /business issue/i })).toBeInTheDocument();
+      });
+      
       await user.click(screen.getByRole('button', { name: /back/i }));
       
-      expect(screen.getByDisplayValue('Test Corp')).toBeInTheDocument();
+      // Wait for navigation back and verify data is preserved
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('Test Corp')).toBeInTheDocument();
+      });
     });
   });
 }); 

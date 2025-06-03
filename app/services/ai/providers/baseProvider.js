@@ -209,7 +209,8 @@ export class BaseProvider {
       throw new Error('Provider returned null/undefined response');
     }
     
-    if (!response.content) {
+    // Content validation - allow null/empty content if there's a function call or tool call
+    if (response.content === undefined && !response.functionCall && !response.toolCalls) {
       throw new Error('Provider response missing content');
     }
     

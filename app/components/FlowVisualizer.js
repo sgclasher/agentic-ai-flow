@@ -18,7 +18,7 @@ const FlowVisualizer = forwardRef(({ onError, layoutDirection: externalLayoutDir
   console.log('Are there use_cases?', agenticData?.use_cases?.length);
   
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesState] = useEdgesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
   
   // Use our custom hooks for layout and data management

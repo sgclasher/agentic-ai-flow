@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import useBusinessProfileStore from '../store/useBusinessProfileStore';
 import { ProfileService } from '../services/profileService';
@@ -11,7 +11,7 @@ import MetricsWidget from './components/MetricsWidget';
 import './timeline.css';
 import { MapPin, Building, Rocket, TrendingUp, Zap, Target } from 'lucide-react';
 
-export default function TimelinePage() {
+function TimelinePageContent() {
   const { 
     businessProfile,
     timelineData,
@@ -289,5 +289,26 @@ export default function TimelinePage() {
       )}
 
     </div>
+  );
+}
+
+// Loading component for Suspense fallback
+function TimelineLoading() {
+  return (
+    <div className="timeline-container">
+      <div className="timeline-empty" style={{height: '100vh', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+        <div className="loading-spinner"></div>
+        <p style={{marginTop: '20px', fontSize: '1.2rem'}}>Loading Timeline...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main export with Suspense boundary
+export default function TimelinePage() {
+  return (
+    <Suspense fallback={<TimelineLoading />}>
+      <TimelinePageContent />
+    </Suspense>
   );
 } 
