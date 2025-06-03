@@ -17,7 +17,9 @@ export default function TimelinePage() {
     timelineData,
     isGenerating,
     generateTimeline,
-    hasValidProfile
+    hasValidProfile,
+    theme,
+    toggleTheme
   } = useBusinessProfileStore();
   
   const searchParams = useSearchParams();
@@ -197,12 +199,14 @@ export default function TimelinePage() {
   }
   
   return (
-    <div className="timeline-container">
+    <div className="timeline-container" data-timeline-theme={theme}>
       {/* Left Sidebar - Timeline Navigation */}
       <TimelineSidebar 
         sections={timelineSections}
         activeSection={activeSection}
         onSectionClick={handleSectionClick}
+        theme={theme}
+        onThemeToggle={toggleTheme}
       />
       
       {/* Main Content Area */}

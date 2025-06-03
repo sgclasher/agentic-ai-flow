@@ -2,7 +2,7 @@
 
 import React, { useLayoutEffect, useRef, useState } from 'react';
 
-export default function TimelineSidebar({ sections, activeSection, onSectionClick }) {
+export default function TimelineSidebar({ sections, activeSection, onSectionClick, theme, onThemeToggle }) {
   const navRef = useRef(null); // Ref for the main navigation container
   const itemRefs = useRef({}); // Refs for individual navigation items
   
@@ -75,7 +75,23 @@ export default function TimelineSidebar({ sections, activeSection, onSectionClic
   return (
     <aside className="timeline-sidebar">
       <div className="timeline-sidebar-header">
-        <h3>Your AI Journey</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3>Your AI Journey</h3>
+          <button 
+            className="btn-secondary"
+            onClick={onThemeToggle}
+            style={{ 
+              padding: 'var(--timeline-spacing-sm)', 
+              fontSize: '1.2rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--timeline-spacing-xs)'
+            }}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        </div>
       </div>
       
       <nav className="timeline-nav" ref={navRef}>

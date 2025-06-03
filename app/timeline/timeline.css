@@ -33,6 +33,27 @@
   --timeline-transition-duration: 0.2s;
 }
 
+/* Light theme variables */
+[data-timeline-theme="light"] {
+  --timeline-bg: #ffffff;
+  --timeline-content-bg: #f8fafc;
+  --timeline-sidebar-bg: #f1f5f9;
+  --timeline-widget-bg: rgba(255, 255, 255, 0.9);
+  --timeline-widget-border: rgba(0, 0, 0, 0.08);
+
+  --timeline-text-primary: #1e293b;
+  --timeline-text-secondary: #475569;
+  --timeline-text-muted: #94a3b8;
+
+  --timeline-border-primary: rgba(0, 0, 0, 0.1);
+  --timeline-border-secondary: rgba(0, 0, 0, 0.05);
+
+  --timeline-accent-blue: #2563eb;
+  --timeline-accent-green: #059669;
+  --timeline-accent-yellow: #d97706;
+  --timeline-accent-red: #dc2626;
+}
+
 /* Reset and Base Styles */
 .timeline-container * {
   box-sizing: border-box;

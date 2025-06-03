@@ -23,6 +23,7 @@ const useBusinessProfileStore = create(
       scenarioType: 'balanced', // 'conservative', 'balanced', 'aggressive'
       selectedYear: new Date().getFullYear(),
       expandedSections: {}, // Track which timeline sections are expanded
+      theme: 'dark', // 'dark' or 'light'
       
       // Generated timeline data
       timelineData: null,
@@ -45,6 +46,11 @@ const useBusinessProfileStore = create(
             ...state.expandedSections,
             [sectionId]: !state.expandedSections[sectionId]
           }
+        })),
+      
+      toggleTheme: () => 
+        set((state) => ({
+          theme: state.theme === 'dark' ? 'light' : 'dark'
         })),
       
       expandAllSections: () => {
