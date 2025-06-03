@@ -7,7 +7,7 @@ import { ProfileService } from '../services/profileService';
 import TimelineSidebar from './components/TimelineSidebar';
 import TimelineContent from './components/TimelineContent';
 import MetricsWidget from './components/MetricsWidget';
-import BusinessProfileModal from './components/BusinessProfileModal';
+
 import './timeline.css';
 import { MapPin, Building, Rocket, TrendingUp, Zap, Target } from 'lucide-react';
 
@@ -26,9 +26,9 @@ export default function TimelinePage() {
   const profileIdFromUrl = searchParams.get('profileId');
   
   const [activeSection, setActiveSection] = useState('current-state');
-  const [showProfileModal, setShowProfileModal] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isLoadingProfileAndTimeline, setIsLoadingProfileAndTimeline] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const contentRef = useRef(null);
   const sectionRefs = useRef({});
   
@@ -78,7 +78,12 @@ export default function TimelinePage() {
     }
   ] : [];
   
-  // Effect to initialize timeline or show modal
+  // Effect to set initialization state
+  useEffect(() => {
+    setIsInitializing(false);
+  }, []);
+
+  // Effect to initialize timeline from profile ID
   useEffect(() => {
     const initializeTimeline = async () => {
       if (profileIdFromUrl) {
@@ -87,28 +92,21 @@ export default function TimelinePage() {
           const loadedProfile = await ProfileService.getProfile(profileIdFromUrl);
           if (loadedProfile) {
             await generateTimeline(loadedProfile);
-            setShowProfileModal(false);
           } else {
-            console.warn(`Profile with ID ${profileIdFromUrl} not found. Opening modal.`);
-            setShowProfileModal(true);
+            console.warn(`Profile with ID ${profileIdFromUrl} not found.`);
           }
         } catch (error) {
           console.error("Error loading profile for timeline:", error);
-          setShowProfileModal(true);
         } finally {
           setIsLoadingProfileAndTimeline(false);
-        }
-      } else {
-        if (!hasValidProfile() || !timelineData) {
-          setShowProfileModal(true);
-        } else {
-          setShowProfileModal(false);
         }
       }
     };
 
-    initializeTimeline();
-  }, [profileIdFromUrl, generateTimeline, hasValidProfile, timelineData]);
+    if (!isInitializing) {
+      initializeTimeline();
+    }
+  }, [profileIdFromUrl, generateTimeline, isInitializing]);
   
   // Changed to useLayoutEffect for scroll handling to sync with paint
   useLayoutEffect(() => {
@@ -123,29 +121,50 @@ export default function TimelinePage() {
       setScrollProgress(Math.max(0, Math.min(100, progress || 0)));
 
       let newActiveSection = null;
-      const scrollThreshold = 50; // How many pixels from top to consider a section active
+      let maxVisibleArea = 0;
 
+      // Check if we're at the very bottom
       const bottomScrollBuffer = 20; 
       if (scrollTop + viewportHeight >= scrollHeight - bottomScrollBuffer) {
         newActiveSection = timelineSections.length > 0 ? timelineSections[timelineSections.length - 1].id : null;
       } else {
-        // Iterate from top to bottom to find the first section whose top part is visible
+        // Find the section with the most visible area in the viewport
         for (let i = 0; i < timelineSections.length; i++) {
           const sectionId = timelineSections[i].id;
           const element = sectionRefs.current[sectionId];
           if (element) {
             const elementTop = element.offsetTop;
             const elementBottom = elementTop + element.offsetHeight;
-
-            // A section is active if its top is near the viewport top, or if it's the first section visible
-            if (scrollTop + scrollThreshold >= elementTop && scrollTop + scrollThreshold < elementBottom) {
+            
+            // Calculate how much of this section is visible in the viewport
+            const visibleTop = Math.max(elementTop, scrollTop);
+            const visibleBottom = Math.min(elementBottom, scrollTop + viewportHeight);
+            const visibleArea = Math.max(0, visibleBottom - visibleTop);
+            
+            // If this section has more visible area than any previous section, make it active
+            if (visibleArea > maxVisibleArea) {
+              maxVisibleArea = visibleArea;
               newActiveSection = sectionId;
-              break; 
             }
-            // Special case for the first section when scrolling up towards it
-            if (i === 0 && scrollTop < elementTop + scrollThreshold) {
-               newActiveSection = sectionId;
-               break;
+          }
+        }
+        
+        // Fallback: if no section has significant visible area, use proximity to viewport center
+        if (!newActiveSection || maxVisibleArea < 50) {
+          const viewportCenter = scrollTop + viewportHeight / 2;
+          let minDistance = Infinity;
+          
+          for (let i = 0; i < timelineSections.length; i++) {
+            const sectionId = timelineSections[i].id;
+            const element = sectionRefs.current[sectionId];
+            if (element) {
+              const elementCenter = element.offsetTop + element.offsetHeight / 2;
+              const distance = Math.abs(viewportCenter - elementCenter);
+              
+              if (distance < minDistance) {
+                minDistance = distance;
+                newActiveSection = sectionId;
+              }
             }
           }
         }
@@ -180,12 +199,7 @@ export default function TimelinePage() {
     }
   };
   
-  const handleProfileSubmit = async (profile) => {
-    setIsLoadingProfileAndTimeline(true);
-    await generateTimeline(profile);
-    setShowProfileModal(false);
-    setIsLoadingProfileAndTimeline(false);
-  };
+
   
   if (profileIdFromUrl && isLoadingProfileAndTimeline) {
     return (
@@ -211,26 +225,58 @@ export default function TimelinePage() {
       
       {/* Main Content Area */}
       <div className="timeline-main" ref={contentRef}>
-        {timelineData && !isLoadingProfileAndTimeline ? (
+        {isInitializing ? (
+          // Show loading state while determining if we have a profile ID
+          <div className="timeline-empty">
+            <div className="loading-spinner"></div>
+            <h2>Loading...</h2>
+          </div>
+        ) : timelineData && !isLoadingProfileAndTimeline ? (
+          // Show the actual timeline
           <TimelineContent 
             sections={timelineSections}
             timelineData={timelineData}
             sectionRefs={sectionRefs}
             businessProfile={businessProfile}
           />
-        ) : (!profileIdFromUrl && !showProfileModal && !isGenerating && !isLoadingProfileAndTimeline) ? (
+        ) : profileIdFromUrl ? (
+          // Show loading state when we have a profile ID but no timeline yet
+          <div className="timeline-empty">
+            <div className="loading-spinner"></div>
+            <h2>Loading Your AI Timeline</h2>
+            <p>Generating personalized roadmap from your profile...</p>
+          </div>
+        ) : isGenerating ? (
+          // Show loading state when generating timeline from existing profile
+          <div className="timeline-empty">
+            <div className="loading-spinner"></div>
+            <h2>Generating AI Timeline</h2>
+            <p>Creating your personalized transformation roadmap...</p>
+          </div>
+        ) : (
+          // Show welcome message only when no profile ID and not generating
           <div className="timeline-empty">
             <h2>Welcome to Your AI Transformation Timeline</h2>
-            <p>Please complete your business profile to generate a personalized roadmap.</p>
-            <button 
-              className="btn-primary"
-              onClick={() => setShowProfileModal(true)}
-              disabled={isGenerating}
-            >
-              Get Started
-            </button>
+            <p>Create a client profile first to generate a personalized AI transformation roadmap.</p>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>
+              <button 
+                className="btn-primary"
+                onClick={() => window.location.href = '/profiles'}
+              >
+                Create Client Profile
+              </button>
+              {hasValidProfile() && (
+                <button 
+                  className="btn-secondary"
+                  onClick={() => generateTimeline()}
+                  disabled={isGenerating}
+                >
+                  Generate Timeline from Current Profile
+                </button>
+              )}
+            </div>
           </div>
-        ) : null}
+        )}
       </div>
       
       {/* Right Sidebar - Metrics Widget */}
@@ -241,18 +287,7 @@ export default function TimelinePage() {
           scrollProgress={scrollProgress}
         />
       )}
-      
-      {/* Business Profile Modal */}
-      {showProfileModal && (
-        <BusinessProfileModal
-          onClose={() => {
-            setShowProfileModal(false);
-          }}
-          onSubmit={handleProfileSubmit}
-          isGenerating={isGenerating}
-          initialData={businessProfile}
-        />
-      )}
+
     </div>
   );
 } 
