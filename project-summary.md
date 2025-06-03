@@ -1,3 +1,914 @@
+(Files content cropped to 300k characters, download full ingest to see more)
+================================================
+FILE: README.md
+================================================
+# Agentic AI Flow Visualizer & Business AI Advisory Platform
+
+**🤖 AI Assistant Context:** This is a comprehensive business AI advisory platform built with Next.js, featuring ServiceNow agentic AI flow visualization, interactive AI transformation timelines, and client profile management with Value Selling Framework. The platform serves as a sophisticated lead-generation tool for AI advisory services, combining technical visualization capabilities with comprehensive business intelligence collection and strategic planning tools. Core technologies: Next.js 15, React 19, ReactFlow, Zustand, Dagre. Design inspired by ai-2027.com with modern dark themes and floating UI elements.
+
+**🎯 Current State:** Fully functional three-feature platform with ServiceNow visualization, AI transformation timeline, and comprehensive client profile management system. Recent major additions include ProfileWizard with 8-step Value Selling Framework, structured markdown profile storage, realistic demo data system, and automatic timeline generation from client profiles. Architecture includes robust service layers (ProfileService, MarkdownService, DemoDataService) and comprehensive business intelligence capture. Ready for production testing and client demos.
+
+**🚀 Next Steps:** Comprehensive testing strategy implementation using TDD, lead capture integration, industry-specific templates, export capabilities, and multi-platform connectors (Salesforce, Microsoft). Focus on converting profile users into advisory clients through sophisticated business intelligence and automated timeline generation.
+
+## Project Overview
+
+A Next.js application that serves three primary functions:
+
+1. **ServiceNow Agentic AI Visualizer**: Transform ServiceNow agentic AI data into interactive flow diagrams
+2. **AI Transformation Timeline**: Business advisory tool that generates personalized AI adoption roadmaps  
+3. **Client Profile Management**: Comprehensive business intelligence system using Value Selling Framework to create client "digital twins"
+
+The platform positions itself as a sophisticated lead-generation tool for AI advisory services, providing immediate value while capturing comprehensive business intelligence and converting prospects into advisory clients.
+
+## Core Features
+
+### 🔄 **ServiceNow Flow Visualization**
+- **Interactive Node Graph**: Drag, zoom, and pan through complex AI workflows
+- **Hierarchical Exploration**: Expand/collapse nodes to explore use cases → agents → tools
+- **Dynamic Layouts**: Toggle between horizontal (LR) and vertical (TB) orientations
+- **Real-time Collaboration**: Multiple layout options and live data refresh
+- **Secure Integration**: Direct connection to ServiceNow instances with credential management
+
+### 📈 **AI Transformation Timeline** (New Major Feature)
+- **Business Profile Collection**: Multi-step form capturing company details, AI maturity, goals
+- **Interactive Timeline**: Scroll-based journey through 6 transformation phases
+- **Floating Metrics Widget**: Real-time KPIs that update based on scroll position (ai-2027.com inspired)
+- **Dynamic Content Generation**: Personalized roadmaps based on industry and company size
+- **ROI Projections**: Detailed investment and return calculations
+- **Mobile-Responsive Design**: Optimized for all device types
+
+### 👥 **Client Profile Management** (New Major Feature)
+- **ProfileWizard**: 8-step guided form implementing Value Selling Framework methodology
+- **Business Intelligence Capture**: Company overview, strategic issues, quantified impact analysis
+- **Value Selling Framework**: Business Issues → Problems → Impact → Solution → Decision → AI Assessment
+- **Structured Markdown Storage**: Prevents AI hallucinations while maintaining human readability
+- **Demo Data System**: 4 realistic industry profiles (Technology, Manufacturing, Healthcare, Finance)
+- **Automatic Timeline Generation**: Client profiles automatically populate personalized AI roadmaps
+- **Opportunity Assessment**: AI readiness scoring and automation opportunity identification
+
+### 🎨 **Design System (ai-2027.com Inspired)**
+- **Dark Theme**: Modern #0a0e27 background with gradient accents
+- **Floating UI Elements**: Metrics widget positioned absolutely with backdrop blur
+- **Smooth Animations**: Scroll-based progress indicators and smooth transitions
+- **Responsive Layout**: 2-column design with floating widget on desktop, stacked on mobile
+- **Visual Storytelling**: Phase-based progression with icons and visual hierarchy
+
+## Architecture Overview
+
+### **Application Structure**
+```
+agentic-ai-flow/
+├── app/
+│   ├── components/                 # Core visualization components
+│   │   ├── FlowVisualizer.js      # Main ServiceNow flow renderer
+│   │   ├── ServiceNowConnector.js # Authentication and data fetching
+│   │   └── nodes/                 # Custom node types
+│   │       ├── AgentNode.js       # AI agent visualization
+│   │       ├── ToolNode.js        # Tool/integration nodes
+│   │       ├── TriggerNode.js     # Event trigger nodes
+│   │       └── UseCaseNode.js     # Business use case nodes
+│   ├── profiles/                  # Client Profile Management (NEW)
+│   │   ├── page.js               # Profile dashboard & management
+│   │   └── components/           
+│   │       └── ProfileWizard.js  # 8-step Value Selling Framework form
+│   ├── timeline/                  # AI Timeline feature
+│   │   ├── page.js               # Main timeline page
+│   │   ├── timeline.css          # Complete timeline styling
+│   │   └── components/           
+│   │       ├── BusinessProfileModal.js    # Multi-step business form
+│   │       ├── TimelineSidebar.js        # Left navigation
+│   │       ├── TimelineContent.js        # Main scrollable content
+│   │       ├── MetricsWidget.js          # Floating metrics (ai-2027 style)
+│   │       └── ...
+│   ├── services/                  # Business Logic Layer (NEW)
+│   │   ├── profileService.js     # Profile CRUD, timeline integration
+│   │   ├── markdownService.js    # Structured markdown conversion
+│   │   ├── demoDataService.js    # Realistic demo profile data
+│   │   └── timelineService.js    # Timeline generation business logic
+│   ├── api/                      # API Routes
+│   │   ├── servicenow/           # ServiceNow integration
+│   │   │   ├── fetch-agentic-data/ # Data retrieval
+│   │   │   └── get-credentials/    # Credential management
+│   │   └── timeline/             # Timeline API (NEW)
+│   │       └── generate/         # Profile-to-timeline generation
+│   ├── store/                    # State management
+│   │   ├── useAgenticStore.js    # ServiceNow data & flow state
+│   │   └── useBusinessProfileStore.js # Timeline data & business profiles
+│   └── utils/                    # Utility functions
+│       ├── layoutGraph.js        # Dagre layout engine
+│       ├── transformAgenticData.js # Data transformation
+│       ├── nodeUtils.js          # Node utilities & URL generation
+│       └── validation.js         # Input validation & security (NEW)
+└── public/images/               # Static assets
+```
+
+### **Key Technical Decisions**
+
+#### **Layout Evolution**
+- **Before**: 3-column fixed layout (sidebar | content | widget)
+- **After**: 2-column with floating widget (sidebar | content + floating widget)
+- **Benefits**: More content space, modern UI, ai-2027.com aesthetic
+
+#### **Service Layer Architecture** (NEW)
+- **ProfileService**: Profile CRUD operations, AI timeline integration, opportunity analysis
+- **MarkdownService**: Converts profile data to/from structured markdown (prevents AI hallucinations)
+- **DemoDataService**: Provides 4 realistic industry profiles for testing and demonstrations
+- **TimelineService**: Business logic for generating AI adoption roadmaps from profile data
+- **Separation of Concerns**: Business logic separated from UI components and state management
+
+#### **State Management Strategy**
+- **useAgenticStore**: ServiceNow data, connection details, flow visualization state
+- **useBusinessProfileStore**: Business profiles, timeline data, scenario planning
+- **Local Storage**: Client profiles persisted locally (ready for backend integration)
+- **Separation of Concerns**: Clear boundaries between visualization, advisory, and profile features
+
+#### **Component Architecture**
+- **Floating Metrics Widget**: `position: fixed` with backdrop blur and responsive behavior
+- **Scroll-Spy Navigation**: Timeline sidebar updates based on scroll position
+- **Dynamic Content Generation**: Timeline phases generated based on business profile
+- **Error Boundary Implementation**: Robust error handling throughout
+
+## Recent Major Improvements
+
+### **🎨 UI/UX Overhaul (ai-2027.com Inspired)**
+- **Refined Dark Theme & Visual Language:** Implemented an updated dark theme with a sophisticated color palette, consistent spacing system, and typography for a premium enterprise aesthetic across the AI Transformation Timeline.
+- **Modernized Timeline Navigation:** Overhauled the `TimelineSidebar` with icon-less navigation dots, a dynamic progress bar precisely connected to the active section, and improved visual hierarchy.
+- **Polished Metrics Visualization:** Enhanced the floating `MetricsWidget` with a crisper progress ring, clearer trend indicators, and refined styling to align with the premium design.
+- **Streamlined User Experience:** Improved page loading logic for the timeline, ensuring smoother transitions and more intentional display of profile forms.
+- **Responsive Breakpoints**: Optimized for 1400px, 1200px, and 768px breakpoints
+- **Smooth Animations**: Enhanced scroll interactions and component transitions
+
+### **👥 Client Profile Management System** (NEW)
+- **ProfileWizard Implementation**: 8-step guided form with Value Selling Framework
+- **Service Layer Architecture**: Robust business logic separation (ProfileService, MarkdownService, DemoDataService)
+- **Demo Data System**: 4 complete industry profiles (TechFlow Solutions, PrecisionParts Manufacturing, Regional Medical Center, Community Trust Bank)
+- **Structured Markdown Storage**: Data integrity and AI hallucination prevention
+- **Automatic Timeline Integration**: Profile data automatically populates AI roadmaps
+- **Security Enhancements**: Input validation, rate limiting, and secure data handling
+
+### **🔧 Technical Enhancements**
+- **MetricsWidget Bug Fixes**: Resolved `TypeError` with phase title mapping
+- **Improved Error Handling**: Added optional chaining and fallback values throughout
+- **Performance Optimizations**: Minimized re-renders and optimized component updates
+- **Code Organization**: Modular component structure with clear separation of concerns
+- **Validation Layer**: Comprehensive input validation and sanitization across all forms
+
+### **📊 Timeline Feature Completion**
+- **6-Phase Journey**: Current State → Foundation → Implementation → Expansion → Optimization → Future State
+- **Business Profile Integration**: Company size, industry, AI maturity level collection
+- **ROI Calculations**: Investment projections from $250K to $3M+ with 425% total ROI
+- **Dynamic Metrics**: Real-time KPIs that change based on current timeline section
+
+## Data Flow & Integration
+
+### **ServiceNow Integration**
+1. **Secure Authentication**: API routes proxy all ServiceNow requests
+2. **Data Transformation**: Convert ServiceNow JSON to React Flow nodes/edges
+3. **Visual Rendering**: Dagre layout algorithm positions nodes intelligently
+4. **Interactive Features**: Node expansion/collapse with real-time layout updates
+
+### **Timeline Generation**
+1. **Profile Collection**: Multi-step modal captures business requirements
+2. **Data Processing**: Generate phase-specific initiatives, technologies, outcomes
+3. **Visual Presentation**: Scroll-based journey with floating metrics
+4. **Lead Capture**: Ready for contact form integration and follow-up
+
+### **Profile Integration** (NEW)
+1. **Value Selling Framework Collection**: 8-step ProfileWizard captures comprehensive business intelligence
+2. **Structured Data Storage**: MarkdownService converts to structured format preventing AI hallucinations
+3. **Opportunity Analysis**: ProfileService identifies automation opportunities and calculates ROI
+4. **Automatic Timeline Generation**: Profile data automatically populates personalized AI roadmaps
+5. **Demo Data Ready**: DemoDataService provides realistic testing scenarios across 4 industries
+
+## Getting Started
+
+### **Prerequisites**
+- Node.js 18+
+- ServiceNow instance with Agentic AI framework (for visualization features)
+- Modern browser (Chrome, Firefox, Safari, Edge)
+
+### **Installation**
+```bash
+# Clone the repository
+git clone <repository-url>
+cd agentic-ai-flow
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+### **Usage Options**
+
+#### **Option 1: ServiceNow Visualization**
+1. Navigate to `http://localhost:3000`
+2. Enter ServiceNow instance details
+3. Connect and explore agentic AI flows
+4. Use layout controls and node interactions
+
+#### **Option 2: AI Timeline Planning**
+1. Click "AI Timeline" button or go to `/timeline`
+2. Complete business profile form
+3. Generate personalized AI transformation roadmap
+4. Explore phases and metrics
+
+#### **Option 3: Client Profile Management** (NEW)
+1. Click "Client Profiles" button or go to `/profiles`
+2. Create new profile or load demo data (4 industry scenarios available)
+3. Complete 8-step Value Selling Framework assessment
+4. Generate automatic AI timeline from profile data
+5. View comprehensive business intelligence and opportunity analysis
+
+## Business Model & Lead Generation
+
+### **Current Positioning**
+- **Free Value-First Tool**: Timeline and profile assessment provide immediate business value
+- **Comprehensive Lead Qualification**: Value Selling Framework captures detailed business intelligence
+- **Client Digital Twins**: Structured markdown profiles create comprehensive client understanding
+- **Advisory Upsell**: Natural progression from assessment to consulting engagement
+- **Market Positioning**: Bridges technical capability with sophisticated business strategy and sales methodology
+
+### **Ready for Integration**
+- **Contact Forms**: Add lead capture at timeline completion
+- **Email Marketing**: Integrate with SendGrid, Mailchimp for nurture campaigns
+- **CRM Integration**: Connect to Salesforce, HubSpot for lead management
+- **Analytics**: Google Analytics ready for user behavior tracking
+
+## Next Development Priorities
+
+### **🎯 Immediate (1-2 weeks)**
+1. **Comprehensive Testing Strategy**: TDD implementation for ProfileService, DemoDataService, MarkdownService
+2. **Lead Capture Integration**: Contact forms and email collection from profile assessments
+3. **Export Capabilities**: PDF generation for timeline roadmaps and profile summaries
+4. **Analytics Implementation**: User engagement and conversion tracking across all three features
+
+### **🚀 Short-term (1-2 months)**
+1. **Industry Templates**: Pre-built timelines for healthcare, finance, manufacturing
+2. **Enhanced ROI Calculator**: More sophisticated financial modeling
+3. **Multi-scenario Planning**: Conservative vs. aggressive vs. innovative paths
+
+### **🌟 Long-term (3-6 months)**
+1. **Multi-platform Connectors**: Salesforce, Microsoft 365, Azure integration
+2. **AI-Powered Recommendations**: Smart suggestions based on industry patterns
+3. **Digital Twin Capabilities**: Business process mapping and optimization
+
+## Technical Considerations
+
+### **Performance**
+- React Flow optimized for large datasets
+- Zustand for minimal re-renders
+- CSS optimizations for smooth animations
+- Mobile-responsive design patterns
+
+### **Security**
+- Server-side credential handling
+- API route proxy layer
+- No client-side authentication exposure
+- Secure data transformation pipeline
+
+### **Scalability**
+- Modular component architecture
+- Extensible state management
+- Clear separation between visualization and advisory features
+- Ready for multi-tenant deployment
+
+## Development Guidelines
+
+### **Code Standards**
+- Functional components with hooks
+- Consistent naming conventions
+- Modular 200-line component limit
+- Comprehensive error handling
+- JSDoc for complex functions
+
+### **Testing Strategy**
+- Unit tests for utility functions
+- Integration tests for API routes
+- Component tests for user interactions
+- E2E tests for critical flows
+
+### **Deployment Considerations**
+- Next.js optimized build
+- Environment variable management
+- CDN-ready static assets
+- Production monitoring ready
+
+---
+
+**📞 Ready for Business Development**: The platform successfully combines technical demonstration, strategic planning tools, and comprehensive business intelligence collection, providing a sophisticated foundation for AI consulting lead generation and client engagement. With the addition of the Value Selling Framework-based profile system, the platform now captures the depth of business intelligence needed for high-value advisory relationships while providing immediate value through automated timeline generation and opportunity analysis.
+
+**🧪 Testing Status**: Comprehensive test suite implemented with 45 tests passing (ProfileService: 25, MarkdownService: 20). TDD approach established for future development. See TESTING_GUIDE.md for complete testing documentation and working with AI assistants.
+
+
+
+================================================
+FILE: CLIENT_PROFILE_SYSTEM.md
+================================================
+# Client Profile Management System
+
+## Overview
+
+The Client Profile Management System is a comprehensive solution for capturing business intelligence through guided forms and storing it as structured markdown files. This system helps consultants create detailed client "digital twins" using the Value Selling Framework, with the markdown profiles later parsed by AI to suggest automation opportunities and generate strategic recommendations.
+
+## Key Features
+
+### ✅ **Anti-Hallucination Design**
+- **Structured Markdown Storage**: All client data is stored in a standardized markdown format that prevents AI hallucinations
+- **Guided Data Capture**: Step-by-step wizard ensures consistent, complete data collection
+- **Validation & Parsing**: Built-in validation ensures data integrity and parseability
+
+### ✅ **Value Selling Framework Implementation**
+- **Complete Sales Methodology**: Implements all 6 stages of the Value Selling Framework
+- **Business Issue Identification**: Captures C-level strategic priorities and concerns
+- **Problem/Challenge Mapping**: Department-specific operational issues with quantified impact
+- **Root Cause Analysis**: Systematic identification of underlying causes
+- **Impact Quantification**: Hard and soft cost calculations with automatic totaling
+- **Solution Requirements**: Capability mapping and differentiation requirements
+- **Decision Process Mapping**: Stakeholder identification and buying process documentation
+
+### ✅ **AI/Automation Assessment**
+- **Technology Landscape**: Current ERP, CRM, collaboration tools assessment
+- **AI Readiness Scoring**: 5-criteria scoring system (0-10 total)
+- **Opportunity Prioritization**: Structured opportunity assessment with impact/effort matrix
+- **Quick Wins Identification**: 0-6 month implementation opportunities
+
+### ✅ **Comprehensive Testing**
+- **60% Test Coverage Threshold**: Branch, function, line, and statement coverage
+- **Component Testing**: React Testing Library integration tests
+- **Service Testing**: Complete ProfileService and MarkdownService test suites
+- **TDD Methodology**: Tests written first, code implemented to pass
+
+## System Architecture
+
+```
+Client Profile System
+├── Frontend Components
+│   ├── ProfileWizard (9-step guided form)
+│   ├── ProfileViewer (markdown preview)
+│   └── ProfileManager (CRUD operations)
+├── Services Layer
+│   ├── ProfileService (business logic)
+│   ├── MarkdownService (parsing/generation)
+│   └── TimelineService (AI integration)
+├── Data Storage
+│   ├── Structured JSON (form data)
+│   └── Markdown Files (client profiles)
+└── Testing Infrastructure
+    ├── Unit Tests (services)
+    ├── Integration Tests (components)
+    └── E2E Tests (user flows)
+```
+
+## Profile Structure
+
+### 1. Company Overview
+- Company name, industry, size
+- Annual revenue, employee count
+- Primary location
+
+### 2. Value Selling Framework
+
+#### Business Issue (Strategic Level)
+- Revenue Growth Pressure
+- Cost Reduction Mandate  
+- Operational Efficiency
+- Customer Experience
+- Digital Transformation
+- Regulatory Compliance
+- Competitive Pressure
+
+#### Problems/Challenges (Operational Level)
+**Finance Department:**
+- Manual invoice processing timelines
+- Error rates in financial processes
+- Month-end close duration
+
+**HR Department:**
+- Employee onboarding timelines
+- Manual resume screening
+- Employee turnover rates
+
+**IT Department:**
+- Ticket resolution times
+- Manual intervention requirements
+- System provisioning duration
+
+**Customer Service:**
+- Response times
+- First contact resolution rates
+- Customer satisfaction scores
+
+**Operations:**
+- Process cycle times
+- Manual process percentages
+- Quality/error rates
+
+#### Root Cause Analysis
+- Legacy systems with poor integration
+- Manual, paper-based processes
+- Lack of real-time data visibility
+- Insufficient automation
+- Skills gap in technology
+- Siloed departments
+
+#### Impact Quantification
+**Hard Costs (Annual):**
+- Labor costs from manual processes
+- Error correction costs
+- System downtime costs
+- Compliance penalties/risk
+- **Auto-calculated total**
+
+**Soft Costs:**
+- Employee frustration/turnover impact
+- Customer satisfaction decline
+- Competitive disadvantage
+- Missed opportunities/growth
+
+#### Solution Requirements
+**Capabilities Needed:**
+- Automate document processing
+- Streamline approval workflows
+- Provide real-time dashboards
+- Integrate disconnected systems
+- Enable self-service capabilities
+- Improve data accuracy
+- Reduce manual handoffs
+
+**Differentiation Requirements:**
+- Industry-specific expertise
+- Rapid implementation (< 6 months)
+- No-code/low-code platform
+- Strong integration capabilities
+- Proven ROI in similar companies
+- Comprehensive support/training
+
+**Value/ROI Expectations:**
+- Target cost reduction
+- Target efficiency improvement
+- Expected payback period
+- Target ROI percentage
+- Time to first value
+
+**Success Metrics:**
+- Process cycle time reduction
+- Error rate improvement
+- Cost per transaction reduction
+- Employee productivity increase
+- Customer satisfaction improvement
+- Revenue impact
+
+#### Decision Process
+**Key Decision Makers:**
+- Economic Buyer (name, title, budget authority)
+- Technical Buyer (name, title)
+- Champion (name, title)
+- Influencers
+
+**Buying Process:**
+- Decision timeline
+- Budget cycle
+- Evaluation criteria
+- Other requirements
+
+**Risks of Inaction:**
+- Continued cost escalation (annual)
+- Employee attrition risk
+- 3-year cost of inaction
+- Competitive disadvantage
+- Customer satisfaction decline
+- Regulatory compliance risk
+
+### 3. AI/Automation Opportunity Assessment
+
+#### Current Technology Landscape
+- Primary ERP system
+- CRM system
+- Collaboration tools
+- Integration maturity level
+- Data quality assessment
+- Current automation description
+
+#### AI Readiness Score (0-10)
+- Data availability and quality (0-2)
+- System integration capability (0-2)
+- Technical team readiness (0-2)
+- Leadership support (0-2)
+- Change management capability (0-2)
+
+#### Top AI Opportunities (Prioritized)
+For each opportunity:
+- Name and description
+- Department
+- Specific process
+- Current state
+- Proposed AI solution
+- Estimated annual impact ($)
+- Implementation effort (Low/Medium/High)
+- Timeline
+- Priority score (1-10)
+
+#### Quick Wins (0-6 months)
+- Opportunity name
+- Estimated impact ($)
+- Implementation timeline
+
+## Usage Guide
+
+### For Consultants
+
+#### Creating a New Client Profile
+1. Navigate to `/profiles`
+2. Click "Create New Profile"
+3. Complete the 9-step wizard:
+   - Company Overview
+   - Business Issue
+   - Problems/Challenges
+   - Root Cause
+   - Impact
+   - Solution
+   - Decision
+   - AI Assessment
+   - Summary
+
+#### Best Practices
+- **Be Specific**: Use actual numbers and timeframes when possible
+- **Quantify Everything**: Always try to attach dollar amounts and percentages
+- **Document Sources**: Note where information came from in the notes section
+- **Regular Updates**: Revisit profiles as new information becomes available
+- **Stakeholder Validation**: Review completed profiles with client stakeholders
+
+### For AI Systems
+
+#### Reading Client Profiles
+```javascript
+import { markdownService } from './services/markdownService';
+
+// Parse existing markdown profile
+const profileData = markdownService.parseMarkdown(markdownContent);
+
+// Access structured data
+const companyName = profileData.companyName;
+const businessIssues = profileData.valueSellingFramework.businessIssues;
+const aiOpportunities = profileData.aiOpportunityAssessment.opportunities;
+```
+
+#### Generating Recommendations
+The structured markdown format enables AI systems to:
+- Identify automation opportunities based on manual processes
+- Calculate ROI based on quantified impacts
+- Suggest implementation priorities based on effort/impact scores
+- Generate proposal content using stakeholder information
+- Create timeline recommendations based on decision timelines
+
+## Technical Implementation
+
+### Core Components
+
+#### ProfileWizard.js
+Multi-step form component with:
+- 9 guided steps
+- Form validation
+- Data persistence
+- Progress tracking
+- Navigation controls
+- Auto-save functionality
+
+#### MarkdownService.js
+Service for markdown operations:
+- `generateMarkdown()` - Convert form data to structured markdown
+- `parseMarkdown()` - Parse markdown back to structured data
+- `extractSection()` - Extract specific sections
+- `sanitizeString()` - Clean data for markdown format
+
+#### ProfileService.js
+Business logic service:
+- `createProfile()` - Create new profiles
+- `updateProfile()` - Update existing profiles  
+- `generateTimelineFromProfile()` - AI integration
+- `calculateAIMaturity()` - Readiness scoring
+- `identifyRiskFactors()` - Risk assessment
+
+### Testing Strategy
+
+#### Unit Tests
+- **ProfileService**: 25 tests covering all business logic
+- **MarkdownService**: 20 tests covering parsing/generation
+- **Utility Functions**: Data validation and transformation
+
+#### Integration Tests
+- **API Routes**: Profile creation and retrieval
+- **Service Integration**: Cross-service communication
+- **Data Flow**: End-to-end data processing
+
+#### Component Tests  
+- **ProfileWizard**: User interactions and form validation
+- **Form Steps**: Individual step functionality
+- **Navigation**: Step transitions and data persistence
+
+### Data Flow
+
+```
+User Input → ProfileWizard → ProfileService → MarkdownService → Storage
+     ↓              ↓              ↓              ↓              ↓
+Form Validation → Business Logic → Markdown Gen → File System → Retrieval
+     ↓              ↓              ↓              ↓              ↓
+Error Handling → Data Transform → Parsing → AI Processing → Recommendations
+```
+
+## Example Generated Markdown
+
+```markdown
+# Client Profile: Acme Manufacturing Corp
+
+## Company Overview
+- **Company Name**: Acme Manufacturing Corp
+- **Industry**: Manufacturing
+- **Size**: Mid-Market (500-5K)
+- **Annual Revenue**: $50,000,000
+- **Employee Count**: 1,200
+- **Primary Location**: Chicago, IL
+
+---
+
+## Value Selling Framework
+
+### 1. Business Issue
+**High-level strategic priority or C-level concern:**
+- [x] Cost Reduction Mandate
+- [x] Operational Efficiency
+- [x] Digital Transformation
+
+**Details**: CEO mandate to reduce operational costs by 15% while improving quality and customer satisfaction.
+
+### 2. Problems / Challenges
+**Specific operational issues identified:**
+
+#### Finance Department
+- [x] Manual invoice processing taking 5-7 days
+- [x] 12% error rate in financial processes
+- [x] Month-end close takes 8 days
+
+#### Operations
+- [x] Process cycle time: 14 days
+- [x] 65% manual processes
+- [x] Quality issues: 8% error rate
+
+**Additional Challenges**: Lack of real-time visibility into production status and inventory levels.
+
+### 3. Root Cause
+**Why do these challenges exist?**
+- [x] Legacy systems with poor integration
+- [x] Manual, paper-based processes
+- [x] Lack of real-time data visibility
+- [x] Insufficient automation
+
+**Details**: 15-year-old ERP system with limited integration capabilities and heavy reliance on spreadsheets and manual data entry.
+
+### 4. Impact
+**Quantified effects:**
+
+#### Hard Costs (Annual)
+- Labor costs from manual processes: $1,200,000
+- Error correction costs: $180,000
+- System downtime costs: $75,000
+- Compliance penalties/risk: $25,000
+- **Total Hard Costs**: $1,480,000
+
+#### Soft Costs
+- Employee frustration/turnover impact: High
+- Customer satisfaction decline: Medium
+- Competitive disadvantage: High
+- Missed opportunities/growth: High
+
+### 5. Solution
+**Capabilities needed to solve these challenges:**
+- [x] Automate document processing
+- [x] Streamline approval workflows
+- [x] Provide real-time dashboards
+- [x] Integrate disconnected systems
+- [x] Improve data accuracy
+
+**Differentiation Requirements:**
+- [x] Industry-specific expertise
+- [x] Rapid implementation (< 6 months)
+- [x] Strong integration capabilities
+- [x] Proven ROI in similar companies
+
+**Value / ROI Expectations:**
+- Target cost reduction: 25% or $370K annually
+- Target efficiency improvement: 40%
+- Expected payback period: 18 months
+- Target ROI: 300%
+- Time to first value: 4 months
+
+**Success Metrics:**
+- [x] Process cycle time reduction
+- [x] Error rate improvement
+- [x] Cost per transaction reduction
+- [x] Employee productivity increase
+
+**Specific Targets**: Reduce processing time from 14 days to 3 days, decrease error rate from 8% to 2%, increase throughput by 40%.
+
+### 6. Decision
+**Decision makers and buying process:**
+
+#### Key Decision Makers
+**Economic Buyer**: Sarah Chen (CEO) - Budget Authority: $2,000,000
+**Technical Buyer**: Mike Rodriguez (CTO)
+**Champion**: Lisa Park (VP Operations)
+**Influencers**: Head of Customer Success, Engineering Manager
+
+#### Buying Process
+- **Decision timeline**: 8 months
+- **Budget cycle**: Q1 planning cycle
+- **Evaluation criteria**:
+  - Technical fit
+  - Cost/ROI
+  - Vendor reputation
+  - Implementation timeline
+  - Support quality
+
+#### Risks of Inaction
+- **Continued cost escalation**: $1,480,000 annually
+- **Employee attrition risk**: High
+- **Estimated cost of inaction (3 years)**: $4,440,000
+- **Competitive disadvantage**: Losing market share to more agile competitors
+- **Customer satisfaction decline**: Risk of losing key accounts due to delivery delays
+- **Regulatory compliance risk**: Increasing audit findings and potential penalties
+
+---
+
+## AI/Automation Opportunity Assessment
+
+### Current Technology Landscape
+- **Primary ERP**: Legacy system (15 years old)
+- **CRM System**: Salesforce
+- **Collaboration Tools**: Microsoft Teams, email
+- **Integration Maturity**: Basic
+- **Data Quality**: Fair
+- **Current Automation**: Basic email notifications, some Excel macros
+
+### AI Readiness Score
+- **Data availability and quality**: 1/2
+- **System integration capability**: 1/2
+- **Technical team readiness**: 2/2
+- **Leadership support**: 2/2
+- **Change management capability**: 1/2
+
+**Total AI Readiness Score: 7/10**
+
+### Top AI Opportunities (Prioritized)
+
+#### 1. Invoice Processing Automation
+- **Department**: Finance
+- **Process**: Accounts Payable processing
+- **Current State**: Manual data entry from paper/PDF invoices
+- **AI Solution**: OCR + machine learning for automated invoice processing
+- **Estimated Impact**: $180,000
+- **Implementation Effort**: Medium
+- **Timeline**: 3 months
+- **Priority Score**: 9/10
+
+#### 2. Production Planning Optimization
+- **Department**: Operations  
+- **Process**: Production scheduling
+- **Current State**: Manual scheduling using spreadsheets
+- **AI Solution**: AI-powered demand forecasting and production optimization
+- **Estimated Impact**: $240,000
+- **Implementation Effort**: High
+- **Timeline**: 6 months
+- **Priority Score**: 8/10
+
+### Quick Wins (0-6 months)
+1. **Automated invoice routing** - Impact: $25,000 - Timeline: 1 month
+2. **Inventory alerts automation** - Impact: $15,000 - Timeline: 2 months
+3. **Order status notifications** - Impact: $10,000 - Timeline: 1 month
+
+---
+
+## Summary & Next Steps
+
+### Executive Summary
+**Current State**: Manufacturing company with $1.48M in annual waste due to manual processes, legacy systems, and operational inefficiencies.
+
+**Recommended Approach**: Phased automation implementation starting with high-impact, low-effort opportunities in finance and operations.
+
+**Expected Value**: 
+- Total 3-year benefit: $3,600,000
+- Investment required: $800,000
+- Net ROI: 350%
+- Payback period: 18 months
+
+### Immediate Next Steps
+1. [ ] Schedule technical architecture review - Mike Rodriguez - March 15
+2. [ ] Prepare detailed ROI analysis - Finance Team - March 22  
+3. [ ] Vendor evaluation kickoff - Lisa Park - April 1
+
+### Notes & Additional Context
+Strong executive sponsorship with CEO mandate driving urgency. Technical team is capable but needs external expertise for implementation. Budget approved in Q1 cycle with flexibility for additional investment if ROI is proven.
+
+---
+
+*Profile created on: March 1, 2024*
+*Last updated: March 1, 2024*  
+*Created by: John Smith, Senior Consultant*
+```
+
+## Future Enhancements
+
+### Planned Features
+- **AI Integration**: Automated opportunity identification from profile data
+- **Competitive Analysis**: Industry benchmarking and comparison
+- **ROI Calculator**: Dynamic financial modeling
+- **Proposal Generator**: Automated proposal creation from profiles
+- **Pipeline Management**: Sales opportunity tracking
+- **Team Collaboration**: Multi-user editing and commenting
+
+### API Integration Opportunities
+- **CRM Integration**: Sync with Salesforce, HubSpot
+- **Financial Tools**: Connect with budgeting and forecasting systems
+- **Industry Data**: Market research and benchmarking APIs
+- **AI Services**: Enhanced opportunity identification and recommendations
+
+## Conclusion
+
+The Client Profile Management System provides a comprehensive, structured approach to capturing and leveraging client business intelligence. By combining the proven Value Selling Framework with modern AI capabilities and rigorous testing practices, it enables consultants to create detailed "digital twins" of their clients while maintaining data integrity and preventing AI hallucinations.
+
+The system's markdown-based storage format ensures that client profiles remain parseable and actionable for AI systems while providing a human-readable format for consultants and stakeholders. 
+
+
+================================================
+FILE: next.config.js
+================================================
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+};
+
+module.exports = nextConfig; 
+
+
+================================================
+FILE: package.json
+================================================
+{
+  "name": "agentic-ai-flow",
+  "version": "1.0.0",
+  "description": "A Next.js application for visualizing ServiceNow agentic AI data as interactive flow diagrams",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "clean": "rm -rf .next out",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --maxWorkers=2"
+  },
+  "keywords": [
+    "servicenow",
+    "agentic-ai",
+    "flow-visualization",
+    "react-flow",
+    "next.js"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dagre": "^0.8.5",
+    "lucide-react": "^0.511.0",
+    "nanoid": "^5.1.5",
+    "next": "^15.2.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "reactflow": "^11.11.4",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@next/swc-win32-x64-msvc": "^15.4.0",
+    "@swc/core": "^1.11.29",
+    "@swc/jest": "^0.2.38",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^29.5.14",
+    "babel-jest": "^30.0.0-beta.3",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^30.0.0-beta.3"
+  }
+}
+
+
+
+================================================
+FILE: project-summary.md
+================================================
 Directory structure:
 └── sgclasher-agentic-ai-flow/
     ├── README.md
@@ -7491,2789 +8402,4 @@ export class TimelineService {
   // Helper methods for generating phase-specific content
   static getPhaseHighlights(phase, companySize, scenarioType) {
     const durations = {
-      conservative: ['9 months', '12 months', '18 months', '24 months'],
-      balanced: ['6 months', '9 months', '12 months', '18 months'],
-      aggressive: ['4 months', '6 months', '8 months', '12 months']
-    };
-
-    const investments = {
-      1: { conservative: '$250K-500K', balanced: '$500K-1M', aggressive: '$750K-1.5M' },
-      2: { conservative: '$500K-1M', balanced: '$1M-2M', aggressive: '$1.5M-3M' },
-      3: { conservative: '$1M-2.5M', balanced: '$2M-4M', aggressive: '$3M-6M' },
-      4: { conservative: '$1.5M-3M', balanced: '$2.5M-5M', aggressive: '$4M-8M' }
-    };
-
-    return [
-      { label: 'Duration', value: durations[scenarioType][phase - 1] },
-      { label: 'Investment', value: investments[phase][scenarioType] },
-      { label: 'Focus Areas', value: phase === 1 ? '3-5 processes' : phase === 2 ? '40% coverage' : phase === 3 ? '75% coverage' : '90% coverage' }
-    ];
-  }
-
-  static getPhaseInitiatives(phase, industry, companySize) {
-    // This would be much more sophisticated in a real AI system
-    const initiatives = {
-      1: [
-        { title: 'Data Infrastructure Setup', description: 'Implement cloud data platform and governance', impact: '60% improvement in data accessibility' },
-        { title: 'AI Team Formation', description: 'Establish center of excellence and governance', impact: 'Structured approach to AI adoption' },
-        { title: 'Pilot Projects Launch', description: 'Deploy 3-5 high-impact automation initiatives', impact: '25% efficiency gain in pilot areas' }
-      ],
-      2: [
-        { title: 'Process Automation', description: 'Scale automation across core business functions', impact: '40% reduction in manual tasks' },
-        { title: 'Analytics Platform', description: 'Deploy predictive analytics and ML models', impact: '30% improvement in decision accuracy' },
-        { title: 'Customer AI', description: 'Implement customer-facing AI solutions', impact: '25% increase in satisfaction scores' }
-      ],
-      3: [
-        { title: 'Enterprise AI Platform', description: 'Unified AI/ML platform across all departments', impact: 'Democratized AI access organization-wide' },
-        { title: 'Advanced Automation', description: 'Deploy autonomous systems and workflows', impact: '50% reduction in operational overhead' },
-        { title: 'AI Product Integration', description: 'Embed AI into core products and services', impact: 'New revenue streams worth $5M+' }
-      ],
-      4: [
-        { title: 'Adaptive AI Systems', description: 'Self-learning and continuously improving AI', impact: 'Minimal human intervention required' },
-        { title: 'AI Ethics Framework', description: 'Comprehensive responsible AI governance', impact: 'Industry-leading trust and compliance' },
-        { title: 'Emerging Technologies', description: 'Quantum computing and advanced AI research', impact: 'Sustainable competitive advantage' }
-      ]
-    };
-
-    return initiatives[phase] || [];
-  }
-
-  static getPhaseTechnologies(phase, scenarioType) {
-    const technologies = {
-      1: ['Cloud Platforms', 'Data Lakes', 'RPA Tools', 'Basic ML'],
-      2: ['AutoML', 'NLP Services', 'Computer Vision', 'Edge Computing'],
-      3: ['MLOps Platforms', 'Conversational AI', 'Digital Twins', 'Advanced Analytics'],
-      4: ['Adaptive ML', 'Explainable AI', 'Federated Learning', 'Quantum-ready Systems']
-    };
-
-    return technologies[phase] || [];
-  }
-
-  static getPhaseOutcomes(phase, companySize, scenarioType) {
-    // Simplified outcome generation - would be much more sophisticated with AI
-    const multipliers = {
-      conservative: 0.8,
-      balanced: 1.0,
-      aggressive: 1.3
-    };
-
-    const baseOutcomes = {
-      1: [
-        { metric: 'Data Quality', value: '85%', description: 'Improved from baseline' },
-        { metric: 'Team Readiness', value: '70%', description: 'AI-skilled resources' }
-      ],
-      2: [
-        { metric: 'Automation Rate', value: '45%', description: 'Processes automated' },
-        { metric: 'Cost Savings', value: '$750K', description: 'Annual run rate' }
-      ],
-      3: [
-        { metric: 'Revenue Growth', value: '+22%', description: 'AI-driven growth' },
-        { metric: 'Market Position', value: 'Top 15%', description: 'In AI adoption' }
-      ],
-      4: [
-        { metric: 'AI Maturity', value: '90%', description: 'Industry leader' },
-        { metric: 'Total ROI', value: '425%', description: 'Cumulative return' }
-      ]
-    };
-
-    return baseOutcomes[phase] || [];
-  }
-
-  // Additional helper methods
-  static getCurrentTechStack(profile) {
-    const baseTech = ['Legacy Systems', 'Basic Analytics', 'Manual Processes'];
-    if (profile.currentTechStack && profile.currentTechStack.length > 0) {
-      return [...profile.currentTechStack, ...baseTech];
-    }
-    return baseTech;
-  }
-
-  static getCurrentStateMetrics(profile) {
-    const maturityMetrics = {
-      beginner: [
-        { metric: 'Process Automation', value: '10%', description: 'Current automation level' },
-        { metric: 'Data Utilization', value: '15%', description: 'Data actively used for decisions' }
-      ],
-      emerging: [
-        { metric: 'Process Automation', value: '25%', description: 'Current automation level' },
-        { metric: 'Data Utilization', value: '30%', description: 'Data actively used for decisions' }
-      ],
-      developing: [
-        { metric: 'Process Automation', value: '40%', description: 'Current automation level' },
-        { metric: 'Data Utilization', value: '50%', description: 'Data actively used for decisions' }
-      ],
-      advanced: [
-        { metric: 'Process Automation', value: '60%', description: 'Current automation level' },
-        { metric: 'Data Utilization', value: '70%', description: 'Data actively used for decisions' }
-      ]
-    };
-
-    return maturityMetrics[profile.aiMaturityLevel] || maturityMetrics.beginner;
-  }
-
-  static getFutureStateOutcomes(profile, scenarioType) {
-    const outcomes = [
-      { metric: 'Valuation Multiple', value: '2.5x', description: 'Premium for AI leadership' },
-      { metric: 'Talent Attraction', value: 'Top 5%', description: 'Best AI talent globally' },
-      { metric: 'Sustainability', value: '100%', description: 'Carbon neutral via AI optimization' }
-    ];
-
-    if (scenarioType === 'aggressive') {
-      outcomes[0].value = '3.2x';
-      outcomes[1].value = 'Top 1%';
-    }
-
-    return outcomes;
-  }
-} 
-
-
-================================================
-FILE: app/store/useAgenticStore.js
-================================================
-'use client';
-
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-
-// Define the store
-const useAgenticStore = create(
-  persist(
-    (set, get) => ({
-      agenticData: null, // Initial state is null
-      connectionDetails: null, // Store connection details for refresh
-      serviceNowUrl: '', // Base ServiceNow instance URL for opening links
-      isLoading: false,
-      error: null,
-
-      // Action to set the agentic data (used by file upload OR API fetch)
-      setAgenticData: (data) => set({ agenticData: data }),
-
-      // Store connection details for later refresh
-      setConnectionDetails: (details) => {
-        // Extract the instance URL and store it for node links
-        const { instanceUrl } = details;
-        set({ 
-          connectionDetails: details,
-          serviceNowUrl: instanceUrl // Set the serviceNowUrl for external links
-        });
-      },
-
-      // Action to clear the data
-      clearAgenticData: () => set({ 
-        agenticData: null, 
-        connectionDetails: null,
-        serviceNowUrl: '',
-        error: null 
-      }),
-      
-      // Action to reset just the flow data, keeping connection details for refresh
-      resetData: () => set({ 
-        agenticData: null,
-        error: null 
-      }),
-
-      // Fetch fresh data using stored connection details
-      refreshData: async () => {
-        const { connectionDetails } = get();
-        
-        if (!connectionDetails) {
-          throw new Error('No connection details available for refresh');
-        }
-
-        set({ isLoading: true, error: null });
-        
-        try {
-          const { instanceUrl, scopeId } = connectionDetails;
-          
-          // Keep or update the serviceNowUrl
-          set({ serviceNowUrl: instanceUrl });
-          
-          // Only send non-sensitive connection details
-          // Credentials are handled server-side via environment variables
-          const response = await fetch('/api/servicenow/fetch-agentic-data', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              instanceUrl,
-              scopeId
-            }),
-          });
-
-          if (!response.ok) {
-            let errorMessage = 'Failed to refresh data from ServiceNow';
-            try {
-              const errorData = await response.json();
-              errorMessage = errorData.error || errorMessage;
-            } catch (e) {
-              // If parsing JSON fails, use the status text
-              errorMessage = `${errorMessage}: ${response.statusText}`;
-            }
-            throw new Error(errorMessage);
-          }
-
-          // Process the response
-          const data = await response.json();
-          console.log('Data refreshed successfully:', data);
-
-          // Update the store with the processed data
-          set({ agenticData: data, isLoading: false });
-          return data;
-        } catch (err) {
-          console.error('Error refreshing ServiceNow data:', err);
-          set({ error: err.message || 'An unknown error occurred while refreshing data', isLoading: false });
-          throw err;
-        }
-      },
-
-      // Add other state/actions as needed, e.g., layout direction, expanded nodes
-      layoutDirection: 'LR', // 'LR' (Horizontal) or 'TB' (Vertical)
-      setLayoutDirection: (direction) => set({ layoutDirection: direction }),
-
-      // Store expanded/collapsed state if needed across re-renders or persistence
-      // Example: expandedNodes: { nodeId: true, ... }
-      // setNodeExpansion: (nodeId, isExpanded) => set((state) => ({ ... })),
-    }),
-    {
-      name: 'agentic-flow-storage', // Name for local storage key
-      storage: createJSONStorage(() => localStorage), // Use local storage
-      // Only persist non-sensitive data
-      partialize: (state) => ({
-        layoutDirection: state.layoutDirection,
-        serviceNowUrl: state.serviceNowUrl, // Persist the serviceNowUrl
-        // Store connection details (no sensitive data included)
-        connectionDetails: state.connectionDetails
-      }),
-    }
-  )
-);
-
-export default useAgenticStore;
-
-
-================================================
-FILE: app/store/useBusinessProfileStore.js
-================================================
-'use client';
-
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { TimelineService } from '../services/timelineService';
-
-const useBusinessProfileStore = create(
-  persist(
-    (set, get) => ({
-      // Business profile information
-      businessProfile: {
-        companyName: '',
-        industry: '',
-        companySize: '',
-        currentTechStack: [],
-        aiMaturityLevel: '',
-        primaryGoals: [],
-        budget: '',
-        timeframe: '',
-      },
-      
-      // Timeline settings
-      scenarioType: 'balanced', // 'conservative', 'balanced', 'aggressive'
-      selectedYear: new Date().getFullYear(),
-      expandedSections: {}, // Track which timeline sections are expanded
-      
-      // Generated timeline data
-      timelineData: null,
-      isGenerating: false,
-      
-      // Actions
-      setBusinessProfile: (profile) => 
-        set({ businessProfile: { ...get().businessProfile, ...profile } }),
-        
-      updateBusinessProfile: (updates) => 
-        set({ businessProfile: { ...get().businessProfile, ...updates } }),
-      
-      setScenarioType: (type) => set({ scenarioType: type }),
-      
-      setSelectedYear: (year) => set({ selectedYear: year }),
-      
-      toggleSection: (sectionId) => 
-        set((state) => ({
-          expandedSections: {
-            ...state.expandedSections,
-            [sectionId]: !state.expandedSections[sectionId]
-          }
-        })),
-      
-      expandAllSections: () => {
-        const sections = ['current-state', 'phase-1', 'phase-2', 'phase-3', 'phase-4', 'future-state'];
-        const expanded = {};
-        sections.forEach(section => { expanded[section] = true; });
-        set({ expandedSections: expanded });
-      },
-      
-      collapseAllSections: () => set({ expandedSections: {} }),
-      
-      hasValidProfile: () => {
-        const { businessProfile } = get();
-        return businessProfile.companyName && 
-               businessProfile.industry && 
-               businessProfile.companySize &&
-               businessProfile.aiMaturityLevel &&
-               businessProfile.primaryGoals.length > 0;
-      },
-      
-      generateTimeline: async (profile) => {
-        set({ isGenerating: true });
-        
-        // If profile is provided, update it first
-        if (profile) {
-          set({ businessProfile: profile });
-        }
-        
-        const { businessProfile, scenarioType } = get();
-        
-        try {
-          // Use the timeline service to generate the timeline
-          const timelineData = await TimelineService.generateTimeline(businessProfile, scenarioType);
-          set({ timelineData, isGenerating: false });
-        } catch (error) {
-          console.error('Error generating timeline:', error);
-          set({ isGenerating: false });
-          throw error;
-        }
-      },
-      
-      clearTimeline: () => set({ timelineData: null, expandedSections: {} }),
-    }),
-    {
-      name: 'business-profile-storage',
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
-);
-
-
-
-export default useBusinessProfileStore; 
-
-
-================================================
-FILE: app/timeline/README.md
-================================================
-# AI Transformation Timeline Feature
-
-## Overview
-
-The AI Transformation Timeline is an interactive business planning tool inspired by ai-2027.com's visual storytelling approach. It allows businesses to input their profile information and receive a personalized AI adoption roadmap with:
-
-- Customized implementation phases
-- ROI projections and metrics
-- Scenario-based planning (Conservative, Balanced, Aggressive)
-- Expandable timeline events with detailed breakdowns
-- Mobile-responsive design
-
-## Architecture
-
-### Components Structure
-
-```
-timeline/
-├── page.js                 # Main timeline page
-├── layout.js              # Timeline layout wrapper
-├── components/
-│   ├── TimelineHeader.js       # Page header with navigation
-│   ├── BusinessProfileForm.js  # Business information form
-│   ├── ScenarioSelector.js     # AI adoption pace selector
-│   ├── MetricsCards.js         # Key metrics display
-│   └── TimelineVisualization.js # Interactive timeline display
-└── README.md              # This file
-```
-
-### State Management
-
-The timeline feature uses a dedicated Zustand store (`useBusinessProfileStore`) that manages:
-
-- **Business Profile Data**: Company information, industry, size, tech stack, etc.
-- **Timeline Settings**: Selected scenario type, expanded sections
-- **Generated Timeline**: Events, metrics, and recommendations
-- **UI State**: Loading states, form validation
-
-### Data Flow
-
-1. User fills out the BusinessProfileForm
-2. Form data is stored in the Zustand store
-3. Timeline generation is triggered (currently mock data, ready for AI integration)
-4. Generated timeline is displayed with interactive elements
-5. Users can switch scenarios to see different adoption paths
-
-## Key Features
-
-### Business Profile Collection
-
-The form collects:
-- Company name and industry
-- Company size (employees)
-- Current AI maturity level
-- Existing technology stack
-- Primary business goals
-- Budget range and timeframe
-
-### Scenario Planning
-
-Three AI adoption scenarios:
-- **Conservative**: Lower risk, proven technologies, extended timelines
-- **Balanced**: Moderate pace, balanced risk/reward
-- **Aggressive**: Fast adoption, cutting-edge tech, compressed timelines
-
-### Interactive Timeline
-
-- **Expandable Events**: Click to reveal detailed information
-- **Visual Markers**: Different icons and colors for event types
-- **Hover Effects**: Enhanced interactivity
-- **Batch Controls**: Expand/collapse all events at once
-
-### Metrics Dashboard
-
-Displays key metrics:
-- Total Investment Range
-- Expected ROI
-- Time to Value
-- Risk Level Assessment
-
-## Extending the Timeline
-
-### Adding New Event Types
-
-1. Update the event type handling in `TimelineVisualization.js`:
-
-```javascript
-const getEventIcon = (type) => {
-  switch (type) {
-    case 'your-new-type': return '🆕';
-    // ... existing cases
-  }
-};
-```
-
-2. Add corresponding color mapping:
-
-```javascript
-const getEventColor = (type) => {
-  switch (type) {
-    case 'your-new-type': return '#yourColor';
-    // ... existing cases
-  }
-};
-```
-
-### Integrating Real AI Generation
-
-Replace the mock timeline generator in `useBusinessProfileStore.js`:
-
-```javascript
-// Replace this function with actual AI API call
-async function generateMockTimeline(profile, scenarioType) {
-  // Call your AI service endpoint
-  const response = await fetch('/api/generate-timeline', {
-    method: 'POST',
-    body: JSON.stringify({ profile, scenarioType })
-  });
-  return response.json();
-}
-```
-
-### Adding New Business Profile Fields
-
-1. Update the store's initial state:
-
-```javascript
-businessProfile: {
-  // ... existing fields
-  yourNewField: '',
-}
-```
-
-2. Add corresponding form inputs in `BusinessProfileForm.js`
-
-### Customizing Timeline Visuals
-
-The timeline styling is in `globals.css` under the "Timeline Page Styles" section. Key classes:
-
-- `.timeline-event`: Individual timeline events
-- `.event-marker`: Circular markers on the timeline
-- `.event-content`: Expandable content containers
-- `.timeline-line`: The vertical/horizontal line
-
-## API Integration Points
-
-The timeline is designed for easy integration with:
-
-1. **AI Generation Services**: Replace mock data generation
-2. **ServiceNow Integration**: Link timeline events to ServiceNow workflows
-3. **Export Functionality**: Generate PDF/PowerPoint reports
-4. **Collaboration Features**: Share timelines with team members
-
-## Future Enhancements
-
-1. **Real AI-Powered Generation**: Integrate with GPT-4 or custom models
-2. **Industry Templates**: Pre-built timelines for specific industries
-3. **Cost Calculator**: Detailed ROI calculations with sliders
-4. **Progress Tracking**: Track actual vs. planned progress
-5. **Multi-Language Support**: Internationalization
-6. **Export Options**: PDF, PowerPoint, Excel formats
-7. **Collaboration**: Team sharing and commenting
-8. **Integration Marketplace**: Connect with various platforms
-
-## Development Guidelines
-
-### Adding New Components
-
-Follow the established patterns:
-- Use functional components with hooks
-- Implement proper prop validation
-- Follow the naming conventions
-- Add JSDoc comments for complex logic
-
-### State Management
-
-- Use the store for cross-component state
-- Keep component-specific state local
-- Implement proper loading and error states
-
-### Styling
-
-- Use CSS classes from globals.css
-- Maintain consistent spacing and colors
-- Ensure mobile responsiveness
-- Follow the existing design system
-
-## Testing Considerations
-
-When adding tests, focus on:
-- Form validation logic
-- Timeline generation with different inputs
-- Scenario switching behavior
-- Expand/collapse functionality
-- Mobile responsiveness
-- Accessibility compliance
-
-## Lead Generation Integration
-
-This timeline tool is designed as a lead generation mechanism:
-
-1. **Value-First Approach**: Provides immediate value without requiring payment
-2. **Contact Capture**: Can add optional email capture for saving/sharing
-3. **Advisory Upsell**: Natural progression to paid consulting services
-4. **Data Insights**: Understand customer needs through form submissions 
-
-
-================================================
-FILE: app/timeline/layout.js
-================================================
-export default function TimelineLayout({ children }) {
-  return children;
-} 
-
-
-================================================
-FILE: app/timeline/page.js
-================================================
-'use client';
-
-import React, { useState, useEffect, useRef } from 'react';
-import useBusinessProfileStore from '../store/useBusinessProfileStore';
-import TimelineSidebar from './components/TimelineSidebar';
-import TimelineContent from './components/TimelineContent';
-import MetricsWidget from './components/MetricsWidget';
-import BusinessProfileModal from './components/BusinessProfileModal';
-import './timeline.css';
-
-export default function TimelinePage() {
-  const { 
-    businessProfile,
-    timelineData,
-    isGenerating,
-    generateTimeline,
-    hasValidProfile
-  } = useBusinessProfileStore();
-  
-  const [activeSection, setActiveSection] = useState('current-state');
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const contentRef = useRef(null);
-  const sectionRefs = useRef({});
-  
-  // Check if we need to show the profile modal
-  useEffect(() => {
-    if (!hasValidProfile() || !timelineData) {
-      setShowProfileModal(true);
-    }
-  }, [hasValidProfile, timelineData]);
-  
-  // Handle scroll spy to update active section
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!contentRef.current) return;
-      
-      const scrollTop = contentRef.current.scrollTop;
-      const scrollHeight = contentRef.current.scrollHeight - contentRef.current.clientHeight;
-      const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-      setScrollProgress(Math.max(0, Math.min(100, progress || 0)));
-      
-      // Find active section based on scroll position
-      const sections = Object.entries(sectionRefs.current);
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const [id, element] = sections[i];
-        if (element && element.offsetTop <= scrollTop + 100) {
-          setActiveSection(id);
-          break;
-        }
-      }
-    };
-    
-    const contentElement = contentRef.current;
-    if (contentElement) {
-      contentElement.addEventListener('scroll', handleScroll);
-      handleScroll(); // Initial check
-    }
-    
-    return () => {
-      if (contentElement) {
-        contentElement.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [timelineData]);
-  
-  const handleSectionClick = (sectionId) => {
-    const element = sectionRefs.current[sectionId];
-    if (element && contentRef.current) {
-      contentRef.current.scrollTo({
-        top: element.offsetTop - 50,
-        behavior: 'smooth'
-      });
-    }
-  };
-  
-  const handleProfileSubmit = async (profile) => {
-    await generateTimeline(profile);
-    setShowProfileModal(false);
-  };
-  
-  // Generate timeline sections based on business journey
-  const timelineSections = timelineData ? [
-    {
-      id: 'current-state',
-      year: 'Today',
-      title: 'Current State',
-      subtitle: 'Where you are now',
-      icon: '📍'
-    },
-    {
-      id: 'phase-1',
-      year: 'Q1-Q2',
-      title: 'Foundation',
-      subtitle: 'Building AI capabilities',
-      icon: '🏗️'
-    },
-    {
-      id: 'phase-2',
-      year: 'Q3-Q4',
-      title: 'Implementation',
-      subtitle: 'Deploying solutions',
-      icon: '🚀'
-    },
-    {
-      id: 'phase-3',
-      year: 'Year 2',
-      title: 'Expansion',
-      subtitle: 'Scaling operations',
-      icon: '📈'
-    },
-    {
-      id: 'phase-4',
-      year: 'Year 3',
-      title: 'Optimization',
-      subtitle: 'Maximizing value',
-      icon: '⚡'
-    },
-    {
-      id: 'future-state',
-      year: 'Year 5',
-      title: 'Future State',
-      subtitle: 'Vision realized',
-      icon: '🎯'
-    }
-  ] : [];
-  
-  return (
-    <div className="timeline-container">
-      {/* Left Sidebar - Timeline Navigation */}
-      <TimelineSidebar 
-        sections={timelineSections}
-        activeSection={activeSection}
-        onSectionClick={handleSectionClick}
-        scrollProgress={scrollProgress}
-      />
-      
-      {/* Main Content Area */}
-      <div className="timeline-main" ref={contentRef}>
-        {timelineData ? (
-          <TimelineContent 
-            sections={timelineSections}
-            timelineData={timelineData}
-            sectionRefs={sectionRefs}
-            businessProfile={businessProfile}
-          />
-        ) : (
-          <div className="timeline-empty">
-            <h2>Welcome to Your AI Transformation Timeline</h2>
-            <p>Complete your business profile to generate a personalized roadmap</p>
-            <button 
-              className="btn-primary"
-              onClick={() => setShowProfileModal(true)}
-            >
-              Get Started
-            </button>
-          </div>
-        )}
-      </div>
-      
-      {/* Right Sidebar - Metrics Widget */}
-      <MetricsWidget 
-        activeSection={activeSection}
-        timelineData={timelineData}
-        scrollProgress={scrollProgress}
-      />
-      
-      {/* Business Profile Modal */}
-      {showProfileModal && (
-        <BusinessProfileModal
-          onClose={() => setShowProfileModal(false)}
-          onSubmit={handleProfileSubmit}
-          isGenerating={isGenerating}
-          initialData={businessProfile}
-        />
-      )}
-    </div>
-  );
-} 
-
-
-================================================
-FILE: app/timeline/components/BusinessProfileForm.js
-================================================
-'use client';
-
-import React, { useState } from 'react';
-import useBusinessProfileStore from '../../store/useBusinessProfileStore';
-
-const industries = [
-  'Technology', 'Healthcare', 'Finance', 'Manufacturing', 'Retail', 
-  'Education', 'Real Estate', 'Transportation', 'Energy', 'Other'
-];
-
-const companySizes = [
-  { value: 'startup', label: '1-50 employees' },
-  { value: 'small', label: '51-200 employees' },
-  { value: 'medium', label: '201-1000 employees' },
-  { value: 'large', label: '1000+ employees' },
-];
-
-const maturityLevels = [
-  { value: 'beginner', label: 'Just Starting', description: 'Little to no AI/automation' },
-  { value: 'emerging', label: 'Emerging', description: 'Some basic automation' },
-  { value: 'developing', label: 'Developing', description: 'Several AI initiatives' },
-  { value: 'advanced', label: 'Advanced', description: 'Widespread AI adoption' },
-];
-
-const techStackOptions = [
-  'ServiceNow', 'Salesforce', 'Microsoft 365', 'Google Workspace', 
-  'SAP', 'Oracle', 'AWS', 'Azure', 'Custom Solutions'
-];
-
-const goalOptions = [
-  'Improve Customer Service', 'Reduce Operational Costs', 'Increase Revenue',
-  'Enhance Data Analytics', 'Automate Workflows', 'Scale Operations',
-  'Improve Decision Making', 'Competitive Advantage'
-];
-
-export default function BusinessProfileForm({ onSubmit }) {
-  const { businessProfile, updateBusinessProfile } = useBusinessProfileStore();
-  const [errors, setErrors] = useState({});
-  
-  const handleInputChange = (field, value) => {
-    updateBusinessProfile({ [field]: value });
-    // Clear error for this field
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: null }));
-    }
-  };
-  
-  const handleArrayToggle = (field, value) => {
-    const currentArray = businessProfile[field] || [];
-    const newArray = currentArray.includes(value)
-      ? currentArray.filter(item => item !== value)
-      : [...currentArray, value];
-    
-    updateBusinessProfile({ [field]: newArray });
-  };
-  
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!businessProfile.companyName?.trim()) {
-      newErrors.companyName = 'Company name is required';
-    }
-    if (!businessProfile.industry) {
-      newErrors.industry = 'Please select an industry';
-    }
-    if (!businessProfile.companySize) {
-      newErrors.companySize = 'Please select company size';
-    }
-    if (!businessProfile.aiMaturityLevel) {
-      newErrors.aiMaturityLevel = 'Please select AI maturity level';
-    }
-    if (!businessProfile.primaryGoals?.length) {
-      newErrors.primaryGoals = 'Please select at least one goal';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      onSubmit();
-    }
-  };
-  
-  return (
-    <form className="business-profile-form" onSubmit={handleSubmit}>
-      <div className="form-section">
-        <h3>Basic Information</h3>
-        
-        <div className="form-group">
-          <label htmlFor="companyName">Company Name *</label>
-          <input
-            type="text"
-            id="companyName"
-            value={businessProfile.companyName || ''}
-            onChange={(e) => handleInputChange('companyName', e.target.value)}
-            placeholder="Enter your company name"
-            className={errors.companyName ? 'error' : ''}
-          />
-          {errors.companyName && <span className="error-message">{errors.companyName}</span>}
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="industry">Industry *</label>
-          <select
-            id="industry"
-            value={businessProfile.industry || ''}
-            onChange={(e) => handleInputChange('industry', e.target.value)}
-            className={errors.industry ? 'error' : ''}
-          >
-            <option value="">Select your industry</option>
-            {industries.map(ind => (
-              <option key={ind} value={ind}>{ind}</option>
-            ))}
-          </select>
-          {errors.industry && <span className="error-message">{errors.industry}</span>}
-        </div>
-        
-        <div className="form-group">
-          <label>Company Size *</label>
-          <div className="radio-group">
-            {companySizes.map(size => (
-              <label key={size.value} className="radio-label">
-                <input
-                  type="radio"
-                  name="companySize"
-                  value={size.value}
-                  checked={businessProfile.companySize === size.value}
-                  onChange={(e) => handleInputChange('companySize', e.target.value)}
-                />
-                <span>{size.label}</span>
-              </label>
-            ))}
-          </div>
-          {errors.companySize && <span className="error-message">{errors.companySize}</span>}
-        </div>
-      </div>
-      
-      <div className="form-section">
-        <h3>Technology & AI Readiness</h3>
-        
-        <div className="form-group">
-          <label>Current AI Maturity Level *</label>
-          <div className="maturity-options">
-            {maturityLevels.map(level => (
-              <label 
-                key={level.value} 
-                className={`maturity-option ${businessProfile.aiMaturityLevel === level.value ? 'selected' : ''}`}
-              >
-                <input
-                  type="radio"
-                  name="aiMaturityLevel"
-                  value={level.value}
-                  checked={businessProfile.aiMaturityLevel === level.value}
-                  onChange={(e) => handleInputChange('aiMaturityLevel', e.target.value)}
-                />
-                <div className="maturity-content">
-                  <h4>{level.label}</h4>
-                  <p>{level.description}</p>
-                </div>
-              </label>
-            ))}
-          </div>
-          {errors.aiMaturityLevel && <span className="error-message">{errors.aiMaturityLevel}</span>}
-        </div>
-        
-        <div className="form-group">
-          <label>Current Technology Stack</label>
-          <div className="checkbox-group">
-            {techStackOptions.map(tech => (
-              <label key={tech} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={businessProfile.currentTechStack?.includes(tech) || false}
-                  onChange={() => handleArrayToggle('currentTechStack', tech)}
-                />
-                <span>{tech}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      <div className="form-section">
-        <h3>Goals & Timeline</h3>
-        
-        <div className="form-group">
-          <label>Primary Goals *</label>
-          <div className="goal-options">
-            {goalOptions.map(goal => (
-              <label 
-                key={goal} 
-                className={`goal-option ${businessProfile.primaryGoals?.includes(goal) ? 'selected' : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={businessProfile.primaryGoals?.includes(goal) || false}
-                  onChange={() => handleArrayToggle('primaryGoals', goal)}
-                />
-                <span>{goal}</span>
-              </label>
-            ))}
-          </div>
-          {errors.primaryGoals && <span className="error-message">{errors.primaryGoals}</span>}
-        </div>
-        
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="budget">Estimated Budget Range</label>
-            <select
-              id="budget"
-              value={businessProfile.budget || ''}
-              onChange={(e) => handleInputChange('budget', e.target.value)}
-            >
-              <option value="">Select budget range</option>
-              <option value="<50k">Less than $50,000</option>
-              <option value="50k-150k">$50,000 - $150,000</option>
-              <option value="150k-500k">$150,000 - $500,000</option>
-              <option value="500k+">$500,000+</option>
-            </select>
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="timeframe">Implementation Timeframe</label>
-            <select
-              id="timeframe"
-              value={businessProfile.timeframe || ''}
-              onChange={(e) => handleInputChange('timeframe', e.target.value)}
-            >
-              <option value="">Select timeframe</option>
-              <option value="3months">3 months</option>
-              <option value="6months">6 months</option>
-              <option value="1year">1 year</option>
-              <option value="2years+">2+ years</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      
-      <div className="form-actions">
-        <button type="submit" className="btn btn-primary btn-large">
-          Generate AI Timeline
-        </button>
-      </div>
-    </form>
-  );
-} 
-
-
-================================================
-FILE: app/timeline/components/BusinessProfileModal.js
-================================================
-'use client';
-
-import React, { useState } from 'react';
-
-const industries = [
-  'Technology', 'Healthcare', 'Finance', 'Manufacturing', 'Retail', 
-  'Education', 'Real Estate', 'Transportation', 'Energy', 'Other'
-];
-
-const companySizes = [
-  { value: 'startup', label: '1-50 employees' },
-  { value: 'small', label: '51-200 employees' },
-  { value: 'medium', label: '201-1000 employees' },
-  { value: 'large', label: '1000+ employees' },
-];
-
-const maturityLevels = [
-  { value: 'beginner', label: 'Just Starting', description: 'Little to no AI/automation' },
-  { value: 'emerging', label: 'Emerging', description: 'Some basic automation' },
-  { value: 'developing', label: 'Developing', description: 'Several AI initiatives' },
-  { value: 'advanced', label: 'Advanced', description: 'Mature AI adoption' },
-];
-
-const primaryGoals = [
-  'Cost Reduction',
-  'Revenue Growth',
-  'Customer Experience',
-  'Operational Efficiency',
-  'Innovation',
-  'Risk Management',
-  'Employee Productivity',
-  'Data-Driven Insights'
-];
-
-export default function BusinessProfileModal({ onClose, onSubmit, isGenerating, initialData }) {
-  const [formData, setFormData] = useState({
-    companyName: initialData?.companyName || '',
-    industry: initialData?.industry || '',
-    companySize: initialData?.companySize || '',
-    aiMaturityLevel: initialData?.aiMaturityLevel || '',
-    primaryGoals: initialData?.primaryGoals || [],
-    currentChallenges: initialData?.currentChallenges || '',
-    budget: initialData?.budget || '',
-    timeframe: initialData?.timeframe || '3-years'
-  });
-  
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 3;
-  
-  const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-  
-  const handleGoalToggle = (goal) => {
-    setFormData(prev => ({
-      ...prev,
-      primaryGoals: prev.primaryGoals.includes(goal)
-        ? prev.primaryGoals.filter(g => g !== goal)
-        : [...prev.primaryGoals, goal]
-    }));
-  };
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-  
-  const canProceed = () => {
-    switch (currentStep) {
-      case 1:
-        return formData.companyName && formData.industry && formData.companySize;
-      case 2:
-        return formData.aiMaturityLevel && formData.primaryGoals.length > 0;
-      case 3:
-        return formData.budget && formData.timeframe;
-      default:
-        return false;
-    }
-  };
-  
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Build Your AI Transformation Timeline</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
-        </div>
-        
-        <div className="modal-progress">
-          <div className="progress-steps">
-            {[1, 2, 3].map(step => (
-              <div 
-                key={step} 
-                className={`progress-step ${currentStep >= step ? 'active' : ''}`}
-              >
-                <div className="step-number">{step}</div>
-                <div className="step-label">
-                  {step === 1 && 'Company Info'}
-                  {step === 2 && 'AI Readiness'}
-                  {step === 3 && 'Planning'}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-            />
-          </div>
-        </div>
-        
-        <form onSubmit={handleSubmit} className="modal-form">
-          {currentStep === 1 && (
-            <div className="form-step">
-              <h3>Tell us about your company</h3>
-              
-              <div className="form-group">
-                <label htmlFor="companyName">Company Name</label>
-                <input
-                  id="companyName"
-                  type="text"
-                  value={formData.companyName}
-                  onChange={(e) => handleChange('companyName', e.target.value)}
-                  placeholder="Enter your company name"
-                  required
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="industry">Industry</label>
-                <select
-                  id="industry"
-                  value={formData.industry}
-                  onChange={(e) => handleChange('industry', e.target.value)}
-                  required
-                >
-                  <option value="">Select your industry</option>
-                  {industries.map(ind => (
-                    <option key={ind} value={ind}>{ind}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="form-group">
-                <label>Company Size</label>
-                <div className="radio-group">
-                  {companySizes.map(size => (
-                    <label key={size.value} className="radio-label">
-                      <input
-                        type="radio"
-                        name="companySize"
-                        value={size.value}
-                        checked={formData.companySize === size.value}
-                        onChange={(e) => handleChange('companySize', e.target.value)}
-                      />
-                      <span className="radio-text">{size.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {currentStep === 2 && (
-            <div className="form-step">
-              <h3>Assess your AI readiness</h3>
-              
-              <div className="form-group">
-                <label>Current AI Maturity Level</label>
-                <div className="maturity-grid">
-                  {maturityLevels.map(level => (
-                    <button
-                      key={level.value}
-                      type="button"
-                      className={`maturity-option ${formData.aiMaturityLevel === level.value ? 'selected' : ''}`}
-                      onClick={() => handleChange('aiMaturityLevel', level.value)}
-                    >
-                      <div className="maturity-label">{level.label}</div>
-                      <div className="maturity-description">{level.description}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <label>Primary Goals (Select all that apply)</label>
-                <div className="goals-grid">
-                  {primaryGoals.map(goal => (
-                    <button
-                      key={goal}
-                      type="button"
-                      className={`goal-option ${formData.primaryGoals.includes(goal) ? 'selected' : ''}`}
-                      onClick={() => handleGoalToggle(goal)}
-                    >
-                      {goal}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="currentChallenges">Current Challenges (Optional)</label>
-                <textarea
-                  id="currentChallenges"
-                  value={formData.currentChallenges}
-                  onChange={(e) => handleChange('currentChallenges', e.target.value)}
-                  placeholder="Describe any specific challenges or pain points..."
-                  rows={3}
-                />
-              </div>
-            </div>
-          )}
-          
-          {currentStep === 3 && (
-            <div className="form-step">
-              <h3>Set your transformation parameters</h3>
-              
-              <div className="form-group">
-                <label htmlFor="budget">Annual AI Investment Budget</label>
-                <select
-                  id="budget"
-                  value={formData.budget}
-                  onChange={(e) => handleChange('budget', e.target.value)}
-                  required
-                >
-                  <option value="">Select budget range</option>
-                  <option value="<100k">Less than $100,000</option>
-                  <option value="100k-500k">$100,000 - $500,000</option>
-                  <option value="500k-1m">$500,000 - $1 million</option>
-                  <option value="1m-5m">$1 million - $5 million</option>
-                  <option value=">5m">More than $5 million</option>
-                </select>
-              </div>
-              
-              <div className="form-group">
-                <label>Transformation Timeframe</label>
-                <div className="timeframe-options">
-                  {['1-year', '3-years', '5-years'].map(tf => (
-                    <button
-                      key={tf}
-                      type="button"
-                      className={`timeframe-option ${formData.timeframe === tf ? 'selected' : ''}`}
-                      onClick={() => handleChange('timeframe', tf)}
-                    >
-                      <div className="timeframe-label">{tf.replace('-', ' ')}</div>
-                      <div className="timeframe-description">
-                        {tf === '1-year' && 'Quick wins focus'}
-                        {tf === '3-years' && 'Balanced approach'}
-                        {tf === '5-years' && 'Full transformation'}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div className="modal-actions">
-            {currentStep > 1 && (
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => setCurrentStep(currentStep - 1)}
-              >
-                Back
-              </button>
-            )}
-            
-            {currentStep < totalSteps ? (
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => setCurrentStep(currentStep + 1)}
-                disabled={!canProceed()}
-              >
-                Continue
-              </button>
-            ) : (
-              <button
-                type="submit"
-                className="btn-primary"
-                disabled={!canProceed() || isGenerating}
-              >
-                {isGenerating ? 'Generating Timeline...' : 'Generate Timeline'}
-              </button>
-            )}
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-} 
-
-
-================================================
-FILE: app/timeline/components/MetricsCards.js
-================================================
-'use client';
-
-import React from 'react';
-
-export default function MetricsCards({ summary }) {
-  const metrics = [
-    {
-      label: 'Total Investment',
-      value: summary.totalInvestment,
-      icon: '💰',
-      color: '#3498db',
-    },
-    {
-      label: 'Expected ROI',
-      value: summary.expectedROI,
-      icon: '📈',
-      color: '#10b981',
-    },
-    {
-      label: 'Time to Value',
-      value: summary.timeToValue,
-      icon: '⏱️',
-      color: '#f39c12',
-    },
-    {
-      label: 'Risk Level',
-      value: summary.riskLevel,
-      icon: '⚡',
-      color: '#ef4444',
-    },
-  ];
-  
-  return (
-    <div className="metrics-cards">
-      {metrics.map((metric, index) => (
-        <div 
-          key={index} 
-          className="metric-card"
-          style={{ '--metric-color': metric.color }}
-        >
-          <div className="metric-icon">{metric.icon}</div>
-          <div className="metric-content">
-            <h4>{metric.label}</h4>
-            <p className="metric-value">{metric.value}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-} 
-
-
-================================================
-FILE: app/timeline/components/MetricsWidget.js
-================================================
-'use client';
-
-import React, { useState } from 'react';
-
-export default function MetricsWidget({ activeSection, timelineData, scrollProgress }) {
-  const [isMinimized, setIsMinimized] = useState(false);
-  
-  if (!timelineData) return null;
-  
-  // Get current phase data based on activeSection
-  const getCurrentPhase = () => {
-    switch(activeSection) {
-      case 'current-state':
-        return { title: 'Current State', ...(timelineData.currentState || {}) };
-      case 'phase-1':
-        return { title: 'Foundation', ...(timelineData.phases?.[0] || {}) };
-      case 'phase-2':
-        return { title: 'Implementation', ...(timelineData.phases?.[1] || {}) };
-      case 'phase-3':
-        return { title: 'Expansion', ...(timelineData.phases?.[2] || {}) };
-      case 'phase-4':
-        return { title: 'Optimization', ...(timelineData.phases?.[3] || {}) };
-      case 'future-state':
-        return { title: 'Future State', ...(timelineData.futureState || {}) };
-      default:
-        return { title: 'Current State', ...(timelineData.currentState || {}) };
-    }
-  };
-  
-  const currentPhase = getCurrentPhase();
-  
-  // Calculate journey metrics based on activeSection
-  const getJourneyProgress = () => {
-    const sectionOrder = ['current-state', 'phase-1', 'phase-2', 'phase-3', 'phase-4', 'future-state'];
-    const currentIndex = sectionOrder.indexOf(activeSection);
-    return currentIndex !== -1 ? ((currentIndex + 1) / sectionOrder.length) * 100 : 0;
-  };
-  
-  const journeyProgress = getJourneyProgress();
-  
-  // Get dynamic metrics based on current section
-  const getDynamicMetrics = () => {
-    switch(activeSection) {
-      case 'current-state':
-        return [
-          { label: 'AI Readiness', value: '25%', trend: 'baseline' },
-          { label: 'Manual Processes', value: '85%', trend: 'baseline' },
-          { label: 'Data Utilization', value: '15%', trend: 'baseline' }
-        ];
-      case 'phase-1':
-        return [
-          { label: 'AI Readiness', value: '45%', trend: '+20%' },
-          { label: 'Automation Level', value: '25%', trend: 'new' },
-          { label: 'Team Trained', value: '30%', trend: 'new' }
-        ];
-      case 'phase-2':
-        return [
-          { label: 'AI Readiness', value: '65%', trend: '+40%' },
-          { label: 'Automation Level', value: '45%', trend: '+20%' },
-          { label: 'ROI Achieved', value: '75%', trend: 'new' }
-        ];
-      case 'phase-3':
-        return [
-          { label: 'AI Integration', value: '80%', trend: '+55%' },
-          { label: 'Efficiency Gain', value: '60%', trend: 'new' },
-          { label: 'Revenue Impact', value: '+25%', trend: 'new' }
-        ];
-      case 'phase-4':
-        return [
-          { label: 'AI Maturity', value: '90%', trend: '+65%' },
-          { label: 'Cost Reduction', value: '40%', trend: 'new' },
-          { label: 'Innovation Rate', value: '3x', trend: 'new' }
-        ];
-      case 'future-state':
-        return [
-          { label: 'AI Leadership', value: '95%', trend: 'achieved' },
-          { label: 'Market Position', value: 'Top 10%', trend: 'achieved' },
-          { label: 'Total ROI', value: '425%', trend: 'achieved' }
-        ];
-      default:
-        return [];
-    }
-  };
-  
-  const getProgressRing = (value) => {
-    // Ensure value is a valid number between 0 and 100
-    const validValue = typeof value === 'number' && !isNaN(value) ? Math.max(0, Math.min(100, value)) : 0;
-    
-    const radius = 40;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (validValue / 100) * circumference;
-    
-    return (
-      <svg className="progress-ring" width="100" height="100">
-        <circle
-          cx="50"
-          cy="50"
-          r={radius}
-          fill="none"
-          stroke="rgba(255, 255, 255, 0.1)"
-          strokeWidth="8"
-        />
-        <circle
-          cx="50"
-          cy="50"
-          r={radius}
-          fill="none"
-          stroke="url(#progressGradient)"
-          strokeWidth="8"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          transform="rotate(-90 50 50)"
-          style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-        />
-        <defs>
-          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3498db" />
-            <stop offset="100%" stopColor="#2ecc71" />
-          </linearGradient>
-        </defs>
-        <text x="50" y="50" textAnchor="middle" dy="0.3em" className="progress-text">
-          {Math.round(validValue)}%
-        </text>
-      </svg>
-    );
-  };
-  
-  const metrics = getDynamicMetrics();
-  
-  return (
-    <div className={`metrics-widget ${isMinimized ? 'minimized' : ''}`}>
-      <div className="widget-header">
-        <div className="widget-header-content">
-          <h3>AI Journey Progress</h3>
-          <button 
-            className="widget-toggle"
-            onClick={() => setIsMinimized(!isMinimized)}
-            aria-label={isMinimized ? 'Expand widget' : 'Minimize widget'}
-          >
-            {isMinimized ? '◀' : '▶'}
-          </button>
-        </div>
-        {!isMinimized && (
-          <div className="journey-progress">
-            {getProgressRing(scrollProgress || 0)}
-            <p className="progress-label">Journey Completion</p>
-          </div>
-        )}
-      </div>
-      
-      {!isMinimized && (
-        <>
-          <div className="widget-metrics">
-            <h4>{currentPhase.title} Metrics</h4>
-            {metrics.map((metric, index) => (
-              <div key={index} className="metric-item">
-                <div className="metric-header">
-                  <span className="metric-label">{metric.label}</span>
-                  {metric.trend && metric.trend !== 'baseline' && (
-                    <span className={`metric-trend ${
-                      metric.trend === 'new' ? 'new' : 
-                      metric.trend === 'achieved' ? 'achieved' : 'change'
-                    }`}>
-                      {metric.trend}
-                    </span>
-                  )}
-                </div>
-                <div className="metric-value">{metric.value}</div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="widget-footer">
-            <div className="widget-insight">
-              <h4>Key Insight</h4>
-              <p>{currentPhase.outcomes?.[0]?.description || currentPhase.description || 'Your AI transformation journey is progressing well.'}</p>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-} 
-
-
-================================================
-FILE: app/timeline/components/ScenarioSelector.js
-================================================
-'use client';
-
-import React from 'react';
-
-const scenarios = [
-  {
-    id: 'conservative',
-    label: 'Conservative',
-    description: 'Lower risk, proven technologies',
-    icon: '🛡️',
-    color: '#10b981',
-  },
-  {
-    id: 'balanced',
-    label: 'Balanced',
-    description: 'Moderate pace, balanced approach',
-    icon: '⚖️',
-    color: '#3498db',
-  },
-  {
-    id: 'aggressive',
-    label: 'Aggressive',
-    description: 'Fast adoption, cutting-edge tech',
-    icon: '🚀',
-    color: '#ef4444',
-  },
-];
-
-export default function ScenarioSelector({ currentScenario, onScenarioChange }) {
-  return (
-    <div className="scenario-selector">
-      <h3>Choose Your AI Adoption Scenario</h3>
-      <div className="scenario-options">
-        {scenarios.map(scenario => (
-          <button
-            key={scenario.id}
-            className={`scenario-option ${currentScenario === scenario.id ? 'active' : ''}`}
-            onClick={() => onScenarioChange(scenario.id)}
-            style={{
-              '--scenario-color': scenario.color,
-            }}
-          >
-            <div className="scenario-icon">{scenario.icon}</div>
-            <h4>{scenario.label}</h4>
-            <p>{scenario.description}</p>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-} 
-
-
-================================================
-FILE: app/timeline/components/TimelineContent.js
-================================================
-'use client';
-
-import React, { useRef, useEffect } from 'react';
-
-export default function TimelineContent({ sections, timelineData, sectionRefs, businessProfile }) {
-  const registerRef = (id, element) => {
-    if (element) {
-      sectionRefs.current[id] = element;
-    }
-  };
-  
-  const getSectionContent = (sectionId) => {
-    // Map section IDs to timeline data
-    const contentMap = {
-      'current-state': {
-        title: 'Current State Analysis',
-        content: timelineData.currentState,
-        highlights: [
-          { label: 'AI Maturity', value: businessProfile.aiMaturityLevel },
-          { label: 'Industry', value: businessProfile.industry },
-          { label: 'Company Size', value: businessProfile.companySize }
-        ]
-      },
-      'phase-1': {
-        title: 'Foundation Phase',
-        content: timelineData.phases[0],
-        highlights: timelineData.phases[0]?.highlights || []
-      },
-      'phase-2': {
-        title: 'Implementation Phase',
-        content: timelineData.phases[1],
-        highlights: timelineData.phases[1]?.highlights || []
-      },
-      'phase-3': {
-        title: 'Expansion Phase',
-        content: timelineData.phases[2],
-        highlights: timelineData.phases[2]?.highlights || []
-      },
-      'phase-4': {
-        title: 'Optimization Phase',
-        content: timelineData.phases[3],
-        highlights: timelineData.phases[3]?.highlights || []
-      },
-      'future-state': {
-        title: 'Future State Vision',
-        content: timelineData.futureState,
-        highlights: timelineData.futureState?.highlights || []
-      }
-    };
-    
-    return contentMap[sectionId] || {};
-  };
-  
-  return (
-    <div className="timeline-content">
-      {sections.map((section) => {
-        const sectionData = getSectionContent(section.id);
-        
-        return (
-          <section 
-            key={section.id}
-            id={section.id}
-            ref={(el) => registerRef(section.id, el)}
-            className="timeline-section"
-          >
-            <div className="section-header">
-              <div className="section-icon">{section.icon}</div>
-              <div className="section-meta">
-                <div className="section-year">{section.year}</div>
-                <h2 className="section-title">{sectionData.title}</h2>
-              </div>
-            </div>
-            
-            <div className="section-body">
-              {sectionData.content && (
-                <>
-                  <div className="section-description">
-                    <p>{sectionData.content.description}</p>
-                  </div>
-                  
-                  {sectionData.highlights && sectionData.highlights.length > 0 && (
-                    <div className="section-highlights">
-                      <h3>Key Highlights</h3>
-                      <div className="highlights-grid">
-                        {sectionData.highlights.map((highlight, index) => (
-                          <div key={index} className="highlight-card">
-                            <div className="highlight-label">{highlight.label}</div>
-                            <div className="highlight-value">{highlight.value}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {sectionData.content.initiatives && (
-                    <div className="section-initiatives">
-                      <h3>Key Initiatives</h3>
-                      <ul className="initiatives-list">
-                        {sectionData.content.initiatives.map((initiative, index) => (
-                          <li key={index} className="initiative-item">
-                            <div className="initiative-title">{initiative.title}</div>
-                            <div className="initiative-description">{initiative.description}</div>
-                            {initiative.impact && (
-                              <div className="initiative-impact">
-                                <span className="impact-label">Impact:</span> {initiative.impact}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {sectionData.content.technologies && (
-                    <div className="section-technologies">
-                      <h3>Technologies & Tools</h3>
-                      <div className="tech-tags">
-                        {sectionData.content.technologies.map((tech, index) => (
-                          <span key={index} className="tech-tag">{tech}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {sectionData.content.outcomes && (
-                    <div className="section-outcomes">
-                      <h3>Expected Outcomes</h3>
-                      <div className="outcomes-grid">
-                        {sectionData.content.outcomes.map((outcome, index) => (
-                          <div key={index} className="outcome-card">
-                            <div className="outcome-metric">{outcome.metric}</div>
-                            <div className="outcome-value">{outcome.value}</div>
-                            <div className="outcome-description">{outcome.description}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </section>
-        );
-      })}
-    </div>
-  );
-} 
-
-
-================================================
-FILE: app/timeline/components/TimelineHeader.js
-================================================
-'use client';
-
-import React from 'react';
-
-export default function TimelineHeader({ onBackClick }) {
-  return (
-    <header className="timeline-header">
-      <div className="header-content">
-        <button 
-          className="back-button"
-          onClick={onBackClick}
-          aria-label="Back to Flow Visualizer"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="20" 
-            height="20" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          >
-            <path d="M19 12H5"></path>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-        </button>
-        
-        <div className="header-title-section">
-          <h1 className="timeline-title">AI Transformation Timeline</h1>
-          <p className="timeline-subtitle">Your personalized roadmap to AI-powered business operations</p>
-        </div>
-        
-        <div className="header-actions">
-          <button className="btn btn-secondary btn-icon" aria-label="Share timeline">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="18" cy="5" r="3"></circle>
-              <circle cx="6" cy="12" r="3"></circle>
-              <circle cx="18" cy="19" r="3"></circle>
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-            </svg>
-          </button>
-          <button className="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Export Report
-          </button>
-        </div>
-      </div>
-    </header>
-  );
-} 
-
-
-================================================
-FILE: app/timeline/components/TimelineSidebar.js
-================================================
-'use client';
-
-import React from 'react';
-
-export default function TimelineSidebar({ sections, activeSection, onSectionClick, scrollProgress }) {
-  return (
-    <aside className="timeline-sidebar">
-      <div className="timeline-sidebar-header">
-        <h3>Your AI Journey</h3>
-        <div className="timeline-progress">
-          <div 
-            className="timeline-progress-bar"
-            style={{ height: `${scrollProgress}%` }}
-          />
-        </div>
-      </div>
-      
-      <nav className="timeline-nav">
-        {sections.map((section, index) => (
-          <button
-            key={section.id}
-            className={`timeline-nav-item ${activeSection === section.id ? 'active' : ''}`}
-            onClick={() => onSectionClick(section.id)}
-          >
-            <div className="timeline-nav-dot">
-              <span className="timeline-nav-icon">{section.icon}</span>
-            </div>
-            <div className="timeline-nav-content">
-              <div className="timeline-nav-year">{section.year}</div>
-              <div className="timeline-nav-title">{section.title}</div>
-              <div className="timeline-nav-subtitle">{section.subtitle}</div>
-            </div>
-          </button>
-        ))}
-      </nav>
-      
-      <div className="timeline-sidebar-footer">
-        <button 
-          className="btn-secondary"
-          onClick={() => window.location.href = '/'}
-        >
-          ← Back to Flow Visualizer
-        </button>
-      </div>
-    </aside>
-  );
-} 
-
-
-================================================
-FILE: app/timeline/components/TimelineVisualization.js
-================================================
-'use client';
-
-import React, { useState, useCallback } from 'react';
-import useBusinessProfileStore from '../../store/useBusinessProfileStore';
-
-export default function TimelineVisualization({ events, recommendations }) {
-  const { expandedSections, toggleSection, expandAllSections, collapseAllSections } = useBusinessProfileStore();
-  const [hoveredEvent, setHoveredEvent] = useState(null);
-  
-  const getEventIcon = (type) => {
-    switch (type) {
-      case 'milestone': return '🎯';
-      case 'implementation': return '🔧';
-      case 'expansion': return '📈';
-      case 'transformation': return '🚀';
-      default: return '📍';
-    }
-  };
-  
-  const getEventColor = (type) => {
-    switch (type) {
-      case 'milestone': return '#3498db';
-      case 'implementation': return '#10b981';
-      case 'expansion': return '#f39c12';
-      case 'transformation': return '#ef4444';
-      default: return '#6b7280';
-    }
-  };
-  
-  const handleEventClick = useCallback((eventId) => {
-    toggleSection(eventId);
-  }, [toggleSection]);
-  
-  return (
-    <div className="timeline-visualization">
-      <div className="timeline-controls">
-        <button 
-          className="btn btn-secondary btn-small"
-          onClick={expandAllSections}
-        >
-          Expand All
-        </button>
-        <button 
-          className="btn btn-secondary btn-small"
-          onClick={collapseAllSections}
-        >
-          Collapse All
-        </button>
-      </div>
-      
-      <div className="timeline-container">
-        <div className="timeline-line" />
-        
-        {events.map((event, index) => {
-          const isExpanded = expandedSections[event.id] || false;
-          const isHovered = hoveredEvent === event.id;
-          
-          return (
-            <div 
-              key={event.id}
-              className={`timeline-event ${isExpanded ? 'expanded' : ''} ${isHovered ? 'hovered' : ''}`}
-              onMouseEnter={() => setHoveredEvent(event.id)}
-              onMouseLeave={() => setHoveredEvent(null)}
-            >
-              <div className="event-date">
-                <span>{event.date}</span>
-              </div>
-              
-              <div 
-                className="event-marker"
-                style={{ 
-                  '--event-color': getEventColor(event.type),
-                  transform: isHovered ? 'scale(1.2)' : 'scale(1)',
-                }}
-              >
-                <span className="event-icon">{getEventIcon(event.type)}</span>
-              </div>
-              
-              <div className="event-content">
-                <div 
-                  className="event-header"
-                  onClick={() => handleEventClick(event.id)}
-                >
-                  <h3>{event.title}</h3>
-                  <button 
-                    className="expand-toggle"
-                    aria-label={isExpanded ? 'Collapse' : 'Expand'}
-                  >
-                    {isExpanded ? '−' : '+'}
-                  </button>
-                </div>
-                
-                <p className="event-description">{event.description}</p>
-                
-                {isExpanded && event.details && (
-                  <div className="event-details">
-                    {event.details.activities && (
-                      <div className="detail-section">
-                        <h4>Key Activities</h4>
-                        <ul>
-                          {event.details.activities.map((activity, i) => (
-                            <li key={i}>{activity}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {event.details.agents && (
-                      <div className="detail-section">
-                        <h4>AI Agents</h4>
-                        <div className="agents-list">
-                          {event.details.agents.map((agent, i) => (
-                            <div key={i} className="agent-card">
-                              <h5>{agent.name}</h5>
-                              <p>{agent.description}</p>
-                              <span className="impact">{agent.impact}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {event.details.departments && (
-                      <div className="detail-section">
-                        <h4>Departments Involved</h4>
-                        <div className="department-tags">
-                          {event.details.departments.map((dept, i) => (
-                            <span key={i} className="tag">{dept}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {event.details.deliverables && (
-                      <div className="detail-section">
-                        <h4>Deliverables</h4>
-                        <ul>
-                          {event.details.deliverables.map((deliverable, i) => (
-                            <li key={i}>{deliverable}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {event.details.investment && (
-                      <div className="detail-metric">
-                        <span className="metric-label">Investment Required:</span>
-                        <span className="metric-value">{event.details.investment}</span>
-                      </div>
-                    )}
-                    
-                    {event.details.timeline && (
-                      <div className="detail-metric">
-                        <span className="metric-label">Timeline:</span>
-                        <span className="metric-value">{event.details.timeline}</span>
-                      </div>
-                    )}
-                    
-                    {event.details.expectedOutcomes && (
-                      <div className="detail-section">
-                        <h4>Expected Outcomes</h4>
-                        <div className="outcomes-grid">
-                          {Object.entries(event.details.expectedOutcomes).map(([key, value]) => (
-                            <div key={key} className="outcome">
-                              <span className="outcome-label">{key.charAt(0).toUpperCase() + key.slice(1)}:</span>
-                              <span className="outcome-value">{value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      
-      {recommendations && recommendations.length > 0 && (
-        <div className="recommendations-section">
-          <h3>Key Recommendations</h3>
-          <div className="recommendations-list">
-            {recommendations.map((rec, index) => (
-              <div key={index} className="recommendation">
-                <span className="rec-number">{index + 1}</span>
-                <p>{rec}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-} 
-
-
-================================================
-FILE: app/utils/layoutGraph.js
-================================================
-import * as dagre from 'dagre';
-
-/**
- * Applies Dagre layout to React Flow nodes and edges
- * 
- * @param {Array} nodes - React Flow nodes
- * @param {Array} edges - React Flow edges
- * @param {Object} options - Layout options
- * @param {String} options.direction - Layout direction ('LR' or 'TB')
- * @param {Number} options.nodeSeparation - Separation between nodes (default: 100)
- * @param {Number} options.rankSeparation - Separation between ranks (default: 200)
- * @returns {Object} { nodes, edges } with positions applied
- */
-export function applyDagreLayout(nodes, edges, options = {}) {
-  const direction = options.direction || 'LR';
-  const nodeSeparation = options.nodeSeparation || 100;
-  const rankSeparation = options.rankSeparation || 200;
-  
-  // Filter out hidden nodes
-  const visibleNodes = nodes.filter(node => !node.hidden);
-  
-  // Get IDs of all visible nodes
-  const visibleNodeIds = new Set(visibleNodes.map(node => node.id));
-  
-  // Filter edges to only include those connecting visible nodes
-  const visibleEdges = edges.filter(edge => 
-    visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
-  );
-  
-  // Mark other edges as hidden
-  const updatedEdges = edges.map(edge => {
-    if (visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)) {
-      return { ...edge, hidden: false };
-    } else {
-      return { ...edge, hidden: true };
-    }
-  });
-  
-  // Create a new directed graph
-  const g = new dagre.graphlib.Graph();
-  g.setGraph({
-    rankdir: direction,
-    nodesep: nodeSeparation,
-    ranksep: rankSeparation,
-    marginx: 25,
-    marginy: 25,
-    acyclicer: 'greedy',     // Use greedy algorithm to handle cycles
-    ranker: 'network-simplex' // Use network simplex algorithm for ranking
-  });
-  g.setDefaultEdgeLabel(() => ({}));
-  
-  // Define node dimensions based on type and collapsed state
-  const getNodeDimensions = (node) => {
-    // Base dimensions
-    const defaultDimensions = { width: 250, height: 100 };
-    
-    // If node is collapsed, make it smaller
-    if (node.data.isCollapsed) {
-      return { width: 180, height: 50 };
-    }
-    
-    // Set dimensions based on node type and content
-    if (node.type === 'useCaseNode') {
-      return { width: 260, height: node.data.description ? 130 : 80 };
-    }
-    
-    if (node.type === 'triggerNode') {
-      const hasFields = node.data.target_table || node.data.condition || node.data.objective;
-      return { width: 270, height: hasFields ? 160 : 80 };
-    }
-    
-    if (node.type === 'agentNode') {
-      const hasDetails = node.data.role || node.data.instructions;
-      const hasDescription = node.data.description;
-      
-      if (hasDetails && node.data.expanded) {
-        return { width: 280, height: 240 };
-      } else if (hasDescription) {
-        return { width: 260, height: 120 };
-      }
-      return { width: 230, height: 80 };
-    }
-    
-    if (node.type === 'toolNode') {
-      return { width: 230, height: node.data.description ? 110 : 70 };
-    }
-    
-    return defaultDimensions;
-  };
-  
-  // Add nodes to the graph with computed dimensions
-  visibleNodes.forEach((node) => {
-    const { width, height } = getNodeDimensions(node);
-    g.setNode(node.id, { width, height, id: node.id });
-  });
-  
-  // Add edges to the graph
-  visibleEdges.forEach((edge) => {
-    g.setEdge(edge.source, edge.target);
-  });
-  
-  // Apply the layout algorithm
-  try {
-    dagre.layout(g);
-  } catch (error) {
-    console.error("Error during layout calculation:", error);
-    // Return original nodes if layout fails
-    return { nodes, edges: updatedEdges };
-  }
-  
-  // Get the positioned nodes from the graph with original properties
-  const positionedNodes = nodes.map((node) => {
-    if (node.hidden) {
-      // Keep hidden nodes as is, but under their parent if possible
-      const parentNode = node.data.parentId ? nodes.find(n => n.id === node.data.parentId) : null;
-      if (parentNode && parentNode.position) {
-        return {
-          ...node,
-          position: {
-            x: parentNode.position.x,  // Place under parent
-            y: parentNode.position.y + 200  // Place below parent
-          }
-        };
-      }
-      return node;
-    }
-
-    const graphNode = g.node(node.id);
-    
-    // Skip if node wasn't positioned correctly
-    if (!graphNode) {
-      console.warn(`Node ${node.id} was not positioned correctly by Dagre`);
-      return node;
-    }
-    
-    const { width, height } = getNodeDimensions(node);
-    
-    return {
-      ...node,
-      position: {
-        x: graphNode.x - width / 2,
-        y: graphNode.y - height / 2,
-      },
-      // Preserve original dimensions and any other properties
-      width,
-      height,
-    };
-  });
-  
-  return { nodes: positionedNodes, edges: updatedEdges };
-} 
-
-
-================================================
-FILE: app/utils/nodeUtils.js
-================================================
-/**
- * Generates ServiceNow URLs for different node types
- */
-
-/**
- * Generates the appropriate ServiceNow URL based on node type and sys_id
- * @param {string} baseUrl - Base ServiceNow instance URL
- * @param {string} nodeType - Type of node (useCase, agent, tool, trigger)
- * @param {string} sysId - ServiceNow sys_id of the record
- * @param {string} toolType - Type of tool (only needed for tool nodes)
- * @returns {string} Complete URL to ServiceNow record
- */
-export function generateServiceNowUrl(baseUrl, nodeType, sysId, toolType) {
-  if (!baseUrl || !sysId) return null;
-  
-  // Remove trailing slash if present
-  const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-  
-  switch (nodeType) {
-    case 'useCase':
-      return `${cleanBaseUrl}/now/agent-studio/usecase-guided-setup/${sysId}/params/step/details`;
-      
-    case 'agent':
-      return `${cleanBaseUrl}/now/agent-studio/agent-setup/${sysId}`;
-    
-    case 'trigger':
-      // Updated to match the format provided in the example
-      return `${cleanBaseUrl}/now/nav/ui/classic/params/target/sn_aia_trigger_configuration.do%3Fsys_id%3D${sysId}%26sysparm_view%3D%26sysparm_record_target%3Dsn_aia_trigger_configuration%26sysparm_record_row%3D1%26sysparm_record_list%3DORDERBYusecase%26sysparm_record_rows%3D5`;
-      
-    case 'tool':
-      // Use the standardized format for all tool types to match the example URL format
-      return `${cleanBaseUrl}/now/nav/ui/classic/params/target/sn_aia_tool.do%3Fsys_id%3D${sysId}`;
-      
-    default:
-      return null;
-  }
-}
-
-/**
- * External link icon SVG as JSX
- */
-export const ExternalLinkIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="14" 
-    height="14" 
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="external-link-icon"
-  >
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-    <polyline points="15 3 21 3 21 9"></polyline>
-    <line x1="10" y1="14" x2="21" y2="3"></line>
-  </svg>
-); 
-
-
-================================================
-FILE: app/utils/transformAgenticData.js
-================================================
-/**
- * Transforms ServiceNow agentic AI data into React Flow nodes and edges
- * @param {Object} agenticData - ServiceNow agentic AI data
- * @param {String} layoutDirection - Layout direction ('LR' or 'TB')
- * @returns {Object} { nodes, edges }
- */
-// Remove the layout import as it's no longer used here
-// import { applyDagreLayout } from './layoutGraph';
-
-export function transformAgenticData(agenticData, layoutDirection = 'LR') {
-  console.log("transformAgenticData called with:", { 
-    dataPresent: !!agenticData,
-    dataType: typeof agenticData,
-    hasUseCases: agenticData?.use_cases ? true : false,
-    useCasesLength: agenticData?.use_cases?.length
-  });
-
-  try {
-    if (!agenticData || !agenticData.use_cases || !agenticData.use_cases.length) {
-      console.warn("No valid agentic data to transform:", agenticData);
-      return { nodes: [], edges: [] };
-    }
-
-    const nodes = [];
-    const edges = [];
-    let nodeId = 1;
-
-    // --- Sort Use Cases by Name ---
-    const sortedUseCases = [...agenticData.use_cases].sort((a, b) => {
-      // Basic string comparison should work due to the leading number in the name
-      const nameA = a.name || '';
-      const nameB = b.name || '';
-      return nameA.localeCompare(nameB);
-    });
-
-    console.log(`Processing ${sortedUseCases.length} use cases`);
-
-    // Process sorted use cases
-    sortedUseCases.forEach((useCase, useCaseIndex) => {
-      // Log to debug
-      console.log(`Processing use case: ${useCase.name} (${useCase.sys_id})`);
-      
-      if (!useCase.sys_id) {
-        console.warn("Use case missing sys_id:", useCase);
-        useCase.sys_id = `generated-${nodeId++}`;
-      }
-      
-      // Use case node
-      const useCaseId = `usecase-${useCase.sys_id}`;
-      nodes.push({
-        id: useCaseId,
-        // Initial positions will be overridden by the layout function
-        position: { x: 0, y: 0 },
-        data: { 
-          label: useCase.name || `Use Case ${useCaseIndex + 1}`,
-          type: 'useCase',
-          description: useCase.description || '',
-          details: useCase,
-          isCollapsed: false,
-          childrenCount: (useCase.agents || []).length,
-          nodeType: 'useCaseNode',
-          parentId: null,
-          level: 0
-        },
-        type: 'useCaseNode'
-      });
-
-      // Process triggers for this use case
-      if (useCase.triggers && useCase.triggers.length) {
-        useCase.triggers.forEach((trigger, triggerIndex) => {
-          if (!trigger.sys_id) {
-            console.warn("Trigger missing sys_id:", trigger);
-            trigger.sys_id = `generated-${nodeId++}`;
-          }
-          
-          const triggerId = `trigger-${trigger.sys_id}`;
-          
-          // Trigger node
-          nodes.push({
-            id: triggerId,
-            position: { x: 0, y: 0 },
-            data: { 
-              // Use objective_template as the primary label if name is null
-              label: trigger.name || trigger.objective_template || `Trigger ${triggerIndex + 1}`, 
-              type: 'trigger',
-              target_table: trigger.target_table || '',
-              condition: trigger.condition || '',
-              // Keep objective mapped for potential use in details panel, but label is primary display
-              objective: trigger.objective_template || '', 
-              details: trigger,
-              isCollapsed: false,
-              childrenCount: 0,
-              nodeType: 'triggerNode',
-              parentId: null,
-              level: 0
-            },
-            type: 'triggerNode'
-          });
-
-          // Edge from trigger to use case
-          edges.push({
-            id: `edge-${triggerId}-${useCaseId}`,
-            source: triggerId,
-            target: useCaseId,
-            animated: true,
-            label: 'initiates'
-          });
-        });
-      }
-
-      // Process agents for this use case
-      if (useCase.agents && useCase.agents.length) {
-        console.log(`Processing ${useCase.agents.length} agents for use case ${useCase.name}`);
-        
-        useCase.agents.forEach((agent, agentIndex) => {
-          if (!agent.sys_id) {
-            console.warn("Agent missing sys_id:", agent);
-            agent.sys_id = `generated-${nodeId++}`;
-          }
-          
-          const agentId = `agent-${agent.sys_id}`;
-          
-          // Agent node
-          nodes.push({
-            id: agentId,
-            position: { x: 0, y: 0 },
-            data: { 
-              label: agent.name || `Agent ${agentIndex + 1}`,
-              type: 'agent',
-              description: agent.description || '',
-              role: agent.role || '',
-              instructions: agent.instructions || '',
-              details: agent,
-              isCollapsed: false,
-              childrenCount: (agent.tools || []).length,
-              nodeType: 'agentNode',
-              parentId: useCaseId,  // Parent is the use case
-              level: 1,
-              visible: true  // Initially visible
-            },
-            type: 'agentNode'
-          });
-
-          // Edge from use case to agent
-          edges.push({
-            id: `edge-${useCaseId}-${agentId}`,
-            source: useCaseId,
-            target: agentId,
-            label: 'uses',
-            data: {
-              parentRelationship: true  // Mark this as a parent-child relationship edge
-            }
-          });
-
-          // Process tools for this agent
-          if (agent.tools && agent.tools.length) {
-            console.log(`Processing ${agent.tools.length} tools for agent ${agent.name}`);
-            
-            agent.tools.forEach((tool, toolIndex) => {
-              if (!tool.sys_id) {
-                console.warn("Tool missing sys_id:", tool);
-                tool.sys_id = `generated-${nodeId++}`;
-              }
-              
-              const toolId = `tool-${tool.sys_id}`;
-              
-              // Tool node
-              nodes.push({
-                id: toolId,
-                position: { x: 0, y: 0 },
-                data: { 
-                  label: tool.name || `Tool ${toolIndex + 1}`,
-                  type: 'tool',
-                  description: tool.description || '',
-                  toolType: tool.type || 'unknown',
-                  details: tool,
-                  isCollapsed: false,
-                  childrenCount: 0,
-                  nodeType: 'toolNode',
-                  parentId: agentId,  // Parent is the agent
-                  level: 2,
-                  visible: true  // Initially visible
-                },
-                type: 'toolNode'
-              });
-
-              // Edge from agent to tool
-              edges.push({
-                id: `edge-${agentId}-${toolId}`,
-                source: agentId,
-                target: toolId,
-                label: 'uses',
-                data: {
-                  parentRelationship: true  // Mark this as a parent-child relationship edge
-                }
-              });
-            });
-          }
-        });
-      }
-    });
-
-    console.log(`Transformation complete. Created ${nodes.length} nodes and ${edges.length} edges.`);
-    
-    // Return raw nodes and edges
-    return { nodes, edges };
-  } catch (error) {
-    console.error("Error in transformAgenticData:", error);
-    return { nodes: [], edges: [] };
-  }
-} 
-
-
-================================================
-FILE: app/utils/validation.js
-================================================
-/**
- * Input validation utilities for API endpoints
- */
-
-/**
- * Validate ServiceNow instance URL
- * @param {string} url - The URL to validate
- * @returns {Object} { isValid: boolean, error?: string, sanitized?: string }
- */
-export function validateInstanceUrl(url) {
-  if (!url || typeof url !== 'string') {
-    return { isValid: false, error: 'Instance URL is required' };
-  }
-
-  const trimmed = url.trim();
-  
-  if (trimmed.length === 0) {
-    return { isValid: false, error: 'Instance URL cannot be empty' };
-  }
-
-  if (trimmed.length > 500) {
-    return { isValid: false, error: 'Instance URL is too long' };
-  }
-
-  // Sanitize and format URL
-  let sanitized = trimmed;
-  
-  // Add https if no protocol specified
-  if (!sanitized.match(/^https?:\/\//)) {
-    sanitized = 'https://' + sanitized;
-  }
-  
-  // Remove trailing slash
-  if (sanitized.endsWith('/')) {
-    sanitized = sanitized.slice(0, -1);
-  }
-
-  // Validate URL format
-  try {
-    const urlObj = new URL(sanitized);
-    
-    // Ensure it's HTTPS for security
-    if (urlObj.protocol !== 'https:') {
-      return { isValid: false, error: 'Only HTTPS URLs are allowed' };
-    }
-    
-    // Basic ServiceNow domain validation
-    if (!urlObj.hostname.includes('.service-now.com') && 
-        !urlObj.hostname.includes('.servicenow.com') &&
-        !urlObj.hostname.match(/^[\w-]+\.servicenowservices\.com$/)) {
-      return { isValid: false, error: 'Invalid ServiceNow domain' };
-    }
-    
-    return { isValid: true, sanitized: urlObj.origin };
-  } catch (error) {
-    return { isValid: false, error: 'Invalid URL format' };
-  }
-}
-
-/**
- * Validate ServiceNow scope ID (sys_id)
- * @param {string} scopeId - The scope ID to validate
- * @returns {Object} { isValid: boolean, error?: string, sanitized?: string }
- */
-export function validateScopeId(scopeId) {
-  if (!scopeId || typeof scopeId !== 'string') {
-    return { isValid: false, error: 'Scope ID is required' };
-  }
-
-  const trimmed = scopeId.trim();
-  
-  if (trimmed.length === 0) {
-    return { isValid: false, error: 'Scope ID cannot be empty' };
-  }
-
-  // ServiceNow sys_id is 32 characters long (UUID without dashes)
-  const sysIdPattern = /^[a-f0-9]{32}$/i;
-  
-  // Also allow UUIDs with dashes
-  const uuidPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
-  
-  if (!sysIdPattern.test(trimmed) && !uuidPattern.test(trimmed)) {
-    return { isValid: false, error: 'Invalid scope ID format (must be 32 hex characters or UUID)' };
-  }
-
-  // Normalize to 32-character format
-  const sanitized = trimmed.replace(/-/g, '').toLowerCase();
-  
-  return { isValid: true, sanitized };
-}
-
-/**
- * Validate business profile data
- * @param {Object} profile - The profile to validate
- * @returns {Object} { isValid: boolean, errors: string[], sanitized?: Object }
- */
-export function validateBusinessProfile(profile) {
-  const errors = [];
-  const sanitized = {};
-
-  if (!profile || typeof profile !== 'object') {
-    return { isValid: false, errors: ['Profile data is required'] };
-  }
-
-  // Company name validation
-  if (!profile.companyName || typeof profile.companyName !== 'string') {
-    errors.push('Company name is required');
-  } else {
-    const trimmed = profile.companyName.trim();
-    if (trimmed.length === 0) {
-      errors.push('Company name cannot be empty');
-    } else if (trimmed.length > 200) {
-      errors.push('Company name is too long (max 200 characters)');
-    } else {
-      sanitized.companyName = trimmed;
-    }
-  }
-
-  // Industry validation
-  const validIndustries = [
-    'Technology', 'Healthcare', 'Finance', 'Manufacturing', 
-    'Retail', 'Education', 'Real Estate', 'Transportation', 
-    'Energy', 'Other'
-  ];
-  
-  if (!profile.industry || !validIndustries.includes(profile.industry)) {
-    errors.push('Valid industry selection is required');
-  } else {
-    sanitized.industry = profile.industry;
-  }
-
-  // Company size validation
-  const validSizes = ['startup', 'small', 'medium', 'large'];
-  
-  if (!profile.companySize || !validSizes.includes(profile.companySize)) {
-    errors.push('Valid company size is required');
-  } else {
-    sanitized.companySize = profile.companySize;
-  }
-
-  // AI maturity level validation
-  const validMaturityLevels = ['beginner', 'emerging', 'developing', 'advanced'];
-  
-  if (!profile.aiMaturityLevel || !validMaturityLevels.includes(profile.aiMaturityLevel)) {
-    errors.push('Valid AI maturity level is required');
-  } else {
-    sanitized.aiMaturityLevel = profile.aiMaturityLevel;
-  }
-
-  // Primary goals validation (array)
-  if (!Array.isArray(profile.primaryGoals)) {
-    errors.push('Primary goals must be an array');
-  } else if (profile.primaryGoals.length === 0) {
-    errors.push('At least one primary goal is required');
-  } else if (profile.primaryGoals.length > 10) {
-    errors.push('Too many primary goals selected (max 10)');
-  } else {
-    sanitized.primaryGoals = profile.primaryGoals.filter(goal => 
-      typeof goal === 'string' && goal.trim().length > 0
-    );
-  }
-
-  // Optional fields
-  if (profile.currentTechStack && Array.isArray(profile.currentTechStack)) {
-    sanitized.currentTechStack = profile.currentTechStack.filter(tech => 
-      typeof tech === 'string' && tech.trim().length > 0
-    );
-  }
-
-  if (profile.budget && typeof profile.budget === 'string') {
-    sanitized.budget = profile.budget.trim();
-  }
-
-  if (profile.timeframe && typeof profile.timeframe === 'string') {
-    sanitized.timeframe = profile.timeframe.trim();
-  }
-
-  if (profile.currentChallenges && typeof profile.currentChallenges === 'string') {
-    const trimmed = profile.currentChallenges.trim();
-    if (trimmed.length <= 2000) { // Reasonable limit
-      sanitized.currentChallenges = trimmed;
-    }
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-    sanitized: errors.length === 0 ? sanitized : undefined
-  };
-}
-
-/**
- * Validate scenario type
- * @param {string} scenarioType - The scenario type to validate
- * @returns {Object} { isValid: boolean, error?: string, sanitized?: string }
- */
-export function validateScenarioType(scenarioType) {
-  const validScenarios = ['conservative', 'balanced', 'aggressive'];
-  
-  if (!scenarioType || typeof scenarioType !== 'string') {
-    return { isValid: true, sanitized: 'balanced' }; // Default
-  }
-
-  const trimmed = scenarioType.trim().toLowerCase();
-  
-  if (!validScenarios.includes(trimmed)) {
-    return { isValid: false, error: 'Invalid scenario type' };
-  }
-
-  return { isValid: true, sanitized: trimmed };
-}
-
-/**
- * General purpose string sanitization
- * @param {string} input - String to sanitize
- * @param {number} maxLength - Maximum length allowed
- * @returns {string} Sanitized string
- */
-export function sanitizeString(input, maxLength = 500) {
-  if (!input || typeof input !== 'string') {
-    return '';
-  }
-  
-  return input.trim().slice(0, maxLength);
-}
-
-/**
- * Rate limiting helper (simple in-memory implementation)
- */
-const requestCounts = new Map();
-
-export function checkRateLimit(identifier, maxRequests = 10, windowMs = 60000) {
-  const now = Date.now();
-  const windowStart = now - windowMs;
-  
-  // Clean old entries
-  for (const [key, timestamps] of requestCounts.entries()) {
-    const validTimestamps = timestamps.filter(ts => ts > windowStart);
-    if (validTimestamps.length === 0) {
-      requestCounts.delete(key);
-    } else {
-      requestCounts.set(key, validTimestamps);
-    }
-  }
-  
-  // Check current identifier
-  const timestamps = requestCounts.get(identifier) || [];
-  const recentRequests = timestamps.filter(ts => ts > windowStart);
-  
-  if (recentRequests.length >= maxRequests) {
-    return { allowed: false, retryAfter: Math.ceil((timestamps[0] + windowMs - now) / 1000) };
-  }
-  
-  // Add current request
-  recentRequests.push(now);
-  requestCounts.set(identifier, recentRequests);
-  
-  return { allowed: true };
-} 
-
-
+      conservativ

@@ -8,6 +8,8 @@
 - Ensure robust error handling and update logging as needed.
 - Sanitize and validate all inputs; do not hardcode sensitive information.
 - Consider performance and add benchmarks if relevant.
+- Write or update relevant tests before implementing code changes.
+- Run all tests after each change to verify correctness and prevent regressions.
 - If unsure, ask for clarification or propose alternatives.
 
 # Docs & Decisions

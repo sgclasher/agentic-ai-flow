@@ -1,320 +1,674 @@
 'use client';
 
 /**
- * Demo Data Service
+ * Enhanced Demo Data Service with Supabase Integration
  * 
- * Provides realistic sample client profiles for testing and demonstration.
- * Based on common enterprise scenarios and Value Selling Framework patterns.
+ * Provides realistic demo profiles and data for the AI advisory platform.
+ * Features Supabase integration with localStorage fallback and industry-specific
+ * templates for comprehensive demonstration capabilities.
+ * 
+ * Key Features:
+ * - Supabase integration with demo data storage
+ * - Industry-specific demo profile templates
+ * - Demo mode toggle with session management
+ * - Realistic relationship data between profiles, timelines, and AI conversations
+ * - Data seeding capabilities for development/demo environments
+ * - Export/import demo configurations
  */
 
-export const demoDataService = {
-  /**
-   * Get a collection of demo profiles
-   * @returns {Array} Array of demo profile objects
-   */
-  getDemoProfiles() {
-    return [
-      this.getTechStartupProfile(),
-      this.getManufacturingProfile(), 
-      this.getHealthcareProfile(),
-      this.getFinanceProfile()
-    ];
-  },
+import { 
+  ProfileDB, 
+  TimelineDB, 
+  AuthService, 
+  AuditService,
+  AIConversationDB,
+  FeatureService
+} from './supabaseService';
+import { ProfileService } from './profileService';
+import { TimelineService } from './timelineService';
+
+export class DemoDataService {
+  // Demo configuration
+  static DEMO_CONFIG = {
+    enableSupabase: true,
+    fallbackToLocalStorage: true,
+    demoMode: false,
+    autoGenerateTimelines: true,
+    industryTemplates: [
+      'technology', 'healthcare', 'finance', 'manufacturing', 
+      'retail', 'education', 'government', 'consulting'
+    ]
+  };
+
+  // Demo data cache
+  static demoCache = new Map();
 
   /**
-   * Get a specific demo profile by type
-   * @param {string} type - Type of demo profile
-   * @returns {Object} Demo profile data
+   * Initialize demo environment with sample data
+   * @param {Object} options - Initialization options
+   * @returns {Promise<boolean>} Success status
    */
-  getDemoProfile(type = 'tech-startup') {
-    const profiles = {
-      'tech-startup': this.getTechStartupProfile(),
-      'manufacturing': this.getManufacturingProfile(),
-      'healthcare': this.getHealthcareProfile(),
-      'finance': this.getFinanceProfile()
-    };
-    return profiles[type] || profiles['tech-startup'];
-  },
+  static async initializeDemoData(options = {}) {
+    try {
+      const {
+        clearExisting = false,
+        industries = this.DEMO_CONFIG.industryTemplates,
+        profileCount = 12,
+        generateTimelines = true
+      } = options;
 
-  /**
-   * Technology startup profile
-   */
-  getTechStartupProfile() {
-    return {
-      companyName: 'TechFlow Solutions',
-      industry: 'Technology',
-      size: '51-200 employees',
-      annualRevenue: '15M',
-      employeeCount: '120',
-      primaryLocation: 'Austin, Texas',
-      valueSellingFramework: {
-        businessIssues: [
-          'Revenue Growth Pressure',
-          'Operational Efficiency',
-          'Customer Experience'
-        ],
-        businessIssueOther: 'Scaling challenges with rapid growth',
-        businessIssueDetails: 'Fast-growing SaaS company struggling with manual processes that worked at 50 employees but are breaking down at 120+. Customer support response times increasing, sales processes inconsistent, and engineering productivity declining due to operational overhead.',
-        problems: {
-          finance: {
-            'Manual invoice processing taking [X] days': true,
-            '[X]% error rate in financial processes': true
-          },
-          hr: {
-            'Employee onboarding takes [X] days': true,
-            'Manual resume screening': true
-          },
-          it: {
-            'Average ticket resolution: [X] hours': true,
-            'System provisioning takes [X] hours': true
-          },
-          customerService: {
-            'Average response time: [X] hours': true,
-            '[X]% first contact resolution rate': true
-          },
-          operations: {
-            '[X]% manual processes': true
+      console.log('Initializing demo data environment...');
+
+      // Clear existing demo data if requested
+      if (clearExisting) {
+        await this.clearDemoData();
+      }
+
+      // Enable demo mode
+      await this.enableDemoMode();
+
+      // Generate demo profiles for each industry
+      const demoProfiles = [];
+      for (const industry of industries.slice(0, profileCount)) {
+        const profile = await this.createDemoProfile(industry);
+        if (profile) {
+          demoProfiles.push(profile);
+          
+          // Generate timeline for each profile if enabled
+          if (generateTimelines) {
+            await this.generateDemoTimeline(profile);
           }
-        },
-        additionalChallenges: 'Integration hell with 15+ different tools, lack of real-time visibility into customer health, manual reporting taking 2 days per week',
-        rootCauses: [
-          'Manual, paper-based processes',
-          'Lack of real-time data visibility',
-          'Insufficient automation',
-          'Siloed departments'
-        ],
-        rootCauseDetails: 'Grew too fast to implement proper systems. Started with spreadsheets and manual processes that became embedded in culture. Each department chose their own tools without integration strategy.',
+        }
+      }
+
+      // Create demo AI conversations
+      await this.createDemoAIConversations(demoProfiles);
+
+      // Cache demo data
+      this.demoCache.set('profiles', demoProfiles);
+      this.demoCache.set('initialized', true);
+
+      console.log(`Demo data initialized: ${demoProfiles.length} profiles created`);
+      return true;
+
+    } catch (error) {
+      console.error('Error initializing demo data:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Create a demo profile for a specific industry
+   * @param {string} industry - Industry type
+   * @returns {Promise<Object>} Created demo profile
+   */
+  static async createDemoProfile(industry) {
+    try {
+      const template = this.getIndustryTemplate(industry);
+      const profileData = this.generateProfileData(template);
+
+      // Create profile using ProfileService
+      const profile = await ProfileService.createProfile(profileData);
+
+      // Add demo metadata
+      if (profile) {
+        profile.isDemoData = true;
+        profile.demoIndustry = industry;
+        profile.createdAt = new Date().toISOString();
+      }
+
+      return profile;
+
+    } catch (error) {
+      console.warn(`Error creating demo profile for ${industry}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Generate demo timeline for a profile
+   * @param {Object} profile - Profile to generate timeline for
+   * @returns {Promise<Object>} Generated timeline
+   */
+  static async generateDemoTimeline(profile) {
+    try {
+      // Extract business profile data
+      const businessProfile = ProfileService.extractBusinessProfile(profile);
+      businessProfile.profileId = profile.id;
+
+      // Generate timeline with random scenario
+      const scenarios = ['conservative', 'balanced', 'aggressive'];
+      const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+
+      const timeline = await TimelineService.generateTimeline(
+        businessProfile, 
+        randomScenario,
+        { aiProvider: 'demo', isDemoData: true }
+      );
+
+      return timeline;
+
+    } catch (error) {
+      console.warn(`Error generating demo timeline for profile ${profile.id}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Create demo AI conversations
+   * @param {Array} profiles - Demo profiles to create conversations for
+   * @returns {Promise<Array>} Created conversations
+   */
+  static async createDemoAIConversations(profiles) {
+    try {
+      const conversations = [];
+      const user = await AuthService.getCurrentUser();
+
+      for (const profile of profiles.slice(0, 5)) { // Create conversations for first 5 profiles
+        const conversation = {
+          profile_id: profile.id,
+          provider: 'demo-ai',
+          conversation_type: 'consultation',
+          input_data: {
+            question: this.getDemoQuestion(profile.industry),
+            context: profile.companyName
+          },
+          output_data: {
+            response: this.getDemoResponse(profile.industry),
+            recommendations: this.getDemoRecommendations(profile.industry)
+          },
+          tokens_used: Math.floor(Math.random() * 1000) + 500,
+          cost_usd: (Math.random() * 0.05 + 0.01).toFixed(4),
+          duration_ms: Math.floor(Math.random() * 5000) + 1000
+        };
+
+        if (this.DEMO_CONFIG.enableSupabase && user) {
+          try {
+            const created = await AIConversationDB.create(conversation, user.id);
+            conversations.push(created);
+          } catch (error) {
+            console.warn('Failed to create demo conversation in Supabase:', error);
+          }
+        }
+      }
+
+      return conversations;
+
+    } catch (error) {
+      console.warn('Error creating demo AI conversations:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get all demo profiles
+   * @returns {Promise<Array>} Demo profiles
+   */
+  static async getDemoProfiles() {
+    try {
+      // Check cache first
+      if (this.demoCache.has('profiles')) {
+        return this.demoCache.get('profiles');
+      }
+
+      // Get profiles from ProfileService
+      const allProfiles = await ProfileService.getProfiles();
+      const demoProfiles = allProfiles.filter(profile => profile.isDemoData);
+
+      // Cache the results
+      this.demoCache.set('profiles', demoProfiles);
+      
+      return demoProfiles;
+
+    } catch (error) {
+      console.error('Error fetching demo profiles:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Enable demo mode
+   * @returns {Promise<boolean>} Success status
+   */
+  static async enableDemoMode() {
+    try {
+      this.DEMO_CONFIG.demoMode = true;
+      
+      // Store in localStorage for persistence
+      localStorage.setItem('demoMode', 'true');
+      
+      // Enable demo features if using Supabase
+      if (this.DEMO_CONFIG.enableSupabase) {
+        try {
+          const user = await AuthService.getCurrentUser();
+          if (user) {
+            await FeatureService.enableUserFeature(user.id, 'demo_mode');
+          }
+        } catch (error) {
+          console.warn('Could not enable demo mode in Supabase:', error);
+        }
+      }
+
+      console.log('Demo mode enabled');
+      return true;
+
+    } catch (error) {
+      console.error('Error enabling demo mode:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Disable demo mode
+   * @returns {Promise<boolean>} Success status
+   */
+  static async disableDemoMode() {
+    try {
+      this.DEMO_CONFIG.demoMode = false;
+      
+      // Remove from localStorage
+      localStorage.removeItem('demoMode');
+      
+      // Disable demo features if using Supabase
+      if (this.DEMO_CONFIG.enableSupabase) {
+        try {
+          const user = await AuthService.getCurrentUser();
+          if (user) {
+            await FeatureService.disableUserFeature(user.id, 'demo_mode');
+          }
+        } catch (error) {
+          console.warn('Could not disable demo mode in Supabase:', error);
+        }
+      }
+
+      console.log('Demo mode disabled');
+      return true;
+
+    } catch (error) {
+      console.error('Error disabling demo mode:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if demo mode is enabled
+   * @returns {boolean} Demo mode status
+   */
+  static isDemoMode() {
+    // Check localStorage first
+    const localDemoMode = localStorage.getItem('demoMode') === 'true';
+    return this.DEMO_CONFIG.demoMode || localDemoMode;
+  }
+
+  /**
+   * Clear all demo data
+   * @returns {Promise<boolean>} Success status
+   */
+  static async clearDemoData() {
+    try {
+      const demoProfiles = await this.getDemoProfiles();
+      
+      // Delete each demo profile (this will cascade to timelines and conversations)
+      for (const profile of demoProfiles) {
+        await ProfileService.deleteProfile(profile.id);
+      }
+
+      // Clear cache
+      this.demoCache.clear();
+
+      console.log(`Cleared ${demoProfiles.length} demo profiles`);
+      return true;
+
+    } catch (error) {
+      console.error('Error clearing demo data:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Export demo configuration
+   * @returns {Object} Demo configuration and data
+   */
+  static async exportDemoConfig() {
+    try {
+      const profiles = await this.getDemoProfiles();
+      const config = {
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+        demoConfig: this.DEMO_CONFIG,
+        profileCount: profiles.length,
+        industries: [...new Set(profiles.map(p => p.industry))],
+        profiles: profiles.map(profile => ({
+          industry: profile.industry,
+          companyName: profile.companyName,
+          size: profile.size,
+          data: profile
+        }))
+      };
+
+      return config;
+
+    } catch (error) {
+      console.error('Error exporting demo config:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Import demo configuration
+   * @param {Object} config - Demo configuration to import
+   * @returns {Promise<boolean>} Success status
+   */
+  static async importDemoConfig(config) {
+    try {
+      if (!config || config.version !== '1.0') {
+        throw new Error('Invalid demo configuration format');
+      }
+
+      // Clear existing demo data
+      await this.clearDemoData();
+
+      // Import profiles
+      const importedProfiles = [];
+      for (const profileConfig of config.profiles) {
+        const profile = await this.createDemoProfile(profileConfig.industry);
+        if (profile) {
+          importedProfiles.push(profile);
+        }
+      }
+
+      console.log(`Imported ${importedProfiles.length} demo profiles`);
+      return true;
+
+    } catch (error) {
+      console.error('Error importing demo config:', error);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // INDUSTRY TEMPLATES
+  // ============================================================================
+
+  /**
+   * Get industry-specific template
+   * @param {string} industry - Industry type
+   * @returns {Object} Industry template
+   */
+  static getIndustryTemplate(industry) {
+    const templates = {
+      technology: {
+        companyNames: ['TechNova Solutions', 'CloudPeak Technologies', 'NextGen Systems'],
+        sizes: ['51-200 employees', '201-1000 employees', '1000+ employees'],
+        businessIssues: ['Revenue Growth Pressure', 'Competitive Differentiation', 'Operational Efficiency'],
+        aiReadinessScores: [6, 7, 8, 9],
+        technologies: ['Cloud Computing', 'Machine Learning', 'API Development'],
+        budgetRanges: ['500k-1m', '1m-5m', '>5m']
+      },
+      healthcare: {
+        companyNames: ['HealthFirst Medical', 'CarePoint Systems', 'MedTech Innovations'],
+        sizes: ['201-1000 employees', '1000+ employees'],
+        businessIssues: ['Regulatory Compliance', 'Patient Experience', 'Cost Reduction Mandate'],
+        aiReadinessScores: [4, 5, 6, 7],
+        technologies: ['Electronic Health Records', 'Telemedicine', 'Medical Imaging'],
+        budgetRanges: ['100k-500k', '500k-1m', '1m-5m']
+      },
+      finance: {
+        companyNames: ['Capital Dynamics', 'SecureBank Solutions', 'InvestPro Partners'],
+        sizes: ['51-200 employees', '201-1000 employees', '1000+ employees'],
+        businessIssues: ['Regulatory Compliance', 'Fraud Prevention', 'Customer Experience'],
+        aiReadinessScores: [5, 6, 7, 8],
+        technologies: ['Risk Management', 'Algorithmic Trading', 'Customer Analytics'],
+        budgetRanges: ['500k-1m', '1m-5m', '>5m']
+      },
+      manufacturing: {
+        companyNames: ['Precision Manufacturing', 'Industrial Dynamics', 'SmartFactory Solutions'],
+        sizes: ['201-1000 employees', '1000+ employees'],
+        businessIssues: ['Operational Efficiency', 'Quality Control', 'Supply Chain Optimization'],
+        aiReadinessScores: [3, 4, 5, 6],
+        technologies: ['IoT Sensors', 'Predictive Maintenance', 'Quality Control Systems'],
+        budgetRanges: ['100k-500k', '500k-1m', '1m-5m']
+      },
+      retail: {
+        companyNames: ['RetailMax Solutions', 'ShopSmart Technologies', 'CustomerFirst Retail'],
+        sizes: ['51-200 employees', '201-1000 employees', '1000+ employees'],
+        businessIssues: ['Customer Experience', 'Inventory Management', 'Revenue Growth Pressure'],
+        aiReadinessScores: [4, 5, 6, 7],
+        technologies: ['E-commerce Platform', 'Inventory Management', 'Customer Analytics'],
+        budgetRanges: ['100k-500k', '500k-1m', '1m-5m']
+      },
+      education: {
+        companyNames: ['EduTech Solutions', 'Learning Innovations', 'AcademicPlus Systems'],
+        sizes: ['51-200 employees', '201-1000 employees'],
+        businessIssues: ['Student Engagement', 'Administrative Efficiency', 'Cost Reduction Mandate'],
+        aiReadinessScores: [3, 4, 5, 6],
+        technologies: ['Learning Management System', 'Student Analytics', 'Virtual Classrooms'],
+        budgetRanges: ['<100k', '100k-500k', '500k-1m']
+      },
+      government: {
+        companyNames: ['CivicTech Solutions', 'GovCloud Systems', 'PublicService Technologies'],
+        sizes: ['201-1000 employees', '1000+ employees'],
+        businessIssues: ['Citizen Experience', 'Operational Efficiency', 'Transparency & Accountability'],
+        aiReadinessScores: [2, 3, 4, 5],
+        technologies: ['Citizen Portal', 'Document Management', 'Data Analytics'],
+        budgetRanges: ['100k-500k', '500k-1m', '1m-5m']
+      },
+      consulting: {
+        companyNames: ['Strategic Advisors', 'ConsultPro Solutions', 'Expert Partners'],
+        sizes: ['1-50 employees', '51-200 employees', '201-1000 employees'],
+        businessIssues: ['Service Delivery', 'Client Acquisition', 'Knowledge Management'],
+        aiReadinessScores: [5, 6, 7, 8],
+        technologies: ['Project Management', 'Knowledge Base', 'Client Analytics'],
+        budgetRanges: ['<100k', '100k-500k', '500k-1m']
+      }
+    };
+
+    return templates[industry] || templates.technology;
+  }
+
+  /**
+   * Generate realistic profile data from template
+   * @param {Object} template - Industry template
+   * @returns {Object} Generated profile data
+   */
+  static generateProfileData(template) {
+    const companyName = this.randomSelect(template.companyNames);
+    const size = this.randomSelect(template.sizes);
+    const aiReadinessScore = this.randomSelect(template.aiReadinessScores);
+    const primaryBusinessIssue = this.randomSelect(template.businessIssues);
+    const budgetRange = this.randomSelect(template.budgetRanges);
+
+    return {
+      companyName,
+      industry: this.detectIndustryFromTemplate(template),
+      size,
+      annualRevenue: this.generateRevenueFromSize(size),
+      valueSellingFramework: {
+        businessIssues: [primaryBusinessIssue, ...this.randomSelect(template.businessIssues, 2)],
         impact: {
-          laborCosts: '450000',
-          errorCosts: '75000',
-          downtimeCosts: '120000',
-          complianceCosts: '25000',
-          totalHardCosts: '670000',
-          employeeImpact: 'High',
-          customerImpact: 'Medium',
-          competitiveImpact: 'High',
-          reputationRisk: 'Medium',
-          totalAnnualImpact: '850000'
+          totalAnnualImpact: this.generateImpactFromBudget(budgetRange)
         },
-        solutionCapabilities: [
-          'Automate document processing',
-          'Streamline approval workflows',
-          'Provide real-time dashboards',
-          'Integrate disconnected systems',
-          'Enable self-service capabilities'
-        ],
-        differentiationRequirements: [
-          'Rapid implementation (< 6 months)',
-          'No-code/low-code platform',
-          'Strong integration capabilities',
-          'Proven ROI in similar companies'
-        ],
-        roiExpectations: {
-          costReduction: '30%',
-          efficiencyImprovement: '40%',
-          paybackPeriod: '8 months',
-          targetROI: '300%',
-          timeToFirstValue: '3 months'
-        },
-        successMetrics: [
-          'Process cycle time reduction',
-          'Employee productivity increase',
-          'Customer satisfaction improvement'
-        ],
-        successMetricsTargets: 'Reduce support response time from 4 hours to 1 hour, increase sales cycle speed by 25%, reduce onboarding time from 2 weeks to 3 days',
         decisionMakers: {
           economicBuyer: {
-            name: 'Sarah Chen',
-            title: 'CEO',
-            budget: '500000'
+            name: this.generateExecutiveName(),
+            title: this.generateExecutiveTitle(),
+            budget: budgetRange
           },
           technicalBuyer: {
-            name: 'Mike Rodriguez',
+            name: this.generateTechnicalName(),
             title: 'CTO'
-          },
-          champion: {
-            name: 'Lisa Park',
-            title: 'VP Operations'
-          },
-          influencers: 'Head of Customer Success, Engineering Manager, Finance Director'
+          }
         },
         buyingProcess: {
-          timeline: '4 months',
-          budgetCycle: 'Q1 planning cycle',
-          evaluationCriteria: [
-            'Technical fit',
-            'Implementation timeline',
-            'Cost/ROI'
-          ]
-        },
-        risksOfInaction: {
-          costEscalation: '1200000',
-          competitiveDisadvantage: 'Losing deals to faster competitors, customer churn increasing',
-          employeeAttrition: 'High',
-          customerSatisfaction: 'Support tickets up 40%, NPS declining',
-          complianceRisk: 'SOC2 audit findings due to manual processes',
-          threeYearCost: '3600000'
+          timeline: this.generateTimeline(),
+          stakeholders: 3 + Math.floor(Math.random() * 5)
         }
       },
       aiOpportunityAssessment: {
-        currentTechnology: {
-          erp: 'QuickBooks + custom spreadsheets',
-          crm: 'HubSpot',
-          collaboration: 'Slack, Notion, Zoom',
-          automation: 'Zapier for basic integrations',
-          integrationMaturity: 'Basic',
-          dataQuality: 'Fair'
-        },
-        aiReadinessScore: 6,
-        readinessScoring: {
-          dataQuality: 1,
-          integration: 1,
-          technicalTeam: 2,
-          leadership: 2,
-          changeManagement: 1
-        },
-        opportunities: [
-          {
-            name: 'Customer Support Automation',
-            department: 'Customer Success',
-            process: 'Ticket routing and initial response',
-            currentState: 'Manual ticket assignment, 4-hour response time',
-            aiSolution: 'AI-powered ticket classification and auto-responses',
-            estimatedImpact: '180000',
-            implementationEffort: 'Medium',
-            timeline: '3 months',
-            priorityScore: '9'
-          },
-          {
-            name: 'Sales Lead Scoring',
-            department: 'Sales',
-            process: 'Lead qualification and prioritization',
-            currentState: 'Manual review of all inbound leads',
-            aiSolution: 'ML-based lead scoring and routing',
-            estimatedImpact: '240000',
-            implementationEffort: 'Low',
-            timeline: '2 months',
-            priorityScore: '8'
-          }
-        ],
-        quickWins: [
-          { name: 'Automated ticket routing', impact: '50000', timeline: '1 month' },
-          { name: 'Invoice processing automation', impact: '75000', timeline: '2 months' },
-          { name: 'Employee onboarding workflows', impact: '30000', timeline: '6 weeks' }
-        ],
-        strategicInitiatives: [
-          { name: 'Predictive customer health scoring', impact: '200000', timeline: '6 months' },
-          { name: 'Automated financial reporting', impact: '120000', timeline: '9 months' }
-        ],
-        futureOpportunities: [
-          { name: 'AI-powered product recommendations', impact: '500000', timeline: '18 months' },
-          { name: 'Predictive maintenance for infrastructure', impact: '150000', timeline: '24 months' }
-        ]
+        aiReadinessScore,
+        currentTechnology: this.randomSelect(template.technologies, 2),
+        challenges: this.generateChallenges(primaryBusinessIssue),
+        goals: this.generateGoals(primaryBusinessIssue)
       },
-      summary: {
-        currentState: 'Fast-growing SaaS company with $15M revenue experiencing scaling pains. Manual processes causing 4-hour support response times, 2-week onboarding cycles, and declining productivity. Total annual impact: $850K.',
-        recommendedApproach: 'Phased AI implementation starting with customer support automation and sales lead scoring. Focus on integration platform to unify 15+ disparate systems. Target 40% efficiency improvement within 8 months.',
-        expectedValue: {
-          threeYearBenefit: '2400000',
-          investment: '800000',
-          netROI: '300%',
-          paybackPeriod: '8 months'
-        },
-        nextSteps: [
-          { action: 'Technical architecture review with CTO', owner: 'Mike Rodriguez', date: '2 weeks' },
-          { action: 'ROI validation workshop', owner: 'Lisa Park', date: '3 weeks' },
-          { action: 'Pilot project scope definition', owner: 'Sarah Chen', date: '1 month' }
-        ],
-        notes: 'Strong technical team, CEO is former engineer (technical buyer). Main concern is implementation speed - need to show quick wins. Competitive evaluation against 3 other vendors. Decision by end of Q1.'
-      }
-    };
-  },
-
-  /**
-   * Manufacturing company profile
-   */
-  getManufacturingProfile() {
-    return {
-      companyName: 'PrecisionParts Manufacturing',
-      industry: 'Manufacturing',
-      size: '201-1000 employees',
-      annualRevenue: '85M',
-      employeeCount: '450',
-      primaryLocation: 'Cleveland, Ohio',
-      valueSellingFramework: {
-        businessIssues: [
-          'Cost Reduction Mandate',
-          'Operational Efficiency',
-          'Regulatory Compliance'
-        ],
-        businessIssueDetails: 'Traditional manufacturer facing pressure from low-cost overseas competitors. Need 25% cost reduction while maintaining quality. Current ERP system from 2010 cannot handle modern analytics needs.',
-        impact: {
-          totalAnnualImpact: '2400000'
-        }
-        // ... truncated for brevity, but would include full profile
-      },
-      summary: {
-        currentState: 'Traditional manufacturer with aging systems, manual quality processes, and 15% waste rate. Losing contracts to lower-cost competitors.',
-        recommendedApproach: 'AI-powered predictive maintenance, quality control automation, and supply chain optimization.'
-      }
-    };
-  },
-
-  /**
-   * Healthcare organization profile  
-   */
-  getHealthcareProfile() {
-    return {
-      companyName: 'Regional Medical Center',
-      industry: 'Healthcare',
-      size: '1000+ employees',
-      annualRevenue: '320M',
-      employeeCount: '2100',
-      primaryLocation: 'Phoenix, Arizona',
-      valueSellingFramework: {
-        businessIssues: [
-          'Operational Efficiency',
-          'Regulatory Compliance',
-          'Customer Experience'
-        ],
-        businessIssueDetails: 'Regional hospital system struggling with nurse burnout, patient wait times, and regulatory compliance costs. Need to improve patient outcomes while reducing operational costs.',
-        impact: {
-          totalAnnualImpact: '5200000'
-        }
-      },
-      summary: {
-        currentState: '500-bed hospital system with 45-minute average wait times, 18% nurse turnover, and $5.2M compliance burden.',
-        recommendedApproach: 'Clinical workflow automation, predictive patient risk scoring, and intelligent resource scheduling.'
-      }
-    };
-  },
-
-  /**
-   * Financial services profile
-   */
-  getFinanceProfile() {
-    return {
-      companyName: 'Community Trust Bank',
-      industry: 'Finance',
-      size: '201-1000 employees', 
-      annualRevenue: '180M',
-      employeeCount: '380',
-      primaryLocation: 'Charlotte, North Carolina',
-      valueSellingFramework: {
-        businessIssues: [
-          'Regulatory Compliance',
-          'Competitive Pressure',
-          'Customer Experience'
-        ],
-        businessIssueDetails: 'Regional bank losing customers to fintech apps and digital-first competitors. Loan approval process takes 3 weeks vs 24 hours for online lenders. High compliance costs.',
-        impact: {
-          totalAnnualImpact: '3100000'
-        }
-      },
-      summary: {
-        currentState: 'Regional bank with 15 branches, 3-week loan processing, and declining market share to digital competitors.',
-        recommendedApproach: 'Automated risk assessment, digital customer onboarding, and real-time fraud detection.'
-      }
+      changeManagementCapability: this.generateChangeManagement(aiReadinessScore),
+      riskTolerance: this.generateRiskTolerance(aiReadinessScore),
+      decisionTimeline: this.generateDecisionTimeline(size),
+      primaryBusinessIssue,
+      isDemoData: true
     };
   }
-}; 
+
+  // ============================================================================
+  // HELPER METHODS
+  // ============================================================================
+
+  static randomSelect(array, count = 1) {
+    if (count === 1) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
+    const shuffled = [...array].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  }
+
+  static detectIndustryFromTemplate(template) {
+    // Simple industry detection based on company names
+    const companyName = template.companyNames[0].toLowerCase();
+    if (companyName.includes('tech') || companyName.includes('cloud')) return 'Technology';
+    if (companyName.includes('health') || companyName.includes('med')) return 'Healthcare';
+    if (companyName.includes('bank') || companyName.includes('capital')) return 'Finance';
+    if (companyName.includes('manufacturing') || companyName.includes('factory')) return 'Manufacturing';
+    if (companyName.includes('retail') || companyName.includes('shop')) return 'Retail';
+    if (companyName.includes('edu') || companyName.includes('academic')) return 'Education';
+    if (companyName.includes('gov') || companyName.includes('civic')) return 'Government';
+    if (companyName.includes('consult') || companyName.includes('advisor')) return 'Consulting';
+    return 'Technology';
+  }
+
+  static generateRevenueFromSize(size) {
+    const revenueMap = {
+      '1-50 employees': ['<5M', '5M-15M'],
+      '51-200 employees': ['15M-50M', '50M-100M'],
+      '201-1000 employees': ['100M-500M', '500M-1B'],
+      '1000+ employees': ['1B-5B', '>5B']
+    };
+    return this.randomSelect(revenueMap[size] || revenueMap['51-200 employees']);
+  }
+
+  static generateImpactFromBudget(budgetRange) {
+    const impactMap = {
+      '<100k': 250000 + Math.random() * 250000,
+      '100k-500k': 500000 + Math.random() * 500000,
+      '500k-1m': 1000000 + Math.random() * 1000000,
+      '1m-5m': 2500000 + Math.random() * 2500000,
+      '>5m': 5000000 + Math.random() * 5000000
+    };
+    return Math.round(impactMap[budgetRange] || impactMap['500k-1m']);
+  }
+
+  static generateExecutiveName() {
+    const names = ['Sarah Chen', 'Michael Rodriguez', 'Jennifer Park', 'David Thompson', 'Lisa Wang', 'Robert Johnson'];
+    return this.randomSelect(names);
+  }
+
+  static generateExecutiveTitle() {
+    const titles = ['CEO', 'CFO', 'COO', 'VP of Operations', 'VP of Finance'];
+    return this.randomSelect(titles);
+  }
+
+  static generateTechnicalName() {
+    const names = ['Alex Kumar', 'Emily Foster', 'Marcus Johnson', 'Rachel Lee', 'James Wilson', 'Nina Patel'];
+    return this.randomSelect(names);
+  }
+
+  static generateTimeline() {
+    return 6 + Math.floor(Math.random() * 18); // 6-24 months
+  }
+
+  static generateChallenges(businessIssue) {
+    const challengeMap = {
+      'Revenue Growth Pressure': ['Limited market reach', 'Customer acquisition costs', 'Competitive pricing'],
+      'Operational Efficiency': ['Manual processes', 'Resource allocation', 'System integration'],
+      'Customer Experience': ['Response time', 'Service quality', 'Personalization'],
+      'Cost Reduction Mandate': ['Overhead costs', 'Process automation', 'Resource optimization'],
+      'Regulatory Compliance': ['Documentation burden', 'Audit preparation', 'Policy enforcement'],
+      'Competitive Differentiation': ['Feature parity', 'Market positioning', 'Value proposition']
+    };
+    return challengeMap[businessIssue] || challengeMap['Operational Efficiency'];
+  }
+
+  static generateGoals(businessIssue) {
+    const goalMap = {
+      'Revenue Growth Pressure': ['Increase conversion rates', 'Expand market share', 'Improve sales efficiency'],
+      'Operational Efficiency': ['Automate workflows', 'Reduce processing time', 'Optimize resources'],
+      'Customer Experience': ['Improve satisfaction scores', 'Reduce response time', 'Enhance personalization'],
+      'Cost Reduction Mandate': ['Reduce operational costs', 'Improve efficiency', 'Optimize spending'],
+      'Regulatory Compliance': ['Ensure compliance', 'Reduce audit risks', 'Streamline reporting'],
+      'Competitive Differentiation': ['Develop unique features', 'Improve market position', 'Create value']
+    };
+    return goalMap[businessIssue] || goalMap['Operational Efficiency'];
+  }
+
+  static generateChangeManagement(aiReadinessScore) {
+    if (aiReadinessScore >= 7) return 'High';
+    if (aiReadinessScore >= 5) return 'Medium';
+    return 'Low';
+  }
+
+  static generateRiskTolerance(aiReadinessScore) {
+    if (aiReadinessScore >= 8) return 'high';
+    if (aiReadinessScore >= 5) return 'medium';
+    return 'low';
+  }
+
+  static generateDecisionTimeline(size) {
+    const timelineMap = {
+      '1-50 employees': 3 + Math.floor(Math.random() * 6), // 3-9 months
+      '51-200 employees': 6 + Math.floor(Math.random() * 6), // 6-12 months
+      '201-1000 employees': 9 + Math.floor(Math.random() * 9), // 9-18 months
+      '1000+ employees': 12 + Math.floor(Math.random() * 12) // 12-24 months
+    };
+    return timelineMap[size] || 6;
+  }
+
+  static getDemoQuestion(industry) {
+    const questions = {
+      Technology: "How can we leverage AI to improve our software development lifecycle?",
+      Healthcare: "What AI solutions can help us improve patient outcomes and operational efficiency?",
+      Finance: "How can AI help us with risk assessment and fraud detection?",
+      Manufacturing: "What predictive maintenance solutions would work best for our production line?",
+      Retail: "How can we use AI to personalize customer experiences and optimize inventory?",
+      Education: "What AI tools can enhance student learning and administrative efficiency?",
+      Government: "How can AI improve citizen services while maintaining privacy and transparency?",
+      Consulting: "How can we use AI to deliver better insights and efficiency to our clients?"
+    };
+    return questions[industry] || questions.Technology;
+  }
+
+  static getDemoResponse(industry) {
+    const responses = {
+      Technology: "Based on your development workflow, I recommend implementing AI-powered code review and automated testing solutions.",
+      Healthcare: "Consider AI solutions for medical imaging analysis, patient scheduling optimization, and predictive health analytics.",
+      Finance: "Machine learning models for fraud detection and risk scoring would provide immediate value for your financial operations.",
+      Manufacturing: "IoT sensors combined with predictive analytics can reduce downtime by 30% and optimize maintenance schedules.",
+      Retail: "Recommendation engines and demand forecasting AI can increase sales by 15% and reduce inventory costs by 20%.",
+      Education: "Adaptive learning platforms and automated grading systems can improve student outcomes and reduce administrative burden.",
+      Government: "Citizen service chatbots and document processing automation can improve service delivery and reduce processing times.",
+      Consulting: "AI-powered data analysis and report generation tools can increase your team's productivity and client value delivery."
+    };
+    return responses[industry] || responses.Technology;
+  }
+
+  static getDemoRecommendations(industry) {
+    const recommendations = {
+      Technology: ["Implement AI code review", "Automate testing workflows", "Use AI for bug prediction"],
+      Healthcare: ["Deploy medical imaging AI", "Implement patient risk scoring", "Automate clinical documentation"],
+      Finance: ["Deploy fraud detection ML", "Implement risk assessment AI", "Automate compliance monitoring"],
+      Manufacturing: ["Install IoT sensors", "Implement predictive maintenance", "Optimize production scheduling"],
+      Retail: ["Deploy recommendation engine", "Implement demand forecasting", "Automate inventory management"],
+      Education: ["Implement adaptive learning", "Deploy automated grading", "Use AI for student analytics"],
+      Government: ["Deploy citizen service bots", "Automate document processing", "Implement case management AI"],
+      Consulting: ["Use AI for data analysis", "Automate report generation", "Implement client insight tools"]
+    };
+    return recommendations[industry] || recommendations.Technology;
+  }
+} 
