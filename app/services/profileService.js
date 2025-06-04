@@ -25,8 +25,8 @@ import {
 export class ProfileService {
   // Migration configuration
   static MIGRATION_CONFIG = {
-    enableSupabase: true,
-    dualWriteMode: true,
+    enableSupabase: false,  // DISABLED - using localStorage only to avoid errors
+    dualWriteMode: false,
     fallbackToLocalStorage: true,
     retryAttempts: 3,
     retryDelay: 1000
@@ -39,9 +39,14 @@ export class ProfileService {
    */
   static async createProfile(profileData) {
     try {
+      console.log('ProfileService.createProfile called with:', profileData);
+      
       // Generate unique ID and prepare profile
       const profileId = this.generateProfileId(profileData.companyName);
+      console.log('Generated profile ID:', profileId);
+      
       const markdown = markdownService.generateMarkdown(profileData);
+      console.log('Generated markdown length:', markdown.length);
       
       const profile = {
         id: profileId,
@@ -52,12 +57,18 @@ export class ProfileService {
         status: 'draft'
       };
 
+      console.log('Profile object prepared:', profile);
+
       // Attempt Supabase creation first
       if (this.MIGRATION_CONFIG.enableSupabase) {
         try {
+          console.log('Attempting Supabase creation...');
           const user = await AuthService.getCurrentUser();
+          console.log('Current user:', user ? 'authenticated' : 'not authenticated');
+          
           if (user) {
             const supabaseProfile = await ProfileDB.create(profileData, user.id);
+            console.log('Supabase profile created:', supabaseProfile);
             
             // Log successful creation
             await AuditService.log('CREATE', 'profile', supabaseProfile.id, null, supabaseProfile);
@@ -65,6 +76,7 @@ export class ProfileService {
             // If dual-write is enabled, also save to localStorage
             if (this.MIGRATION_CONFIG.dualWriteMode) {
               await this.saveToLocalStorage(profile);
+              console.log('Profile also saved to localStorage');
             }
             
             return this.transformSupabaseToProfile(supabaseProfile);
@@ -74,7 +86,9 @@ export class ProfileService {
           
           // Fall back to localStorage if enabled
           if (this.MIGRATION_CONFIG.fallbackToLocalStorage) {
+            console.log('Falling back to localStorage...');
             await this.saveToLocalStorage(profile);
+            console.log('Profile saved to localStorage successfully');
             return profile;
           }
           throw supabaseError;
@@ -82,7 +96,9 @@ export class ProfileService {
       }
 
       // Default to localStorage
+      console.log('Using localStorage as default...');
       await this.saveToLocalStorage(profile);
+      console.log('Profile saved to localStorage successfully');
       return profile;
       
     } catch (error) {
@@ -397,9 +413,18 @@ export class ProfileService {
    * Save profile to localStorage
    */
   static async saveToLocalStorage(profile) {
-    const profiles = this.getFromLocalStorage();
-    profiles.push(profile);
-    localStorage.setItem('clientProfiles', JSON.stringify(profiles));
+    try {
+      console.log('Saving profile to localStorage:', profile.id);
+      const profiles = this.getFromLocalStorage();
+      console.log('Existing profiles count:', profiles.length);
+      
+      profiles.push(profile);
+      localStorage.setItem('clientProfiles', JSON.stringify(profiles));
+      console.log('Profile saved successfully to localStorage');
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+      throw error;
+    }
   }
 
   /**

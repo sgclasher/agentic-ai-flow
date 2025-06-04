@@ -5,9 +5,17 @@ import useAgenticStore from './store/useAgenticStore';
 import ServiceNowConnector from './components/ServiceNowConnector';
 import FlowVisualizer from './components/FlowVisualizer';
 import { ReactFlowProvider } from 'reactflow';
-import { Users, TrendingUp, Info } from 'lucide-react';
+import { Users, TrendingUp, Info, LogIn, LogOut, User } from 'lucide-react';
+import { useAuth } from './contexts/AuthContext';
+import AuthModal from './components/auth/AuthModal';
 
 export default function Home() {
+  // Authentication
+  const { user, loading, signOut } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  
+  // Agentic data
   const agenticData = useAgenticStore((state) => state.agenticData);
   const clearAgenticData = useAgenticStore((state) => state.clearAgenticData);
   const refreshData = useAgenticStore((state) => state.refreshData);
@@ -68,6 +76,28 @@ export default function Home() {
     setAutoFitEnabled(!autoFitEnabled);
   };
 
+  // Authentication handlers
+  const handleLogin = () => {
+    setShowAuthModal(true);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setShowUserMenu(false);
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+  };
+
+  const toggleUserMenu = () => {
+    setShowUserMenu(!showUserMenu);
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center p-0" style={{ 
       backgroundColor: '#f5f5f5', 
@@ -126,6 +156,43 @@ export default function Home() {
               >
                 <Info size={18} />
               </button>
+              
+              {/* Authentication Controls */}
+              {loading ? (
+                <div className="auth-loading">
+                  <div className="spinner-small"></div>
+                </div>
+              ) : user ? (
+                <div className="user-menu">
+                  <button 
+                    onClick={toggleUserMenu}
+                    className="btn btn-user"
+                  >
+                    <User size={18} />
+                    <span>{user.user_metadata?.firstName || user.email?.split('@')[0] || 'User'}</span>
+                  </button>
+                  {showUserMenu && (
+                    <div className="user-dropdown">
+                      <div className="user-info">
+                        <p><strong>{user.user_metadata?.fullName || 'User'}</strong></p>
+                        <p>{user.email}</p>
+                      </div>
+                      <button onClick={handleSignOut} className="dropdown-item">
+                        <LogOut size={16} />
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button 
+                  onClick={handleLogin}
+                  className="btn btn-auth"
+                >
+                  <LogIn size={18} />
+                  Sign In
+                </button>
+              )}
             </div>
           </div>
           
@@ -229,6 +296,128 @@ export default function Home() {
           </div>
         )}
       </div>
+      
+      {/* Authentication Modal */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={closeAuthModal}
+        defaultMode="login"
+      />
+      
+      <style jsx>{`
+        .auth-loading {
+          display: flex;
+          align-items: center;
+          padding: 0.5rem;
+        }
+
+        .spinner-small {
+          width: 20px;
+          height: 20px;
+          border: 2px solid #e2e8f0;
+          border-top: 2px solid #3498db;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .user-menu {
+          position: relative;
+        }
+
+        .btn-user {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: #f8f9fa;
+          border: 1px solid #dee2e6;
+          color: #495057;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .btn-user:hover {
+          background: #e9ecef;
+          border-color: #adb5bd;
+        }
+
+        .btn-auth {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: #3498db;
+          border: none;
+          color: white;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .btn-auth:hover {
+          background: #2980b9;
+          transform: translateY(-1px);
+        }
+
+        .user-dropdown {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          margin-top: 0.5rem;
+          background: white;
+          border: 1px solid #dee2e6;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          min-width: 200px;
+          z-index: 1000;
+          overflow: hidden;
+        }
+
+        .user-info {
+          padding: 1rem;
+          border-bottom: 1px solid #e9ecef;
+          background: #f8f9fa;
+        }
+
+        .user-info p {
+          margin: 0;
+          font-size: 0.9rem;
+        }
+
+        .user-info p:first-child {
+          color: #212529;
+        }
+
+        .user-info p:last-child {
+          color: #6c757d;
+          margin-top: 0.25rem;
+        }
+
+        .dropdown-item {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem 1rem;
+          background: none;
+          border: none;
+          color: #495057;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+          font-size: 0.9rem;
+        }
+
+        .dropdown-item:hover {
+          background: #f8f9fa;
+          color: #dc3545;
+        }
+      `}</style>
     </main>
   );
 } 

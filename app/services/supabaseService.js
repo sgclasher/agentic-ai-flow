@@ -300,21 +300,44 @@ export class TimelineDB {
    */
   static async create(timelineData, userId) {
     try {
+      console.log('TimelineDB.create called with:', {
+        profile_id: timelineData.profile_id,
+        scenario_type: timelineData.scenario_type,
+        userId: userId,
+        dataKeys: Object.keys(timelineData.data || {})
+      });
+
+      // Only include fields that exist in the database schema
       const { data, error } = await supabase
         .from('timelines')
         .insert([
           {
-            ...timelineData,
+            profile_id: timelineData.profile_id,
+            scenario_type: timelineData.scenario_type,
+            data: timelineData.data,
+            generated_by: timelineData.generated_by,
+            cost_usd: timelineData.cost_usd || null,
             created_by: userId
           }
         ])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase timeline creation error:', error);
+        throw error;
+      }
+      
+      console.log('Timeline created successfully in Supabase:', data.id);
       return data;
     } catch (error) {
-      console.error('Error creating timeline:', error);
+      console.error('Error creating timeline in Supabase:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        error: error
+      });
       throw error;
     }
   }

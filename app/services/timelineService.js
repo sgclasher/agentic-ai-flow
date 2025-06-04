@@ -27,8 +27,8 @@ import {
 export class TimelineService {
   // Migration configuration
   static MIGRATION_CONFIG = {
-    enableSupabase: true,
-    dualWriteMode: true,
+    enableSupabase: false,  // DISABLED - using localStorage only to avoid errors
+    dualWriteMode: false,
     fallbackToLocalStorage: true,
     enableCaching: true,
     cacheExpiryHours: 24,
@@ -135,50 +135,68 @@ export class TimelineService {
     return timeline;
   }
 
-  /**
+    /**
    * Store timeline in Supabase with audit trail
    */
   static async storeTimeline(timeline, profileId, userId) {
+    console.log('TimelineService.storeTimeline called with:', {
+      timelineId: timeline.id,
+      profileId: profileId,
+      userId: userId,
+      scenarioType: timeline.scenarioType,
+      enableSupabase: this.MIGRATION_CONFIG.enableSupabase
+    });
+
+    // Always store locally first as a backup
+    await this.storeTimelineLocally(timeline);
+    console.log('Timeline stored locally as backup');
+
     if (!this.MIGRATION_CONFIG.enableSupabase) {
-      return await this.storeTimelineLocally(timeline);
+      console.log('Supabase disabled, using localStorage only');
+      return timeline;
     }
 
     try {
+      console.log('Attempting to store timeline in Supabase...');
       const timelineData = {
         profile_id: profileId,
         scenario_type: timeline.scenarioType,
         data: timeline,
         generated_by: timeline.metadata.aiProvider,
-        cost_usd: timeline.metadata.cost,
-        status: 'active'
+        cost_usd: timeline.metadata.cost
       };
 
       const stored = await TimelineDB.create(timelineData, userId);
+      console.log('Timeline stored successfully in Supabase:', stored.id);
       
-      // Log the creation
-      await AuditService.log('CREATE', 'timeline', stored.id, null, timelineData);
-      
-      // Track AI conversation if external provider used
-      if (timeline.metadata.aiProvider !== 'internal') {
-        await this.trackAIConversation(profileId, timeline, userId);
+      // Log the creation (non-blocking)
+      try {
+        await AuditService.log('CREATE', 'timeline', stored.id, null, timelineData);
+      } catch (auditError) {
+        console.warn('Failed to log audit entry:', auditError);
       }
-
-      // Dual-write to localStorage if enabled
-      if (this.MIGRATION_CONFIG.dualWriteMode) {
-        await this.storeTimelineLocally(timeline);
+      
+      // Track AI conversation if external provider used (non-blocking)
+      if (timeline.metadata.aiProvider !== 'internal') {
+        try {
+          await this.trackAIConversation(profileId, timeline, userId);
+        } catch (trackError) {
+          console.warn('Failed to track AI conversation:', trackError);
+        }
       }
 
       return stored;
 
     } catch (error) {
-      console.warn('Failed to store timeline in Supabase:', error);
+      console.warn('Failed to store timeline in Supabase, using localStorage fallback:', {
+        message: error.message,
+        code: error.code,
+        details: error.details
+      });
       
-      // Fallback to localStorage
-      if (this.MIGRATION_CONFIG.fallbackToLocalStorage) {
-        return await this.storeTimelineLocally(timeline);
-      }
-      
-      throw error;
+      // Always return the timeline object even if Supabase storage fails
+      // since we already stored it locally
+      return timeline;
     }
   }
 
