@@ -46,6 +46,13 @@ global.localStorage = localStorageMock
 // Mock fetch for API calls
 global.fetch = jest.fn()
 
-// Suppress console errors during tests (optional)
-// global.console.error = jest.fn()
-// global.console.warn = jest.fn() 
+// Suppress console warnings/errors in tests
+global.console = {
+  ...console,
+  warn: jest.fn(),
+  error: jest.fn(),
+};
+
+// Make React available globally for tests
+import React from 'react';
+global.React = React; 

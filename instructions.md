@@ -1,5 +1,109 @@
 # Agentic AI Flow Visualizer - Project Roadmap
 
+## 🚀 Current Status & Recent Updates
+
+### ✅ COMPLETED: MVP Testing Setup (Phase 1 - Simplified)
+**What was implemented:**
+- **Simple Smoke Tests**: 9 passing tests in `app/__tests__/features/simple-smoke-tests.js`
+  - Tests all core services can be imported and function
+  - Verifies ServiceNow flow utilities, profile services, AI timeline generation
+  - Runs in 3 seconds via `npm run test:smoke`
+- **Manual Test Checklist**: Located at `app/__tests__/features/manual-test-checklist.md`
+- **GitHub Actions**: Optional CI/CD at `.github/workflows/test.yml`
+- **Testing Philosophy**: "Test the Features, Not the Functions" - simple MVP approach
+- **Documentation**: `MVP_TESTING_SUMMARY.md` explains the full testing strategy
+
+**Key Commands Added:**
+```bash
+npm run test:smoke    # Quick 3-second verification
+npm run test:features # All feature tests  
+npm test             # Full test suite
+```
+
+**Next AI Assistant Context**: The testing setup is complete and working. Focus on the next phase rather than testing infrastructure.
+
+### 🎯 READY FOR: Next Implementation Phase
+
+**Current Priority Order:**
+1. **Authentication System** (Phase 3) - Supabase Auth integration 
+2. **Database Migration** (Phase 4) - Move from localStorage to Supabase
+3. **AI Integration** (Phase 5) - ChatGPT 4o for timeline generation
+4. **PDF Export** (Phase 6) - Professional document generation
+
+**Recommended Next Steps:**
+1. Set up Supabase project and authentication
+2. Begin Phase 3: Authentication System implementation
+3. Run `npm run test:smoke` after any major changes
+
+---
+
+## 🧪 MVP Testing Strategy (Simplified)
+
+### Philosophy: "Test the Features, Not the Functions"
+As a solo developer on an MVP, focus on high-value integration tests that verify complete user flows rather than exhaustive unit testing.
+
+### Core Test Suite (Quick & Practical)
+1. **ServiceNow Flow Visualization**
+   - Can connect to ServiceNow instance
+   - Can fetch and display flow data
+   - Can expand/collapse nodes
+   - Layout changes work (LR/TB)
+
+2. **Client Profile Management**
+   - Can create a new profile via wizard
+   - Can save and retrieve profiles
+   - Can load demo data
+   - Markdown generation works
+
+3. **AI Timeline Generation**
+   - Can generate timeline from profile
+   - Scenario switching works
+   - Metrics update correctly
+   - Floating widget displays
+
+### Testing Approach
+```bash
+# Simple command to test everything
+npm run test:smoke
+
+# What this does:
+# 1. Runs key feature tests
+# 2. Shows pass/fail for each feature
+# 3. Takes ~3 seconds total
+# 4. Gives confidence before commits
+```
+
+### Implementation Plan
+1. **Create `test:smoke` script** ✅ DONE
+2. **Use existing Jest setup** ✅ DONE
+3. **Mock external services** ✅ DONE
+4. **Test happy paths primarily** ✅ DONE
+5. **Optional: GitHub Actions** ✅ DONE
+
+### What NOT to Test (For Now)
+- Every utility function
+- CSS styling details  
+- Performance optimizations
+- Browser compatibility
+- Accessibility (until later)
+
+### Quick Win: GitHub Actions ✅ DONE
+```yaml
+# .github/workflows/test.yml
+name: Test Features
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm ci
+      - run: npm run test:smoke
+```
+
+---
+
 ## Project Vision
 Transform the Agentic AI Flow Visualizer into a robust, scalable platform that serves as a comprehensive business intelligence tool, featuring ServiceNow integration, AI-powered insights, and secure multi-user support.
 
